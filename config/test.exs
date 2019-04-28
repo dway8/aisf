@@ -8,3 +8,12 @@ config :aisf, AisfWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+# Configure your database
+config :aisf, Aisf.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  username: "postgres",
+  password: "postgres",
+  database: "aisf_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox

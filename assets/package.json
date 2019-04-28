@@ -4,9 +4,11 @@
   "scripts": {
     "deploy": "webpack --mode production",
     "watch": "webpack --mode development --watch",
-    "elm": "elm"
+    "elm": "elm",
+    "api": "elm-graphql http://localhost:4000/graphql --base ChampionsApi --output src/"
   },
   "dependencies": {
+    "@dillonkearns/elm-graphql": "^3.4.0",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html"
   },
@@ -16,18 +18,18 @@
     "babel-loader": "^8.0.0",
     "copy-webpack-plugin": "^4.5.0",
     "css-loader": "^0.28.10",
-    "mini-css-extract-plugin": "^0.4.0",
-    "optimize-css-assets-webpack-plugin": "^4.0.0",
-    "uglifyjs-webpack-plugin": "^1.2.4",
-    "webpack": "4.4.0",
-    "webpack-cli": "^2.0.10",
+    "elm-format": "^0.8.0",
     "elm-hot-webpack-loader": "^1.0.0",
     "elm-webpack-loader": "^5.0.0",
     "eslint": "^5.14.1",
     "eslint-config-prettier": "^4.0.0",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint_d": "^5.0.0",
-    "elm-format": "^0.8.0",
-    "prettier": "^1.16.4"
+    "mini-css-extract-plugin": "^0.4.0",
+    "optimize-css-assets-webpack-plugin": "^4.0.0",
+    "prettier": "^1.16.4",
+    "uglifyjs-webpack-plugin": "^1.2.4",
+    "webpack": "4.4.0",
+    "webpack-cli": "^2.0.10"
   }
 }

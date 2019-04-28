@@ -7,6 +7,9 @@
 # General application configuration
 use Mix.Config
 
+config :aisf,
+  ecto_repos: [Aisf.Repo]
+
 # Configures the endpoint
 config :aisf, AisfWeb.Endpoint,
   url: [host: "localhost"],
