@@ -41,14 +41,16 @@ subscriptions model =
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { champions = NotAsked, page = ListPage }
-    , fetchChampions
+    ( { champion = NotAsked, page = ListPage }
+      -- , fetchChampions
+    , Cmd.none
     )
 
 
-fetchChampions : Cmd Msg
-fetchChampions =
-    Http.get
-        { url = "/api/champions"
-        , expect = Http.expectJson (RemoteData.fromResult >> ReceivedChampionsResponse) championsDecoder
-        }
+
+-- fetchChampions : Cmd Msg
+-- fetchChampions =
+--     Http.get
+--         { url = "/api/champions"
+--         , expect = Http.expectJson (RemoteData.fromResult >> ReceivedChampionsResponse) championsDecoder
+--         }

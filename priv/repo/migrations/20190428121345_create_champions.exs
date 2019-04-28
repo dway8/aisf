@@ -3,11 +3,10 @@ defmodule Aisf.Repo.Migrations.CreateChampions do
 
   def change do
     create table(:champions) do
-      add :lastName, :string
-      add :firstName, :string
+      add(:last_name, :string)
+      add(:first_name, :string)
 
       timestamps()
     end
-
   end
 end

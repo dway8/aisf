@@ -3,8 +3,8 @@ defmodule Aisf.Champions.Champion do
   import Ecto.Changeset
 
   schema "champions" do
-    field :firstName, :string
-    field :lastName, :string
+    field(:first_name, :string)
+    field(:last_name, :string)
 
     timestamps()
   end
@@ -12,7 +12,7 @@ defmodule Aisf.Champions.Champion do
   @doc false
   def changeset(champion, attrs) do
     champion
-    |> cast(attrs, [:lastName, :firstName])
-    |> validate_required([:lastName, :firstName])
+    |> cast(attrs, [:last_name, :first_name])
+    |> validate_required([:last_name, :first_name])
   end
 end

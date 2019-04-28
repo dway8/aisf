@@ -10,7 +10,7 @@ defmodule Aisf.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases
+      aliases: aliases()
     ]
   end
 
@@ -40,10 +40,11 @@ defmodule Aisf.MixProject do
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
-      {:jason, "~> 1.0"},
+      {:jason, "~> 1.1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:absinthe_ecto, "~> 0.1.0"},
-      {:absinthe_plug, "~> 1.3.0"}
+      {:absinthe_ecto, "~> 0.1.3"},
+      {:absinthe_plug, "~> 1.4.0"},
+      {:poison, "~> 3.0"}
     ]
   end
 

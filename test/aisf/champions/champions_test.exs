@@ -6,9 +6,9 @@ defmodule Aisf.ChampionsTest do
   describe "champions" do
     alias Aisf.Champions.Champion
 
-    @valid_attrs %{firstName: "some firstName", lastName: "some lastName"}
-    @update_attrs %{firstName: "some updated firstName", lastName: "some updated lastName"}
-    @invalid_attrs %{firstName: nil, lastName: nil}
+    @valid_attrs %{first_name: "some first_name", last_name: "some last_name"}
+    @update_attrs %{first_name: "some updated first_name", last_name: "some updated last_name"}
+    @invalid_attrs %{first_name: nil, last_name: nil}
 
     def champion_fixture(attrs \\ %{}) do
       {:ok, champion} =
@@ -31,8 +31,8 @@ defmodule Aisf.ChampionsTest do
 
     test "create_champion/1 with valid data creates a champion" do
       assert {:ok, %Champion{} = champion} = Champions.create_champion(@valid_attrs)
-      assert champion.firstName == "some firstName"
-      assert champion.lastName == "some lastName"
+      assert champion.first_name == "some first_name"
+      assert champion.last_name == "some last_name"
     end
 
     test "create_champion/1 with invalid data returns error changeset" do
@@ -42,8 +42,8 @@ defmodule Aisf.ChampionsTest do
     test "update_champion/2 with valid data updates the champion" do
       champion = champion_fixture()
       assert {:ok, %Champion{} = champion} = Champions.update_champion(champion, @update_attrs)
-      assert champion.firstName == "some updated firstName"
-      assert champion.lastName == "some updated lastName"
+      assert champion.first_name == "some updated first_name"
+      assert champion.last_name == "some updated last_name"
     end
 
     test "update_champion/2 with invalid data returns error changeset" do

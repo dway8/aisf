@@ -13,10 +13,13 @@ defmodule AisfWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", AisfWeb do
-    pipe_through :browser
+  scope "/" do
+    pipe_through :api
 
-    get "/", PageController, :index
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: AisfWeb.Schema,
+      interface: :simple,
+      context: %{pubsub: AisfWeb.Endpoint}
   end
 
   # Other scopes may use custom stacks.
