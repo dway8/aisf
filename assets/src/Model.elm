@@ -1,6 +1,7 @@
-module Model exposing (Champions, Flags, Model, Msg(..), Page(..), championsDecoder)
+module Model exposing (Champion, Champions, Flags, Model, Msg(..), Page(..), championsDecoder)
 
 import Browser exposing (UrlRequest(..))
+import Graphql.Http
 import Json.Decode as D
 import Json.Decode.Pipeline as P
 import RemoteData exposing (RemoteData(..), WebData)
@@ -8,7 +9,7 @@ import Url exposing (Url)
 
 
 type alias Model =
-    { champion : WebData Champion
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , page : Page
     }
 
@@ -36,7 +37,7 @@ type Msg
     = NoOp
     | ClickedLink UrlRequest
     | ChangedUrl Url
-    | GotChampions (WebData (List Champion))
+    | GotChampions (RemoteData (Graphql.Http.Error Champions) Champions)
 
 
 championsDecoder : D.Decoder Champions
