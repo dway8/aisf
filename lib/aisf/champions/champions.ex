@@ -38,6 +38,11 @@ defmodule Aisf.Champions do
   def get_champion!(id), do: Repo.get!(Champion, id)
 
   @doc """
+  Gets a single champion.
+  """
+  def get_champion(id), do: Repo.get(Champion, id)
+
+  @doc """
   Creates a champion.
 
   ## Examples

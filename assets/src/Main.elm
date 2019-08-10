@@ -1,15 +1,15 @@
 module Main exposing (main)
 
+import Aisf.Scalar exposing (Id(..))
 import Api
-import Browser exposing (Document)
+import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
-import Element exposing (..)
-import Element.Font as Font
-import Html exposing (Html)
 import Http
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 import Url exposing (Url)
+import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
+import View exposing (view)
 
 
 main : Program Flags Model Msg
@@ -19,60 +19,51 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = ClickedLink
-        , onUrlChange = ChangedUrl
+        , onUrlRequest = UrlRequested
+        , onUrlChange = UrlChanged
         }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UrlChanged newLocation ->
+            handleUrlChange newLocation model
+
+        UrlRequested urlRequest ->
+            case urlRequest of
+                Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                External _ ->
+                    ( model, Cmd.none )
+
         GotChampions resp ->
             ( { model | champions = resp }, Cmd.none )
+
+        GotChampion resp ->
+            case ( model.currentPage, resp ) of
+                ( ChampionPage id _, Success champion ) ->
+                    if id == champion.id then
+                        ( { model | currentPage = ChampionPage id resp }, Cmd.none )
+                    else
+                        ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-view : Model -> Document Msg
-view model =
-    { title = "AISF"
-    , body =
-        [ viewBody model ]
-    }
-
-
-viewBody : Model -> Html Msg
-viewBody model =
-    layout
-        [ Font.family
-            [ Font.external
-                { name = "Roboto"
-                , url = "https://fonts.googleapis.com/css?family=Roboto:100,200,200italic,300,300italic,400,400italic,600,700,800"
-                }
-            ]
-        , alignLeft
-        , Font.size 16
-        ]
-    <|
-        column [ spacing 10 ]
-            [ case model.champions of
-                Success champions ->
-                    column [ spacing 5 ]
-                        (List.map
-                            (\champ -> text <| champ.firstName ++ " " ++ champ.lastName)
-                            champions
-                        )
-
-                NotAsked ->
-                    none
-
-                Loading ->
-                    text "..."
-
-                _ ->
-                    text "Une erreur s'est produite."
-            ]
+handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
+handleUrlChange newLocation model =
+    let
+        ( page, cmd ) =
+            parseUrl newLocation
+                |> getPageAndCmdFromRoute
+    in
+    ( { model | currentPage = page }, cmd )
 
 
 subscriptions : Model -> Sub Msg
@@ -82,6 +73,34 @@ subscriptions model =
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { champions = NotAsked, page = ListPage }
-    , Api.getChampions
+    let
+        ( page, cmd ) =
+            parseUrl url
+                |> getPageAndCmdFromRoute
+    in
+    ( { champions = NotAsked, currentPage = page, key = key }
+    , cmd
     )
+
+
+parseUrl : Url -> Route
+parseUrl url =
+    url
+        |> parse
+            (oneOf
+                [ map ListRoute top
+                , map ListRoute (s "champions")
+                , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
+                ]
+            )
+        |> Maybe.withDefault ListRoute
+
+
+getPageAndCmdFromRoute : Route -> ( Page, Cmd Msg )
+getPageAndCmdFromRoute route =
+    case route of
+        ListRoute ->
+            ( ListPage, Api.getChampions )
+
+        ChampionRoute id ->
+            ( ChampionPage id Loading, Api.getChampion id )

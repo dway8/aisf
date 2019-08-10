@@ -1,22 +1,28 @@
-module Model exposing (Champion, Champions, Flags, Model, Msg(..), Page(..), championsDecoder)
+module Model exposing (Champion, Champions, Flags, Model, Msg(..), Page(..), Route(..), getId)
 
+import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
+import Browser.Navigation as Nav
 import Graphql.Http
-import Json.Decode as D
-import Json.Decode.Pipeline as P
 import RemoteData exposing (RemoteData(..), WebData)
 import Url exposing (Url)
 
 
 type alias Model =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , page : Page
+    , currentPage : Page
+    , key : Nav.Key
     }
 
 
 type Page
     = ListPage
-    | ChampionPage
+    | ChampionPage Id (RemoteData (Graphql.Http.Error Champion) Champion)
+
+
+type Route
+    = ListRoute
+    | ChampionRoute Id
 
 
 type alias Champions =
@@ -24,9 +30,17 @@ type alias Champions =
 
 
 type alias Champion =
-    { lastName : String
+    { id : Id
+    , lastName : String
     , firstName : String
     }
+
+
+getId : Champion -> String
+getId { id } =
+    case id of
+        Id str ->
+            str
 
 
 type alias Flags =
@@ -35,18 +49,7 @@ type alias Flags =
 
 type Msg
     = NoOp
-    | ClickedLink UrlRequest
-    | ChangedUrl Url
+    | UrlRequested UrlRequest
+    | UrlChanged Url
     | GotChampions (RemoteData (Graphql.Http.Error Champions) Champions)
-
-
-championsDecoder : D.Decoder Champions
-championsDecoder =
-    D.list championDecoder
-
-
-championDecoder : D.Decoder Champion
-championDecoder =
-    D.succeed Champion
-        |> P.required "lastName" D.string
-        |> P.required "firstName" D.string
+    | GotChampion (RemoteData (Graphql.Http.Error Champion) Champion)

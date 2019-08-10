@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (firstName, id, lastName)
+module Aisf.Object.Champion exposing (email, firstName, id, lastName)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -17,6 +17,11 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
+
+
+email : SelectionSet String Aisf.Object.Champion
+email =
+    Object.selectionForField "String" "email" [] Decode.string
 
 
 firstName : SelectionSet String Aisf.Object.Champion
