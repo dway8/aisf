@@ -35,7 +35,8 @@ getChampion id =
 
 championInfoSelection : SelectionSet Champion Aisf.Object.Champion
 championInfoSelection =
-    SelectionSet.map3 Champion
+    SelectionSet.map4 Champion
         Champion.id
         Champion.lastName
         Champion.firstName
+        Champion.email

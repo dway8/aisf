@@ -27,6 +27,9 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         UrlChanged newLocation ->
             handleUrlChange newLocation model
 
@@ -46,14 +49,20 @@ update msg model =
                 ( ChampionPage id _, Success champion ) ->
                     if id == champion.id then
                         ( { model | currentPage = ChampionPage id resp }, Cmd.none )
+
                     else
                         ( model, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        UpdatedChampionField field val ->
+            case model.currentPage of
+                NewChampionPage champion ->
+                    updateNewChampion field val champion model
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -78,7 +87,11 @@ init flags url key =
             parseUrl url
                 |> getPageAndCmdFromRoute
     in
-    ( { champions = NotAsked, currentPage = page, key = key }
+    ( { champions = NotAsked
+      , currentPage = page
+      , key = key
+      , isAdmin = flags.isAdmin
+      }
     , cmd
     )
 
@@ -90,6 +103,7 @@ parseUrl url =
             (oneOf
                 [ map ListRoute top
                 , map ListRoute (s "champions")
+                , map NewChampionRoute (s "champions" </> s "new")
                 , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                 ]
             )
@@ -104,3 +118,11 @@ getPageAndCmdFromRoute route =
 
         ChampionRoute id ->
             ( ChampionPage id Loading, Api.getChampion id )
+
+        NewChampionRoute ->
+            ( NewChampionPage Model.initChampion, Cmd.none )
+
+
+updateNewChampion : FormField -> String -> Champion -> Model -> ( Model, Cmd Msg )
+updateNewChampion field val champion model =
+    ( model, Cmd.none )
