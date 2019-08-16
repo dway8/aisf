@@ -44,7 +44,8 @@ defmodule Aisf.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:absinthe_ecto, "~> 0.1.3"},
       {:absinthe_plug, "~> 1.4.0"},
-      {:poison, "~> 3.0"}
+      {:poison, "~> 3.0"},
+      {:bcrypt_elixir, "~> 2.0.3"}
     ]
   end
 

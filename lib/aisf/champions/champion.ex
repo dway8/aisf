@@ -13,16 +13,7 @@ defmodule Aisf.Champions.Champion do
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:first_name, :last_name, :email])
-    |> validate_required([:first_name, :last_name, :email])
-    |> add_pass_hash()
+    |> cast(params, [:first_name, :last_name, :email, :password])
+    |> validate_required([:first_name, :last_name, :email, :password])
   end
-
-  defp add_pass_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
-    password = Ecto.UUID.generate() |> binary_part(16, 16)
-
-    change(changeset, password: Bcrypt.hashpwsalt(password))
-  end
-
-  defp add_pass_hash(changeset), do: changeset
 end

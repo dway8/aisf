@@ -1,4 +1,4 @@
-module Model exposing (Champion, Champions, Flags, FormField(..), Model, Msg(..), Page(..), Route(..), getId, initChampion)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), getId, initChampion)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -9,17 +9,26 @@ import Url exposing (Url)
 
 
 type alias Model =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , currentPage : Page
+    { currentPage : Page
     , key : Nav.Key
     , isAdmin : Bool
     }
 
 
 type Page
-    = ListPage
-    | ChampionPage Id (RemoteData (Graphql.Http.Error Champion) Champion)
+    = ListPage ListPageModel
+    | ChampionPage ChampionPageModel
     | NewChampionPage Champion
+
+
+type alias ListPageModel =
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions }
+
+
+type alias ChampionPageModel =
+    { id : Id
+    , champion : RemoteData (Graphql.Http.Error Champion) Champion
+    }
 
 
 type Route
@@ -58,6 +67,8 @@ type Msg
     | GotChampions (RemoteData (Graphql.Http.Error Champions) Champions)
     | GotChampion (RemoteData (Graphql.Http.Error Champion) Champion)
     | UpdatedChampionField FormField String
+    | PressedSaveChampionButton
+    | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
 
 
 initChampion : Champion

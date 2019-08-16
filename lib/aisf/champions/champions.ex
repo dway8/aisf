@@ -55,9 +55,18 @@ defmodule Aisf.Champions do
 
   """
   def create_champion(attrs \\ %{}) do
+    attrs = add_pass_hash(attrs)
+
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
+  end
+
+  defp add_pass_hash(params) do
+    password = Ecto.UUID.generate() |> binary_part(16, 16)
+
+    params
+    |> Map.put(:password, Bcrypt.hash_pwd_salt(password))
   end
 
   @doc """

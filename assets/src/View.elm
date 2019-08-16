@@ -36,17 +36,17 @@ viewBody model =
         ]
     <|
         case model.currentPage of
-            ListPage ->
-                viewListPage model
+            ListPage listModel ->
+                viewListPage listModel
 
-            ChampionPage id champion ->
-                viewChampionPage id champion
+            ChampionPage championModel ->
+                viewChampionPage championModel
 
             NewChampionPage champion ->
                 viewNewChampionPage champion
 
 
-viewListPage : Model -> Element Msg
+viewListPage : ListPageModel -> Element Msg
 viewListPage model =
     column [ spacing 10 ]
         [ case model.champions of
@@ -76,8 +76,8 @@ viewListPage model =
         ]
 
 
-viewChampionPage : Id -> RemoteData (Graphql.Http.Error Champion) Champion -> Element Msg
-viewChampionPage id champion =
+viewChampionPage : ChampionPageModel -> Element Msg
+viewChampionPage { id, champion } =
     column [ spacing 10 ]
         [ link []
             { url = "/champions"
@@ -105,14 +105,18 @@ viewChampionPage id champion =
 viewNewChampionPage : Champion -> Element Msg
 viewNewChampionPage champion =
     column []
-        [ viewTextInput FirstName ]
+        [ viewTextInput FirstName champion
+        , viewTextInput LastName champion
+        , viewTextInput Email champion
+        , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+        ]
 
 
-viewTextInput : FormField -> Element Msg
-viewTextInput field =
+viewTextInput : FormField -> Champion -> Element Msg
+viewTextInput field champion =
     let
-        label =
-            getLabelForField field
+        ( label, value ) =
+            getLabelAndValueForField field champion
     in
     Input.text
         [ Border.solid
@@ -121,7 +125,7 @@ viewTextInput field =
         , Border.width 3
         ]
         { onChange = UpdatedChampionField field
-        , text = ""
+        , text = value
         , placeholder = Nothing
         , label =
             Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
@@ -129,14 +133,14 @@ viewTextInput field =
         }
 
 
-getLabelForField : FormField -> String
-getLabelForField field =
+getLabelAndValueForField : FormField -> Champion -> ( String, String )
+getLabelAndValueForField field champion =
     case field of
         FirstName ->
-            "Prénom"
+            ( "Prénom", champion.firstName )
 
         LastName ->
-            "Nom"
+            ( "Nom", champion.lastName )
 
         Email ->
-            "Email"
+            ( "Email", champion.email )

@@ -1,5 +1,6 @@
-module Api exposing (getChampion, getChampions)
+module Api exposing (createChampion, getChampion, getChampions)
 
+import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
 import Aisf.Query as Query
@@ -40,3 +41,12 @@ championInfoSelection =
         Champion.lastName
         Champion.firstName
         Champion.email
+
+
+createChampion : Champion -> Cmd Msg
+createChampion { firstName, lastName, email } =
+    Mutation.createChampion { email = email, firstName = firstName, lastName = lastName } championInfoSelection
+        |> Graphql.Http.mutationRequest endpoint
+        -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotCreateChampionResponse)
