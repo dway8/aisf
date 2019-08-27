@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), getId, initChampion)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -46,7 +46,18 @@ type alias Champion =
     , lastName : String
     , firstName : String
     , email : String
+    , sport : Maybe Sport
     }
+
+
+type Sport
+    = SkiAlpin
+    | SkiDeFond
+    | Biathlon
+    | Combine
+    | Freestyle
+    | Saut
+    | Snowboard
 
 
 getId : Champion -> String
@@ -77,6 +88,7 @@ initChampion =
     , lastName = ""
     , firstName = ""
     , email = ""
+    , sport = Nothing
     }
 
 

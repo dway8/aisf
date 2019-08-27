@@ -6,8 +6,10 @@ import Aisf.Object.Champion as Champion
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Graphql.Http
+import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
-import Model exposing (Champion, Msg(..))
+import Json.Decode as D
+import Model exposing (Champion, Msg(..), Sport(..))
 import RemoteData
 
 
@@ -36,11 +38,20 @@ getChampion id =
 
 championInfoSelection : SelectionSet Champion Aisf.Object.Champion
 championInfoSelection =
-    SelectionSet.map4 Champion
+    SelectionSet.map4 (\id l f e -> Champion id l f e Nothing)
         Champion.id
         Champion.lastName
         Champion.firstName
         Champion.email
+
+
+sportDecoder : D.Decoder (Maybe Sport)
+sportDecoder =
+    D.succeed (Just SkiAlpin)
+
+
+
+-- Champion.sport
 
 
 createChampion : Champion -> Cmd Msg
