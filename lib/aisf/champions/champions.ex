@@ -19,6 +19,7 @@ defmodule Aisf.Champions do
   """
   def list_champions do
     Repo.all(Champion)
+    |> Repo.preload([:sport])
   end
 
   @doc """

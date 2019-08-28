@@ -4,35 +4,16 @@ defmodule AisfWeb.Schema do
 
   alias AisfWeb.ChampionsResolver
 
-  # alias AisfWeb.ChampionsResolver
-
   object :champion do
     field(:id, non_null(:id))
     field(:last_name, non_null(:string))
     field(:first_name, non_null(:string))
     field(:email, non_null(:string))
-    # field(:sport, :sport, resolve: assoc(:sport))
-
-    field :sport, :sport do
-      resolve(fn champion, _, _ ->
-        batch({AisfWeb.Schema, :by_id, Champion}, champion.sport_id, fn batch_results ->
-          {:ok, Map.get(batch_results, champion.sport_id)}
-        end)
-      end)
-    end
-
-    # field :sport, :sport do
-    #   resolve(fn champion, _, _ ->
-    #     if champion.sport do
-    #       {:ok, champion.sport.name}
-    #     else
-    #       {:error, "bla"}
-    #     end
-    #   end)
-    # end
+    field(:sport, :sport, resolve: assoc(:sport))
   end
 
   object :sport do
+    field(:id, non_null(:id))
     field(:name, non_null(:string))
   end
 
@@ -55,17 +36,5 @@ defmodule AisfWeb.Schema do
 
       resolve(&ChampionsResolver.create/2)
     end
-  end
-
-  def by_id(model, ids) do
-    import Ecto.Query
-    alias Aisf.Champions.Champions
-
-    ids = ids |> Enum.uniq()
-
-    model
-    |> where([m], m.id in ^ids)
-    |> Repo.all()
-    |> Map.new(&{&1.id, &1})
   end
 end
