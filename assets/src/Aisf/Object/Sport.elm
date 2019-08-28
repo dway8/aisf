@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Sport exposing (name)
+module Aisf.Object.Sport exposing (id, name)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -17,6 +17,11 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
+
+
+id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.Sport
+id =
+    Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 name : SelectionSet String Aisf.Object.Sport

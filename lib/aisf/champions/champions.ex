@@ -36,12 +36,18 @@ defmodule Aisf.Champions do
       ** (Ecto.NoResultsError)
 
   """
-  def get_champion!(id), do: Repo.get!(Champion, id)
+  def get_champion!(id) do
+    Repo.get!(Champion, id)
+    |> Repo.preload([:sport])
+  end
 
   @doc """
   Gets a single champion.
   """
-  def get_champion(id), do: Repo.get(Champion, id)
+  def get_champion(id) do
+    Repo.get(Champion, id)
+    |> Repo.preload([:sport])
+  end
 
   @doc """
   Creates a champion.

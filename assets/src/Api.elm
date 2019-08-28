@@ -3,6 +3,7 @@ module Api exposing (createChampion, getChampion, getChampions)
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
+import Aisf.Object.Sport as Sport
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Graphql.Http
@@ -38,11 +39,12 @@ getChampion id =
 
 championInfoSelection : SelectionSet Champion Aisf.Object.Champion
 championInfoSelection =
-    SelectionSet.map4 (\id l f e -> Champion id l f e Nothing)
+    SelectionSet.map5 (\id l f e s -> Champion id l f e (s |> Maybe.map sportFromString))
         Champion.id
         Champion.lastName
         Champion.firstName
         Champion.email
+        (Champion.sport Sport.name)
 
 
 sportDecoder : D.Decoder (Maybe Sport)
@@ -50,8 +52,17 @@ sportDecoder =
     D.succeed (Just SkiAlpin)
 
 
+sportFromString : String -> Sport
+sportFromString str =
+    case str of
+        "Ski alpin" ->
+            SkiAlpin
 
--- Champion.sport
+        "Ski de fond" ->
+            SkiDeFond
+
+        _ ->
+            Saut
 
 
 createChampion : Champion -> Cmd Msg

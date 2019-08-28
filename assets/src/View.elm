@@ -89,6 +89,7 @@ viewChampionPage { id, champion } =
                     [ text <| Model.getId champ
                     , text <| champ.lastName
                     , text <| champ.firstName
+                    , champ.sport |> Maybe.map (Model.sportToString >> text) |> Maybe.withDefault none
                     ]
 
             NotAsked ->

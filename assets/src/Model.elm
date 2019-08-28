@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion, sportToString)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -96,3 +96,16 @@ type FormField
     = FirstName
     | LastName
     | Email
+
+
+sportToString : Sport -> String
+sportToString sport =
+    case sport of
+        SkiAlpin ->
+            "Ski alpin"
+
+        SkiDeFond ->
+            "Ski de fond"
+
+        _ ->
+            "Autre"
