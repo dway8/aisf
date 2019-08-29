@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion, sportToString)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -46,7 +46,7 @@ type alias Champion =
     , lastName : String
     , firstName : String
     , email : String
-    , sport : Maybe Sport
+    , sport : Sport
     }
 
 
@@ -58,6 +58,18 @@ type Sport
     | Freestyle
     | Saut
     | Snowboard
+
+
+sportsList : List Sport
+sportsList =
+    [ SkiAlpin
+    , SkiDeFond
+    , Biathlon
+    , Combine
+    , Freestyle
+    , Saut
+    , Snowboard
+    ]
 
 
 getId : Champion -> String
@@ -80,6 +92,7 @@ type Msg
     | UpdatedChampionField FormField String
     | PressedSaveChampionButton
     | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
+    | ChangeSport String
 
 
 initChampion : Champion
@@ -88,7 +101,7 @@ initChampion =
     , lastName = ""
     , firstName = ""
     , email = ""
-    , sport = Nothing
+    , sport = SkiAlpin
     }
 
 
@@ -107,5 +120,45 @@ sportToString sport =
         SkiDeFond ->
             "Ski de fond"
 
+        Biathlon ->
+            "Biathlon"
+
+        Combine ->
+            "Combiné"
+
+        Freestyle ->
+            "Freestyle"
+
+        Saut ->
+            "Saut"
+
+        Snowboard ->
+            "Snowboard"
+
+
+sportFromString : String -> Sport
+sportFromString str =
+    case str of
+        "Ski alpin" ->
+            SkiAlpin
+
+        "Ski de fond" ->
+            SkiDeFond
+
+        "Biathlon" ->
+            Biathlon
+
+        "Combiné" ->
+            Combine
+
+        "Freestyle" ->
+            Freestyle
+
+        "Saut" ->
+            Saut
+
+        "Snowboard" ->
+            Snowboard
+
         _ ->
-            "Autre"
+            SkiAlpin

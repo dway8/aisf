@@ -9,7 +9,7 @@ defmodule AisfWeb.Schema do
     field(:last_name, non_null(:string))
     field(:first_name, non_null(:string))
     field(:email, non_null(:string))
-    field(:sport, :sport, resolve: assoc(:sport))
+    field(:sport, non_null(:sport), resolve: assoc(:sport))
   end
 
   object :sport do
@@ -33,6 +33,7 @@ defmodule AisfWeb.Schema do
       arg(:first_name, non_null(:string))
       arg(:last_name, non_null(:string))
       arg(:email, non_null(:string))
+      arg(:sport, non_null(:string))
 
       resolve(&ChampionsResolver.create/2)
     end

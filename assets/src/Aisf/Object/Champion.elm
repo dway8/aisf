@@ -39,6 +39,6 @@ lastName =
     Object.selectionForField "String" "lastName" [] Decode.string
 
 
-sport : SelectionSet decodesTo Aisf.Object.Sport -> SelectionSet (Maybe decodesTo) Aisf.Object.Champion
+sport : SelectionSet decodesTo Aisf.Object.Sport -> SelectionSet decodesTo Aisf.Object.Champion
 sport object_ =
-    Object.selectionForCompositeField "sport" [] object_ (identity >> Decode.nullable)
+    Object.selectionForCompositeField "sport" [] object_ identity

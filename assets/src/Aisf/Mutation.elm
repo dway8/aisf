@@ -23,9 +23,10 @@ type alias CreateChampionRequiredArguments =
     { email : String
     , firstName : String
     , lastName : String
+    , sport : String
     }
 
 
 createChampion : CreateChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (Maybe decodesTo) RootMutation
 createChampion requiredArgs object_ =
-    Object.selectionForCompositeField "createChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "lastName" requiredArgs.lastName Encode.string ] object_ (identity >> Decode.nullable)
+    Object.selectionForCompositeField "createChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "sport" requiredArgs.sport Encode.string ] object_ (identity >> Decode.nullable)

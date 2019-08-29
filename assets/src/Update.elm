@@ -59,6 +59,9 @@ update msg model =
         GotCreateChampionResponse resp ->
             handleCreateChampionResponse resp model
 
+        ChangeSport sportStr ->
+            changeSport sportStr model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -124,6 +127,20 @@ handleCreateChampionResponse response model =
     case response of
         Success _ ->
             ( model, Nav.pushUrl model.key "/" )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+changeSport : String -> Model -> ( Model, Cmd Msg )
+changeSport sportStr model =
+    case model.currentPage of
+        NewChampionPage champion ->
+            let
+                newChamp =
+                    { champion | sport = Model.sportFromString sportStr }
+            in
+            ( { model | currentPage = NewChampionPage newChamp }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

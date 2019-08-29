@@ -39,7 +39,7 @@ getChampion id =
 
 championInfoSelection : SelectionSet Champion Aisf.Object.Champion
 championInfoSelection =
-    SelectionSet.map5 (\id l f e s -> Champion id l f e (s |> Maybe.map sportFromString))
+    SelectionSet.map5 (\id l f e s -> Champion id l f e (sportFromString s))
         Champion.id
         Champion.lastName
         Champion.firstName
@@ -66,8 +66,14 @@ sportFromString str =
 
 
 createChampion : Champion -> Cmd Msg
-createChampion { firstName, lastName, email } =
-    Mutation.createChampion { email = email, firstName = firstName, lastName = lastName } championInfoSelection
+createChampion { firstName, lastName, email, sport } =
+    Mutation.createChampion
+        { email = email
+        , firstName = firstName
+        , lastName = lastName
+        , sport = Model.sportToString sport
+        }
+        championInfoSelection
         |> Graphql.Http.mutationRequest endpoint
         -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
         |> Graphql.Http.withCredentials

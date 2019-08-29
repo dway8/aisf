@@ -9,6 +9,8 @@ import Element.Font as Font
 import Element.Input as Input
 import Graphql.Http
 import Html exposing (Html)
+import Html.Attributes as HA
+import Html.Events as HE
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -89,7 +91,7 @@ viewChampionPage { id, champion } =
                     [ text <| Model.getId champ
                     , text <| champ.lastName
                     , text <| champ.firstName
-                    , champ.sport |> Maybe.map (Model.sportToString >> text) |> Maybe.withDefault none
+                    , text <| Model.sportToString champ.sport
                     ]
 
             NotAsked ->
@@ -109,8 +111,25 @@ viewNewChampionPage champion =
         [ viewTextInput FirstName champion
         , viewTextInput LastName champion
         , viewTextInput Email champion
+        , el [] <|
+            html <|
+                Html.select
+                    [ HE.onInput ChangeSport
+                    , HA.style "font-family" "Roboto"
+                    , HA.style "font-size" "15px"
+                    ]
+                    (List.map (viewSportOption champion.sport) Model.sportsList)
         , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
         ]
+
+
+viewSportOption : Sport -> Sport -> Html.Html msg
+viewSportOption currentSport sport =
+    Html.option
+        [ HA.value (Model.sportToString sport)
+        , HA.selected <| currentSport == sport
+        ]
+        [ Html.text (Model.sportToString sport) ]
 
 
 viewTextInput : FormField -> Champion -> Element Msg

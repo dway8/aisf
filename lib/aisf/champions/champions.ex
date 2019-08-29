@@ -7,6 +7,7 @@ defmodule Aisf.Champions do
   alias Aisf.Repo
 
   alias Aisf.Champions.Champion
+  alias Aisf.Sport
 
   @doc """
   Returns the list of champions.
@@ -62,18 +63,31 @@ defmodule Aisf.Champions do
 
   """
   def create_champion(attrs \\ %{}) do
-    attrs = add_pass_hash(attrs)
+    attrs =
+      attrs
+      |> add_pass_hash()
+      |> link_to_sport()
 
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
+    |> (fn {:ok, champion} -> {:ok, champion |> Repo.preload([:sport])} end).()
   end
 
-  defp add_pass_hash(params) do
+  defp add_pass_hash(attrs) do
     password = Ecto.UUID.generate() |> binary_part(16, 16)
 
-    params
+    attrs
     |> Map.put(:password, Bcrypt.hash_pwd_salt(password))
+  end
+
+  defp link_to_sport(attrs) do
+    sport_name = attrs.sport
+    sport = Sport.get_sport_by_name(sport_name)
+
+    attrs = Map.put(attrs, :sport_id, sport.id)
+
+    Map.delete(attrs, attrs.sport)
   end
 
   @doc """
