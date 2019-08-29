@@ -127,6 +127,7 @@ viewNewChampionPage champion =
         , viewTextInput LastName champion
         , viewTextInput Email champion
         , sportSelector False UpdatedChampionSport (Just champion.sport)
+        , Input.button [] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience professionnelle" }
         , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
         ]
 

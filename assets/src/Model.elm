@@ -49,6 +49,7 @@ type alias Champion =
     , firstName : String
     , email : String
     , sport : Sport
+    , proExperiences : List ProExperience
     }
 
 
@@ -60,6 +61,16 @@ type Sport
     | Freestyle
     | Saut
     | Snowboard
+
+
+type alias ProExperience =
+    { occupationalCategory : String
+    , title : String
+    , companyName : String
+    , description : String
+    , website : String
+    , contact : String
+    }
 
 
 sportsList : List Sport
@@ -96,6 +107,7 @@ type Msg
     | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
     | UpdatedChampionSport String
     | FilteredBySport String
+    | PressedAddProExperienceButton
 
 
 initChampion : Champion
@@ -105,6 +117,7 @@ initChampion =
     , firstName = ""
     , email = ""
     , sport = SkiAlpin
+    , proExperiences = []
     }
 
 
