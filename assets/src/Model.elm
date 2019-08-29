@@ -22,7 +22,9 @@ type Page
 
 
 type alias ListPageModel =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions }
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions
+    , sport : Maybe Sport
+    }
 
 
 type alias ChampionPageModel =
@@ -92,7 +94,8 @@ type Msg
     | UpdatedChampionField FormField String
     | PressedSaveChampionButton
     | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
-    | ChangeSport String
+    | UpdatedChampionSport String
+    | FilteredBySport String
 
 
 initChampion : Champion
@@ -136,29 +139,29 @@ sportToString sport =
             "Snowboard"
 
 
-sportFromString : String -> Sport
+sportFromString : String -> Maybe Sport
 sportFromString str =
     case str of
         "Ski alpin" ->
-            SkiAlpin
+            Just SkiAlpin
 
         "Ski de fond" ->
-            SkiDeFond
+            Just SkiDeFond
 
         "Biathlon" ->
-            Biathlon
+            Just Biathlon
 
         "Combiné" ->
-            Combine
+            Just Combine
 
         "Freestyle" ->
-            Freestyle
+            Just Freestyle
 
         "Saut" ->
-            Saut
+            Just Saut
 
         "Snowboard" ->
-            Snowboard
+            Just Snowboard
 
         _ ->
-            SkiAlpin
+            Nothing

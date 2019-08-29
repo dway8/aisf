@@ -53,18 +53,22 @@ viewListPage model =
     column [ spacing 10 ]
         [ case model.champions of
             Success champions ->
-                row [ spacing 20 ]
-                    [ column [ spacing 5 ]
-                        (List.map
-                            (\champ ->
-                                link []
-                                    { url = "/champions/" ++ Model.getId champ
-                                    , label = text <| champ.firstName ++ " " ++ champ.lastName
-                                    }
+                column [ spacing 20 ]
+                    [ sportSelector True FilteredBySport model.sport
+                    , row [ spacing 20 ]
+                        [ column [ spacing 5 ]
+                            (champions
+                                |> filterBySport model.sport
+                                |> List.map
+                                    (\champ ->
+                                        link []
+                                            { url = "/champions/" ++ Model.getId champ
+                                            , label = text <| champ.firstName ++ " " ++ champ.lastName
+                                            }
+                                    )
                             )
-                            champions
-                        )
-                    , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
+                        , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
+                        ]
                     ]
 
             NotAsked ->
@@ -76,6 +80,17 @@ viewListPage model =
             _ ->
                 text "Une erreur s'est produite."
         ]
+
+
+filterBySport : Maybe Sport -> List Champion -> List Champion
+filterBySport sport champions =
+    case sport of
+        Nothing ->
+            champions
+
+        Just s ->
+            champions
+                |> List.filter (.sport >> (==) s)
 
 
 viewChampionPage : ChampionPageModel -> Element Msg
@@ -111,25 +126,40 @@ viewNewChampionPage champion =
         [ viewTextInput FirstName champion
         , viewTextInput LastName champion
         , viewTextInput Email champion
-        , el [] <|
-            html <|
-                Html.select
-                    [ HE.onInput ChangeSport
-                    , HA.style "font-family" "Roboto"
-                    , HA.style "font-size" "15px"
-                    ]
-                    (List.map (viewSportOption champion.sport) Model.sportsList)
+        , sportSelector False UpdatedChampionSport (Just champion.sport)
         , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
         ]
 
 
-viewSportOption : Sport -> Sport -> Html.Html msg
+sportSelector : Bool -> (String -> Msg) -> Maybe Sport -> Element Msg
+sportSelector showOptionAll msg currentSport =
+    let
+        list =
+            (if showOptionAll then
+                [ "Tous les sports" ]
+
+             else
+                []
+            )
+                ++ List.map sportToString Model.sportsList
+    in
+    el [] <|
+        html <|
+            Html.select
+                [ HE.onInput msg
+                , HA.style "font-family" "Roboto"
+                , HA.style "font-size" "15px"
+                ]
+                (List.map (viewSportOption currentSport) list)
+
+
+viewSportOption : Maybe Sport -> String -> Html.Html msg
 viewSportOption currentSport sport =
     Html.option
-        [ HA.value (Model.sportToString sport)
-        , HA.selected <| currentSport == sport
+        [ HA.value sport
+        , HA.selected <| currentSport == Model.sportFromString sport
         ]
-        [ Html.text (Model.sportToString sport) ]
+        [ Html.text sport ]
 
 
 viewTextInput : FormField -> Champion -> Element Msg

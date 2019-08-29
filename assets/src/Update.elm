@@ -29,7 +29,7 @@ update msg model =
                     ( model, Cmd.none )
 
         GotChampions resp ->
-            ( { model | currentPage = ListPage { champions = resp } }, Cmd.none )
+            ( { model | currentPage = ListPage { champions = resp, sport = Nothing } }, Cmd.none )
 
         GotChampion resp ->
             case ( model.currentPage, resp ) of
@@ -59,8 +59,11 @@ update msg model =
         GotCreateChampionResponse resp ->
             handleCreateChampionResponse resp model
 
-        ChangeSport sportStr ->
-            changeSport sportStr model
+        UpdatedChampionSport sportStr ->
+            updateCurrentSport sportStr model
+
+        FilteredBySport sportStr ->
+            updateCurrentSport sportStr model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -91,7 +94,7 @@ getPageAndCmdFromRoute : Route -> ( Page, Cmd Msg )
 getPageAndCmdFromRoute route =
     case route of
         ListRoute ->
-            ( ListPage (ListPageModel Loading), Api.getChampions )
+            ( ListPage (ListPageModel Loading Nothing), Api.getChampions )
 
         ChampionRoute id ->
             ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
@@ -132,15 +135,24 @@ handleCreateChampionResponse response model =
             ( model, Cmd.none )
 
 
-changeSport : String -> Model -> ( Model, Cmd Msg )
-changeSport sportStr model =
+updateCurrentSport : String -> Model -> ( Model, Cmd Msg )
+updateCurrentSport sportStr model =
     case model.currentPage of
         NewChampionPage champion ->
             let
                 newChamp =
-                    { champion | sport = Model.sportFromString sportStr }
+                    { champion | sport = Model.sportFromString sportStr |> Maybe.withDefault champion.sport }
             in
             ( { model | currentPage = NewChampionPage newChamp }, Cmd.none )
+
+        ListPage lModel ->
+            ( { model
+                | currentPage =
+                    ListPage
+                        { lModel | sport = Model.sportFromString sportStr }
+              }
+            , Cmd.none
+            )
 
         _ ->
             ( model, Cmd.none )
