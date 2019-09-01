@@ -123,12 +123,39 @@ viewChampionPage { id, champion } =
 viewNewChampionPage : Champion -> Element Msg
 viewNewChampionPage champion =
     column []
-        [ viewTextInput FirstName champion
-        , viewTextInput LastName champion
-        , viewTextInput Email champion
-        , sportSelector False UpdatedChampionSport (Just champion.sport)
-        , Input.button [] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience professionnelle" }
-        , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+        ([ viewChampionTextInput FirstName champion
+         , viewChampionTextInput LastName champion
+         , viewChampionTextInput Email champion
+         , sportSelector False UpdatedChampionSport (Just champion.sport)
+         ]
+            ++ (champion.proExperiences
+                    |> List.map viewProExperienceForm
+               )
+            ++ [ Input.button [] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience professionnelle" }
+               , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+               ]
+        )
+
+
+viewProExperienceForm : ProExperience -> Element Msg
+viewProExperienceForm proExperience =
+    let
+        fields =
+            [ OccupationalCategory, Title, CompanyName, Description, Website, Contact ]
+    in
+    column []
+        [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton proExperience, label = text "Supprimer" } ]
+        , column []
+            (fields
+                |> List.map
+                    (\field ->
+                        let
+                            ( label, value ) =
+                                getProExperienceFormFieldData field proExperience
+                        in
+                        viewTextInput label value (UpdatedProExperienceField proExperience field)
+                    )
+            )
         ]
 
 
@@ -163,19 +190,24 @@ viewSportOption currentSport sport =
         [ Html.text sport ]
 
 
-viewTextInput : FormField -> Champion -> Element Msg
-viewTextInput field champion =
+viewChampionTextInput : FormField -> Champion -> Element Msg
+viewChampionTextInput field champion =
     let
         ( label, value ) =
-            getLabelAndValueForField field champion
+            getChampionFormFieldData field champion
     in
+    viewTextInput label value (UpdatedChampionField field)
+
+
+viewTextInput : String -> String -> (String -> Msg) -> Element Msg
+viewTextInput label value msg =
     Input.text
         [ Border.solid
         , Border.rounded 8
         , paddingXY 13 7
         , Border.width 3
         ]
-        { onChange = UpdatedChampionField field
+        { onChange = msg
         , text = value
         , placeholder = Nothing
         , label =
@@ -184,8 +216,8 @@ viewTextInput field champion =
         }
 
 
-getLabelAndValueForField : FormField -> Champion -> ( String, String )
-getLabelAndValueForField field champion =
+getChampionFormFieldData : FormField -> Champion -> ( String, String )
+getChampionFormFieldData field champion =
     case field of
         FirstName ->
             ( "Prénom", champion.firstName )
@@ -195,3 +227,31 @@ getLabelAndValueForField field champion =
 
         Email ->
             ( "Email", champion.email )
+
+        _ ->
+            ( "", "" )
+
+
+getProExperienceFormFieldData : FormField -> ProExperience -> ( String, String )
+getProExperienceFormFieldData field exp =
+    case field of
+        OccupationalCategory ->
+            ( "Catégorie professionnelle", exp.occupationalCategory )
+
+        Title ->
+            ( "Titre", exp.title )
+
+        CompanyName ->
+            ( "Nom de l'entreprise", exp.companyName )
+
+        Description ->
+            ( "Description", exp.description )
+
+        Website ->
+            ( "Site internet", exp.website )
+
+        Contact ->
+            ( "Contact", exp.contact )
+
+        _ ->
+            ( "", "" )

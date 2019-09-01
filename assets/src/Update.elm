@@ -68,6 +68,12 @@ update msg model =
         PressedAddProExperienceButton ->
             addProExperience model
 
+        PressedDeleteProExperienceButton proExperience ->
+            deleteProExperience proExperience model
+
+        UpdatedProExperienceField proExperience field val ->
+            updateProExperience proExperience field val model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -121,6 +127,9 @@ updateNewChampion field val model =
 
                         Email ->
                             { champion | email = val }
+
+                        _ ->
+                            champion
             in
             ( { model | currentPage = NewChampionPage newChamp }, Cmd.none )
 
@@ -163,4 +172,69 @@ updateCurrentSport sportStr model =
 
 addProExperience : Model -> ( Model, Cmd Msg )
 addProExperience model =
-    ( model, Cmd.none )
+    case model.currentPage of
+        NewChampionPage ({ proExperiences } as champion) ->
+            let
+                newProExperiences =
+                    proExperiences ++ [ Model.initProExperience ]
+            in
+            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+deleteProExperience : ProExperience -> Model -> ( Model, Cmd Msg )
+deleteProExperience proExperience model =
+    case model.currentPage of
+        NewChampionPage ({ proExperiences } as champion) ->
+            let
+                newProExperiences =
+                    proExperiences |> List.filter ((/=) proExperience)
+            in
+            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateProExperience : ProExperience -> FormField -> String -> Model -> ( Model, Cmd Msg )
+updateProExperience proExperience field val model =
+    case model.currentPage of
+        NewChampionPage ({ proExperiences } as champion) ->
+            let
+                newProExperiences =
+                    proExperiences
+                        |> List.map
+                            (\exp ->
+                                if exp == proExperience then
+                                    case field of
+                                        OccupationalCategory ->
+                                            { exp | occupationalCategory = val }
+
+                                        Title ->
+                                            { exp | title = val }
+
+                                        CompanyName ->
+                                            { exp | companyName = val }
+
+                                        Description ->
+                                            { exp | description = val }
+
+                                        Website ->
+                                            { exp | website = val }
+
+                                        Contact ->
+                                            { exp | contact = val }
+
+                                        _ ->
+                                            exp
+
+                                else
+                                    exp
+                            )
+            in
+            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )

@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), ProExperience, Route(..), Sport(..), getId, initChampion, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), ProExperience, Route(..), Sport(..), getId, initChampion, initProExperience, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -108,6 +108,8 @@ type Msg
     | UpdatedChampionSport String
     | FilteredBySport String
     | PressedAddProExperienceButton
+    | PressedDeleteProExperienceButton ProExperience
+    | UpdatedProExperienceField ProExperience FormField String
 
 
 initChampion : Champion
@@ -125,6 +127,12 @@ type FormField
     = FirstName
     | LastName
     | Email
+    | OccupationalCategory
+    | Title
+    | CompanyName
+    | Description
+    | Website
+    | Contact
 
 
 sportToString : Sport -> String
@@ -178,3 +186,14 @@ sportFromString str =
 
         _ ->
             Nothing
+
+
+initProExperience : ProExperience
+initProExperience =
+    { occupationalCategory = ""
+    , title = ""
+    , companyName = ""
+    , description = ""
+    , website = ""
+    , contact = ""
+    }
