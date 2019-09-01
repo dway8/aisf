@@ -2,6 +2,7 @@ defmodule Aisf.Champions.Champion do
   use Ecto.Schema
   import Ecto.Changeset
   alias Aisf.Sport
+  alias Aisf.ProExperiences.ProExperience
 
   schema "champions" do
     field(:first_name, :string)
@@ -9,6 +10,7 @@ defmodule Aisf.Champions.Champion do
     field(:email, :string)
     field(:password, :string)
     belongs_to(:sport, Sport)
+    has_many(:pro_experiences, ProExperience)
 
     timestamps()
   end

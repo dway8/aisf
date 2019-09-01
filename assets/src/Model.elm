@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), Route(..), Sport(..), getId, initChampion, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), ProExperience, Route(..), Sport(..), getId, initChampion, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))

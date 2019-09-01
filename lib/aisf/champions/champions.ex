@@ -8,6 +8,7 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.Sport
+  alias Aisf.ProExperiences.ProExperience
 
   @doc """
   Returns the list of champions.
@@ -20,7 +21,7 @@ defmodule Aisf.Champions do
   """
   def list_champions do
     Repo.all(Champion)
-    |> Repo.preload([:sport])
+    |> Repo.preload([:sport, :pro_experiences])
   end
 
   @doc """
@@ -39,7 +40,7 @@ defmodule Aisf.Champions do
   """
   def get_champion!(id) do
     Repo.get!(Champion, id)
-    |> Repo.preload([:sport])
+    |> Repo.preload([:sport, :pro_experiences])
   end
 
   @doc """
@@ -47,7 +48,7 @@ defmodule Aisf.Champions do
   """
   def get_champion(id) do
     Repo.get(Champion, id)
-    |> Repo.preload([:sport])
+    |> Repo.preload([:sport, :pro_experiences])
   end
 
   @doc """
@@ -71,7 +72,7 @@ defmodule Aisf.Champions do
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
-    |> (fn {:ok, champion} -> {:ok, champion |> Repo.preload([:sport])} end).()
+    |> (fn {:ok, champion} -> {:ok, champion |> Repo.preload([:sport, :pro_experiences])} end).()
   end
 
   defp add_pass_hash(attrs) do

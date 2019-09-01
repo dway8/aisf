@@ -1,14 +1,16 @@
 defmodule Aisf.ProExperiences.ProExperience do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Aisf.Champions.Champion
 
   schema "pro_experiences" do
-    field :companyName, :string
-    field :contact, :string
-    field :description, :string
-    field :occupationalCategory, :string
-    field :title, :string
-    field :website, :string
+    field(:company_name, :string)
+    field(:contact, :string)
+    field(:description, :string)
+    field(:occupational_category, :string)
+    field(:title, :string)
+    field(:website, :string)
+    belongs_to(:champion, Champion)
 
     timestamps()
   end
@@ -16,7 +18,21 @@ defmodule Aisf.ProExperiences.ProExperience do
   @doc false
   def changeset(pro_experience, attrs) do
     pro_experience
-    |> cast(attrs, [:occupationalCategory, :title, :companyName, :description, :website, :contact])
-    |> validate_required([:occupationalCategory, :title, :companyName, :description, :website, :contact])
+    |> cast(attrs, [
+      :occupational_category,
+      :title,
+      :company_name,
+      :description,
+      :website,
+      :contact
+    ])
+    |> validate_required([
+      :occupational_category,
+      :title,
+      :company_name,
+      :description,
+      :website,
+      :contact
+    ])
   end
 end

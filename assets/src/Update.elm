@@ -65,6 +65,9 @@ update msg model =
         FilteredBySport sportStr ->
             updateCurrentSport sportStr model
 
+        PressedAddProExperienceButton ->
+            addProExperience model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -156,3 +159,8 @@ updateCurrentSport sportStr model =
 
         _ ->
             ( model, Cmd.none )
+
+
+addProExperience : Model -> ( Model, Cmd Msg )
+addProExperience model =
+    ( model, Cmd.none )
