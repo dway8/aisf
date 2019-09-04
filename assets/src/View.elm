@@ -98,15 +98,37 @@ viewChampionPage { id, champion } =
     column [ spacing 10 ]
         [ link []
             { url = "/champions"
-            , label = el [ Border.width 1 ] <| text <| "Retour à la liste"
+            , label = el [ Border.width 1, padding 5 ] <| text <| "Retour à la liste"
             }
         , case champion of
             Success champ ->
-                column [ spacing 5 ]
-                    [ text <| Model.getId champ
-                    , text <| champ.lastName
-                    , text <| champ.firstName
-                    , text <| Model.sportToString champ.sport
+                column [ spacing 15 ]
+                    [ column [ spacing 10 ]
+                        [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
+                        , column [ spacing 4 ]
+                            [ viewField "N°" (Model.getId champ)
+                            , viewField "Nom" champ.lastName
+                            , viewField "Prénom" champ.firstName
+                            , viewField "Discipline" (Model.sportToString champ.sport)
+                            ]
+                        ]
+                    , column [ spacing 10 ]
+                        [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
+                        , column [ spacing 7 ]
+                            (champ.proExperiences
+                                |> List.map
+                                    (\exp ->
+                                        column [ spacing 4 ]
+                                            [ viewField "Catégorie professionnelle" exp.occupationalCategory
+                                            , viewField "Titre" exp.title
+                                            , viewField "Nom de l'entreprise" exp.companyName
+                                            , viewField "Description" exp.description
+                                            , viewField "Site internet" exp.website
+                                            , viewField "Contact" exp.contact
+                                            ]
+                                    )
+                            )
+                        ]
                     ]
 
             NotAsked ->
@@ -118,6 +140,11 @@ viewChampionPage { id, champion } =
             _ ->
                 text "Une erreur s'est produite."
         ]
+
+
+viewField : String -> String -> Element Msg
+viewField label value =
+    row [ spacing 10 ] [ text label, el [ Font.bold ] <| text value ]
 
 
 viewNewChampionPage : Champion -> Element Msg
