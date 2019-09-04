@@ -2,9 +2,51 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (placeholder)
+module Aisf.InputObject exposing (ProExperienceParams, ProExperienceParamsRequiredFields, buildProExperienceParams, encodeProExperienceParams)
+
+import Aisf.Interface
+import Aisf.Object
+import Aisf.Scalar
+import Aisf.ScalarCodecs
+import Aisf.Union
+import Graphql.Internal.Builder.Argument as Argument exposing (Argument)
+import Graphql.Internal.Builder.Object as Object
+import Graphql.Internal.Encode as Encode exposing (Value)
+import Graphql.OptionalArgument exposing (OptionalArgument(..))
+import Graphql.SelectionSet exposing (SelectionSet)
+import Json.Decode as Decode
 
 
-placeholder : String
-placeholder =
-    ""
+buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams
+buildProExperienceParams required =
+    { companyName = required.companyName, contact = required.contact, description = required.description, occupationalCategory = required.occupationalCategory, title = required.title, website = required.website }
+
+
+type alias ProExperienceParamsRequiredFields =
+    { companyName : String
+    , contact : String
+    , description : String
+    , occupationalCategory : String
+    , title : String
+    , website : String
+    }
+
+
+{-| Type for the ProExperienceParams input object.
+-}
+type alias ProExperienceParams =
+    { companyName : String
+    , contact : String
+    , description : String
+    , occupationalCategory : String
+    , title : String
+    , website : String
+    }
+
+
+{-| Encode a ProExperienceParams into a value that can be used as an argument.
+-}
+encodeProExperienceParams : ProExperienceParams -> Value
+encodeProExperienceParams input =
+    Encode.maybeObject
+        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "occupationalCategory", Encode.string input.occupationalCategory |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]

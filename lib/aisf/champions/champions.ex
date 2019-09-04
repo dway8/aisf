@@ -8,7 +8,7 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.Sport
-  alias Aisf.ProExperiences.ProExperience
+  alias Aisf.ProExperiences
 
   @doc """
   Returns the list of champions.
@@ -53,15 +53,6 @@ defmodule Aisf.Champions do
 
   @doc """
   Creates a champion.
-
-  ## Examples
-
-      iex> create_champion(%{field: value})
-      {:ok, %Champion{}}
-
-      iex> create_champion(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
   def create_champion(attrs \\ %{}) do
     attrs =
@@ -72,7 +63,12 @@ defmodule Aisf.Champions do
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
-    |> (fn {:ok, champion} -> {:ok, champion |> Repo.preload([:sport, :pro_experiences])} end).()
+    |> (fn {:ok, champion} ->
+          attrs.pro_experiences
+          |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)
+
+          {:ok, champion |> Repo.preload([:sport, :pro_experiences])}
+        end).()
   end
 
   defp add_pass_hash(attrs) do

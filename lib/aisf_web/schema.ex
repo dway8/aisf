@@ -44,8 +44,18 @@ defmodule AisfWeb.Schema do
       arg(:last_name, non_null(:string))
       arg(:email, non_null(:string))
       arg(:sport, non_null(:string))
+      arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
 
       resolve(&ChampionsResolver.create/2)
     end
+  end
+
+  input_object :pro_experience_params do
+    field(:company_name, non_null(:string))
+    field(:contact, non_null(:string))
+    field(:description, non_null(:string))
+    field(:occupational_category, non_null(:string))
+    field(:title, non_null(:string))
+    field(:website, non_null(:string))
   end
 end

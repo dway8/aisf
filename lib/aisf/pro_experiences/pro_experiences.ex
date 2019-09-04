@@ -40,17 +40,10 @@ defmodule Aisf.ProExperiences do
   @doc """
   Creates a pro_experience.
 
-  ## Examples
-
-      iex> create_pro_experience(%{field: value})
-      {:ok, %ProExperience{}}
-
-      iex> create_pro_experience(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def create_pro_experience(attrs \\ %{}) do
-    %ProExperience{}
+  def create_pro_experience(champion, attrs \\ %{}) do
+    champion
+    |> Ecto.build_assoc(:pro_experiences)
     |> ProExperience.changeset(attrs)
     |> Repo.insert()
   end
