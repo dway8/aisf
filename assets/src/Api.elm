@@ -40,13 +40,14 @@ getChampion id =
 
 championSelection : SelectionSet Champion Aisf.Object.Champion
 championSelection =
-    SelectionSet.map6 (\id l f e s p -> Champion id l f e (Model.sportFromString s |> Maybe.withDefault SkiAlpin) p)
+    SelectionSet.map7 Champion
         Champion.id
         Champion.lastName
         Champion.firstName
         Champion.email
-        (Champion.sport Sport.name)
+        (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) (Champion.sport Sport.name))
         (Champion.proExperiences proExperienceSelection)
+        (SelectionSet.map (Maybe.withDefault []) Champion.yearsInFrenchTeam)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience

@@ -129,6 +129,20 @@ viewChampionPage { id, champion } =
                                     )
                             )
                         ]
+                    , column [ spacing 10 ]
+                        [ el [ Font.bold, Font.size 18 ] <| text "ANNÉES EN ÉQUIPE DE FRANCE"
+                        , column [ spacing 7 ]
+                            (if champ.yearsInFrenchTeam == [] then
+                                [ text "Aucune" ]
+
+                             else
+                                champ.yearsInFrenchTeam
+                                    |> List.map
+                                        (\year ->
+                                            text <| String.fromInt year
+                                        )
+                            )
+                        ]
                     ]
 
             NotAsked ->
@@ -149,19 +163,40 @@ viewField label value =
 
 viewNewChampionPage : Champion -> Element Msg
 viewNewChampionPage champion =
-    column []
-        ([ viewChampionTextInput FirstName champion
-         , viewChampionTextInput LastName champion
-         , viewChampionTextInput Email champion
-         , sportSelector False UpdatedChampionSport (Just champion.sport)
-         ]
-            ++ (champion.proExperiences
-                    |> List.map viewProExperienceForm
-               )
-            ++ [ Input.button [] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience professionnelle" }
-               , Input.button [] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
-               ]
-        )
+    column [ spacing 10 ]
+        [ el [ Font.bold, Font.size 18 ] <| text "AJOUTER CHAMPION"
+        , column []
+            [ viewChampionTextInput FirstName champion
+            , viewChampionTextInput LastName champion
+            , viewChampionTextInput Email champion
+            , sportSelector False UpdatedChampionSport (Just champion.sport)
+            , editProExperiences champion
+            , editYearsInFrenchTeam champion
+            , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+            ]
+        ]
+
+
+editProExperiences : Champion -> Element Msg
+editProExperiences champion =
+    column [ spacing 10 ]
+        [ column []
+            (champion.proExperiences
+                |> List.map viewProExperienceForm
+            )
+        , Input.button [ Font.bold ] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience" }
+        ]
+
+
+editYearsInFrenchTeam : Champion -> Element Msg
+editYearsInFrenchTeam champion =
+    column [ spacing 10 ]
+        [ column []
+            (champion.yearsInFrenchTeam
+                |> List.map (\year -> text "-")
+            )
+        , Input.button [ Font.bold ] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une année" }
+        ]
 
 
 viewProExperienceForm : ProExperience -> Element Msg

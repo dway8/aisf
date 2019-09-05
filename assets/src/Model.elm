@@ -50,6 +50,7 @@ type alias Champion =
     , email : String
     , sport : Sport
     , proExperiences : List ProExperience
+    , yearsInFrenchTeam : List Int
     }
 
 
@@ -120,6 +121,7 @@ initChampion =
     , email = ""
     , sport = SkiAlpin
     , proExperiences = []
+    , yearsInFrenchTeam = []
     }
 
 

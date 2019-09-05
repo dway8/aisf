@@ -11,6 +11,7 @@ defmodule AisfWeb.Schema do
     field(:email, non_null(:string))
     field(:sport, non_null(:sport), resolve: assoc(:sport))
     field(:pro_experiences, non_null(list_of(non_null(:pro_experience))))
+    field(:years_in_french_team, list_of(non_null(:integer)))
   end
 
   object :sport do

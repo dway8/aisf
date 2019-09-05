@@ -23,7 +23,8 @@ end
   first_name: "Rowena",
   email: "rowena@pipitsu.com",
   password: "azeaze",
-  sport_id: 1
+  sport_id: 1,
+  years_in_french_team: [2001, 2003]
 }
 |> Repo.insert!()
 

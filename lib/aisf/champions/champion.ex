@@ -11,6 +11,7 @@ defmodule Aisf.Champions.Champion do
     field(:password, :string)
     belongs_to(:sport, Sport)
     has_many(:pro_experiences, ProExperience)
+    field(:years_in_french_team, {:array, :integer})
 
     timestamps()
   end
