@@ -44,8 +44,8 @@ viewBody model =
             ChampionPage championModel ->
                 viewChampionPage championModel
 
-            NewChampionPage champion ->
-                viewNewChampionPage champion
+            NewChampionPage newChampionModel ->
+                viewNewChampionPage newChampionModel
 
 
 viewListPage : ListPageModel -> Element Msg
@@ -54,7 +54,7 @@ viewListPage model =
         [ case model.champions of
             Success champions ->
                 column [ spacing 20 ]
-                    [ sportSelector True FilteredBySport model.sport
+                    [ sportSelector True SelectedASport model.sport
                     , row [ spacing 20 ]
                         [ column [ spacing 5 ]
                             (champions
@@ -161,17 +161,17 @@ viewField label value =
     row [ spacing 10 ] [ text label, el [ Font.bold ] <| text value ]
 
 
-viewNewChampionPage : Champion -> Element Msg
-viewNewChampionPage champion =
+viewNewChampionPage : NewChampionPageModel -> Element Msg
+viewNewChampionPage { champion, showYearSelector } =
     column [ spacing 10 ]
         [ el [ Font.bold, Font.size 18 ] <| text "AJOUTER CHAMPION"
         , column []
             [ viewChampionTextInput FirstName champion
             , viewChampionTextInput LastName champion
             , viewChampionTextInput Email champion
-            , sportSelector False UpdatedChampionSport (Just champion.sport)
+            , sportSelector False SelectedASport (Just champion.sport)
             , editProExperiences champion
-            , editYearsInFrenchTeam champion
+            , editYearsInFrenchTeam showYearSelector champion
             , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
             ]
         ]
@@ -188,14 +188,17 @@ editProExperiences champion =
         ]
 
 
-editYearsInFrenchTeam : Champion -> Element Msg
-editYearsInFrenchTeam champion =
+editYearsInFrenchTeam : Bool -> Champion -> Element Msg
+editYearsInFrenchTeam showYearSelector champion =
     column [ spacing 10 ]
         [ column []
             (champion.yearsInFrenchTeam
                 |> List.map (\year -> text "-")
             )
-        , Input.button [ Font.bold ] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une année" }
+        , row [ spacing 10 ]
+            [ Input.button [ Font.bold ] { onPress = Just PressedAddYearInFrenchTeamButton, label = text "Ajouter une année" }
+            , viewIf showYearSelector yearSelector
+            ]
         ]
 
 
@@ -241,6 +244,31 @@ sportSelector showOptionAll msg currentSport =
                 , HA.style "font-size" "15px"
                 ]
                 (List.map (viewSportOption currentSport) list)
+
+
+yearSelector : Element Msg
+yearSelector =
+    let
+        list : List Int
+        list =
+            List.range 1960 2019
+    in
+    el [] <|
+        html <|
+            Html.select
+                [ HE.onInput SelectedAYear
+                , HA.style "font-family" "Roboto"
+                , HA.style "font-size" "15px"
+                ]
+                (list
+                    |> List.map
+                        (\year ->
+                            Html.option
+                                [ HA.value <| String.fromInt year
+                                ]
+                                [ Html.text <| String.fromInt year ]
+                        )
+                )
 
 
 viewSportOption : Maybe Sport -> String -> Html.Html msg
@@ -317,3 +345,12 @@ getProExperienceFormFieldData field exp =
 
         _ ->
             ( "", "" )
+
+
+viewIf : Bool -> Element Msg -> Element Msg
+viewIf condition elem =
+    if condition then
+        elem
+
+    else
+        none

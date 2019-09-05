@@ -50,7 +50,7 @@ update msg model =
 
         PressedSaveChampionButton ->
             case model.currentPage of
-                NewChampionPage champion ->
+                NewChampionPage { champion } ->
                     ( model, Api.createChampion champion )
 
                 _ ->
@@ -59,10 +59,7 @@ update msg model =
         GotCreateChampionResponse resp ->
             handleCreateChampionResponse resp model
 
-        UpdatedChampionSport sportStr ->
-            updateCurrentSport sportStr model
-
-        FilteredBySport sportStr ->
+        SelectedASport sportStr ->
             updateCurrentSport sportStr model
 
         PressedAddProExperienceButton ->
@@ -73,6 +70,12 @@ update msg model =
 
         UpdatedProExperienceField proExperience field val ->
             updateProExperience proExperience field val model
+
+        PressedAddYearInFrenchTeamButton ->
+            showYearSelector model
+
+        SelectedAYear str ->
+            addChampionYearInFrenchTeam str model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -109,13 +112,13 @@ getPageAndCmdFromRoute route =
             ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
 
         NewChampionRoute ->
-            ( NewChampionPage Model.initChampion, Cmd.none )
+            ( NewChampionPage { champion = Model.initChampion, showYearSelector = False }, Cmd.none )
 
 
 updateNewChampion : FormField -> String -> Model -> ( Model, Cmd Msg )
 updateNewChampion field val model =
     case model.currentPage of
-        NewChampionPage champion ->
+        NewChampionPage ({ champion } as m) ->
             let
                 newChamp =
                     case field of
@@ -131,7 +134,7 @@ updateNewChampion field val model =
                         _ ->
                             champion
             in
-            ( { model | currentPage = NewChampionPage newChamp }, Cmd.none )
+            ( { model | currentPage = NewChampionPage { m | champion = newChamp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -150,12 +153,12 @@ handleCreateChampionResponse response model =
 updateCurrentSport : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSport sportStr model =
     case model.currentPage of
-        NewChampionPage champion ->
+        NewChampionPage ({ champion } as m) ->
             let
                 newChamp =
                     { champion | sport = Model.sportFromString sportStr |> Maybe.withDefault champion.sport }
             in
-            ( { model | currentPage = NewChampionPage newChamp }, Cmd.none )
+            ( { model | currentPage = NewChampionPage { m | champion = newChamp } }, Cmd.none )
 
         ListPage lModel ->
             ( { model
@@ -173,12 +176,15 @@ updateCurrentSport sportStr model =
 addProExperience : Model -> ( Model, Cmd Msg )
 addProExperience model =
     case model.currentPage of
-        NewChampionPage ({ proExperiences } as champion) ->
+        NewChampionPage ({ champion } as m) ->
             let
                 newProExperiences =
-                    proExperiences ++ [ Model.initProExperience ]
+                    champion.proExperiences ++ [ Model.initProExperience ]
+
+                newChampion =
+                    { champion | proExperiences = newProExperiences }
             in
-            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -187,12 +193,15 @@ addProExperience model =
 deleteProExperience : ProExperience -> Model -> ( Model, Cmd Msg )
 deleteProExperience proExperience model =
     case model.currentPage of
-        NewChampionPage ({ proExperiences } as champion) ->
+        NewChampionPage ({ champion } as m) ->
             let
                 newProExperiences =
-                    proExperiences |> List.filter ((/=) proExperience)
+                    champion.proExperiences |> List.filter ((/=) proExperience)
+
+                newChampion =
+                    { champion | proExperiences = newProExperiences }
             in
-            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -201,10 +210,10 @@ deleteProExperience proExperience model =
 updateProExperience : ProExperience -> FormField -> String -> Model -> ( Model, Cmd Msg )
 updateProExperience proExperience field val model =
     case model.currentPage of
-        NewChampionPage ({ proExperiences } as champion) ->
+        NewChampionPage ({ champion } as m) ->
             let
                 newProExperiences =
-                    proExperiences
+                    champion.proExperiences
                         |> List.map
                             (\exp ->
                                 if exp == proExperience then
@@ -233,8 +242,36 @@ updateProExperience proExperience field val model =
                                 else
                                     exp
                             )
+
+                newChampion =
+                    { champion | proExperiences = newProExperiences }
             in
-            ( { model | currentPage = NewChampionPage { champion | proExperiences = newProExperiences } }, Cmd.none )
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+showYearSelector : Model -> ( Model, Cmd Msg )
+showYearSelector model =
+    case model.currentPage of
+        NewChampionPage m ->
+            ( { model | currentPage = NewChampionPage { m | showYearSelector = True } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+addChampionYearInFrenchTeam : String -> Model -> ( Model, Cmd Msg )
+addChampionYearInFrenchTeam str model =
+    case model.currentPage of
+        NewChampionPage ({ champion } as m) ->
+            case String.toInt str of
+                Just year ->
+                    ( model, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

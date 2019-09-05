@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), Page(..), ProExperience, Route(..), Sport(..), getId, initChampion, initProExperience, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionPageModel, Champions, Flags, FormField(..), ListPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Sport(..), getId, initChampion, initProExperience, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -18,7 +18,7 @@ type alias Model =
 type Page
     = ListPage ListPageModel
     | ChampionPage ChampionPageModel
-    | NewChampionPage Champion
+    | NewChampionPage NewChampionPageModel
 
 
 type alias ListPageModel =
@@ -30,6 +30,12 @@ type alias ListPageModel =
 type alias ChampionPageModel =
     { id : Id
     , champion : RemoteData (Graphql.Http.Error Champion) Champion
+    }
+
+
+type alias NewChampionPageModel =
+    { champion : Champion
+    , showYearSelector : Bool
     }
 
 
@@ -106,11 +112,12 @@ type Msg
     | UpdatedChampionField FormField String
     | PressedSaveChampionButton
     | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
-    | UpdatedChampionSport String
-    | FilteredBySport String
+    | SelectedASport String
     | PressedAddProExperienceButton
     | PressedDeleteProExperienceButton ProExperience
     | UpdatedProExperienceField ProExperience FormField String
+    | PressedAddYearInFrenchTeamButton
+    | SelectedAYear String
 
 
 initChampion : Champion
