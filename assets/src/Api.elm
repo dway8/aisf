@@ -3,6 +3,7 @@ module Api exposing (createChampion, getChampion, getChampions)
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
+import Aisf.Object.Medal as Medal
 import Aisf.Object.ProExperience as ProExperience
 import Aisf.Object.Sport as Sport
 import Aisf.Query as Query
@@ -11,7 +12,7 @@ import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Json.Decode as D
-import Model exposing (Champion, Msg(..), ProExperience, Sport(..))
+import Model exposing (Champion, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..))
 import RemoteData
 
 
@@ -40,7 +41,7 @@ getChampion id =
 
 championSelection : SelectionSet Champion Aisf.Object.Champion
 championSelection =
-    SelectionSet.map7 Champion
+    SelectionSet.map8 Champion
         Champion.id
         Champion.lastName
         Champion.firstName
@@ -48,6 +49,7 @@ championSelection =
         (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) (Champion.sport Sport.name))
         (Champion.proExperiences proExperienceSelection)
         (SelectionSet.map (Maybe.withDefault []) Champion.yearsInFrenchTeam)
+        (Champion.medals medalSelection)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience
@@ -59,6 +61,15 @@ proExperienceSelection =
         ProExperience.description
         ProExperience.website
         ProExperience.contact
+
+
+medalSelection : SelectionSet Medal Aisf.Object.Medal
+medalSelection =
+    SelectionSet.map4 Medal
+        (SelectionSet.map (Model.competitionFromString >> Maybe.withDefault OlympicGames) Medal.competition)
+        Medal.year
+        (SelectionSet.map (Model.specialtyFromString >> Maybe.withDefault Slalom) Medal.specialty)
+        (SelectionSet.map (Model.medalTypeFromInt >> Maybe.withDefault Bronze) Medal.medalType)
 
 
 sportDecoder : D.Decoder (Maybe Sport)

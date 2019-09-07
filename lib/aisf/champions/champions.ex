@@ -21,7 +21,7 @@ defmodule Aisf.Champions do
   """
   def list_champions do
     Repo.all(Champion)
-    |> Repo.preload([:sport, :pro_experiences])
+    |> Repo.preload([:sport, :pro_experiences, :medals])
   end
 
   @doc """
@@ -40,7 +40,7 @@ defmodule Aisf.Champions do
   """
   def get_champion!(id) do
     Repo.get!(Champion, id)
-    |> Repo.preload([:sport, :pro_experiences])
+    |> Repo.preload([:sport, :pro_experiences, :medals])
   end
 
   @doc """
@@ -48,7 +48,7 @@ defmodule Aisf.Champions do
   """
   def get_champion(id) do
     Repo.get(Champion, id)
-    |> Repo.preload([:sport, :pro_experiences])
+    |> Repo.preload([:sport, :pro_experiences, :medals])
   end
 
   @doc """
@@ -67,7 +67,7 @@ defmodule Aisf.Champions do
           attrs.pro_experiences
           |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)
 
-          {:ok, champion |> Repo.preload([:sport, :pro_experiences])}
+          {:ok, champion |> Repo.preload([:sport, :pro_experiences, :medals])}
         end).()
   end
 

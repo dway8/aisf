@@ -12,6 +12,7 @@ defmodule AisfWeb.Schema do
     field(:sport, non_null(:sport), resolve: assoc(:sport))
     field(:pro_experiences, non_null(list_of(non_null(:pro_experience))))
     field(:years_in_french_team, list_of(non_null(:integer)))
+    field(:medals, non_null(list_of(non_null(:medal))))
   end
 
   object :sport do
@@ -26,6 +27,13 @@ defmodule AisfWeb.Schema do
     field(:occupational_category, non_null(:string))
     field(:title, non_null(:string))
     field(:website, non_null(:string))
+  end
+
+  object :medal do
+    field(:competition, non_null(:string))
+    field(:year, non_null(:integer))
+    field(:specialty, non_null(:string))
+    field(:medal_type, non_null(:integer))
   end
 
   query do
