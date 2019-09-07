@@ -268,7 +268,14 @@ addChampionYearInFrenchTeam str model =
         NewChampionPage ({ champion } as m) ->
             case String.toInt str of
                 Just year ->
-                    ( model, Cmd.none )
+                    let
+                        newYears =
+                            champion.yearsInFrenchTeam ++ [ year ]
+
+                        newChampion =
+                            { champion | yearsInFrenchTeam = newYears }
+                    in
+                    ( { model | currentPage = NewChampionPage { m | champion = newChampion, showYearSelector = False } }, Cmd.none )
 
                 Nothing ->
                     ( model, Cmd.none )

@@ -67,13 +67,14 @@ sportDecoder =
 
 
 createChampion : Champion -> Cmd Msg
-createChampion { firstName, lastName, email, sport, proExperiences } =
+createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam } =
     Mutation.createChampion
         { email = email
         , firstName = firstName
         , lastName = lastName
         , sport = Model.sportToString sport
         , proExperiences = proExperiences
+        , yearsInFrenchTeam = yearsInFrenchTeam
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint

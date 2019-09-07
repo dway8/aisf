@@ -137,6 +137,7 @@ viewChampionPage { id, champion } =
 
                              else
                                 champ.yearsInFrenchTeam
+                                    |> List.sort
                                     |> List.map
                                         (\year ->
                                             text <| String.fromInt year
@@ -193,7 +194,8 @@ editYearsInFrenchTeam showYearSelector champion =
     column [ spacing 10 ]
         [ column []
             (champion.yearsInFrenchTeam
-                |> List.map (\year -> text "-")
+                |> List.sort
+                |> List.map (\year -> text <| String.fromInt year)
             )
         , row [ spacing 10 ]
             [ Input.button [ Font.bold ] { onPress = Just PressedAddYearInFrenchTeamButton, label = text "Ajouter une année" }

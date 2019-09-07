@@ -18,7 +18,14 @@ defmodule Aisf.Champions.Champion do
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:first_name, :last_name, :email, :password, :sport_id])
-    |> validate_required([:first_name, :last_name, :email, :password, :sport_id])
+    |> cast(params, [:first_name, :last_name, :email, :password, :sport_id, :years_in_french_team])
+    |> validate_required([
+      :first_name,
+      :last_name,
+      :email,
+      :password,
+      :sport_id,
+      :years_in_french_team
+    ])
   end
 end

@@ -46,6 +46,7 @@ defmodule AisfWeb.Schema do
       arg(:email, non_null(:string))
       arg(:sport, non_null(:string))
       arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
+      arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
 
       resolve(&ChampionsResolver.create/2)
     end
