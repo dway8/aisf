@@ -8,7 +8,8 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.Sport
-  alias Aisf.ProExperiences
+  alias Aisf.ProExperiences.ProExperiences
+  alias Aisf.Medals.Medals
 
   @doc """
   Returns the list of champions.
@@ -66,6 +67,9 @@ defmodule Aisf.Champions do
     |> (fn {:ok, champion} ->
           attrs.pro_experiences
           |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)
+
+          attrs.medals
+          |> Enum.map(fn m -> Medals.create_medal(champion, m) end)
 
           {:ok, champion |> Repo.preload([:sport, :pro_experiences, :medals])}
         end).()

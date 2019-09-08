@@ -1,8 +1,10 @@
-module Model exposing (Champion, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), competitionFromString, getId, initChampion, initProExperience, medalTypeFromInt, specialtyFromString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getYear, initChampionForm, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
+import Dict exposing (Dict)
+import Editable exposing (Editable)
 import Graphql.Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Url exposing (Url)
@@ -12,6 +14,7 @@ type alias Model =
     { currentPage : Page
     , key : Nav.Key
     , isAdmin : Bool
+    , currentYear : Year
     }
 
 
@@ -34,8 +37,7 @@ type alias ChampionPageModel =
 
 
 type alias NewChampionPageModel =
-    { champion : Champion
-    , showYearSelector : Bool
+    { champion : ChampionForm
     }
 
 
@@ -56,14 +58,30 @@ type alias Champion =
     , email : String
     , sport : Sport
     , proExperiences : List ProExperience
-    , yearsInFrenchTeam : List Int
+    , yearsInFrenchTeam : List Year
     , medals : List Medal
     }
 
 
+type alias ChampionForm =
+    { id : Id
+    , lastName : String
+    , firstName : String
+    , email : String
+    , sport : Sport
+    , proExperiences : Dict Int (Editable ProExperience)
+    , yearsInFrenchTeam : Dict Int (Editable Year)
+    , medals : Dict Int (Editable Medal)
+    }
+
+
+type Year
+    = Year Int
+
+
 type alias Medal =
     { competition : Competition
-    , year : Int
+    , year : Year
     , specialty : Specialty
     , medalType : MedalType
     }
@@ -73,6 +91,16 @@ type Competition
     = OlympicGames
     | WorldChampionships
     | WorldCup
+
+
+competitionsList : List Competition
+competitionsList =
+    [ OlympicGames, WorldChampionships, WorldCup ]
+
+
+getYear : Year -> Int
+getYear (Year year) =
+    year
 
 
 competitionFromString : String -> Maybe Competition
@@ -91,6 +119,32 @@ competitionFromString str =
             Nothing
 
 
+competitionToString : Competition -> String
+competitionToString competition =
+    case competition of
+        OlympicGames ->
+            "OlympicGames"
+
+        WorldChampionships ->
+            "WorldChampionships"
+
+        WorldCup ->
+            "WorldCup"
+
+
+competitionToDisplay : Competition -> String
+competitionToDisplay competition =
+    case competition of
+        OlympicGames ->
+            "Jeux Olympiques"
+
+        WorldChampionships ->
+            "Championnats du monde"
+
+        WorldCup ->
+            "Coupe du monde"
+
+
 medalTypeFromInt : Int -> Maybe MedalType
 medalTypeFromInt int =
     case int of
@@ -105,6 +159,19 @@ medalTypeFromInt int =
 
         _ ->
             Nothing
+
+
+medalTypeToInt : MedalType -> Int
+medalTypeToInt medalType =
+    case medalType of
+        Gold ->
+            1
+
+        Silver ->
+            2
+
+        Bronze ->
+            3
 
 
 specialtyFromString : String -> Maybe Specialty
@@ -247,6 +314,145 @@ specialtyFromString str =
 
         _ ->
             Nothing
+
+
+specialtyToString : Specialty -> String
+specialtyToString specialty =
+    case specialty of
+        Slalom ->
+            "Slalom"
+
+        SlalomGeneral ->
+            "SlalomGeneral"
+
+        Descente ->
+            "Descente"
+
+        DescenteGeneral ->
+            "DescenteGeneral"
+
+        SuperG ->
+            "SuperG"
+
+        SuperGGeneral ->
+            "SuperGGeneral"
+
+        SuperCombine ->
+            "SuperCombine"
+
+        SuperCombineGeneral ->
+            "SuperCombineGeneral"
+
+        Geant ->
+            "Geant"
+
+        General ->
+            "General"
+
+        Combine ->
+            "Combine"
+
+        ParEquipe ->
+            "ParEquipe"
+
+        Individuel ->
+            "Individuel"
+
+        IndividuelGeneral ->
+            "IndividuelGeneral"
+
+        Sprint ->
+            "Sprint"
+
+        SprintGeneral ->
+            "SprintGeneral"
+
+        Poursuite ->
+            "Poursuite"
+
+        PoursuiteGeneral ->
+            "PoursuiteGeneral"
+
+        Relais ->
+            "Relais"
+
+        RelaisGeneral ->
+            "RelaisGeneral"
+
+        SprintX2 ->
+            "SprintX2"
+
+        SprintX2General ->
+            "SprintX2General"
+
+        MassStart ->
+            "MassStart"
+
+        ParEquipeGeneral ->
+            "ParEquipeGeneral"
+
+        Bosses ->
+            "Bosses"
+
+        BossesGeneral ->
+            "BossesGeneral"
+
+        SautBigAir ->
+            "SautBigAir"
+
+        SautBigAirGeneral ->
+            "SautBigAirGeneral"
+
+        SkiCross ->
+            "SkiCross"
+
+        SkiCrossGeneral ->
+            "SkiCrossGeneral"
+
+        HalfPipe ->
+            "HalfPipe"
+
+        HalfPipeGeneral ->
+            "HalfPipeGeneral"
+
+        Slopestyle ->
+            "Slopestyle"
+
+        Acrobatique ->
+            "Acrobatique"
+
+        Artistique ->
+            "Artistique"
+
+        SautSpecial ->
+            "SautSpecial"
+
+        SautSpecialGeneral ->
+            "SautSpecialGeneral"
+
+        VolASki ->
+            "VolASki"
+
+        VolASkiGeneral ->
+            "VolASkiGeneral"
+
+        Cross ->
+            "Cross"
+
+        CrossGeneral ->
+            "CrossGeneral"
+
+        SnowFreestyle ->
+            "SnowFreestyle"
+
+        SnowFreestyleGeneral ->
+            "SnowFreestyleGeneral"
+
+        SnowAlpin ->
+            "SnowAlpin"
+
+        SnowAlpinGeneral ->
+            "SnowAlpinGeneral"
 
 
 type Specialty
@@ -411,7 +617,9 @@ getId { id } =
 
 
 type alias Flags =
-    { isAdmin : Bool }
+    { isAdmin : Bool
+    , currentYear : Int
+    }
 
 
 type Msg
@@ -425,22 +633,26 @@ type Msg
     | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
     | SelectedASport String
     | PressedAddProExperienceButton
-    | PressedDeleteProExperienceButton ProExperience
-    | UpdatedProExperienceField ProExperience FormField String
+    | PressedDeleteProExperienceButton Int
+    | UpdatedProExperienceField Int FormField String
     | PressedAddYearInFrenchTeamButton
-    | SelectedAYear String
+    | SelectedAYearInFrenchTeam Int String
+    | PressedAddMedalButton
+    | PressedDeleteMedalButton Int
+    | SelectedACompetition Int String
+    | SelectedAMedalYear Int String
 
 
-initChampion : Champion
-initChampion =
+initChampionForm : ChampionForm
+initChampionForm =
     { id = Id "new"
     , lastName = ""
     , firstName = ""
     , email = ""
     , sport = SkiAlpin
-    , proExperiences = []
-    , yearsInFrenchTeam = []
-    , medals = []
+    , proExperiences = Dict.empty
+    , yearsInFrenchTeam = Dict.empty
+    , medals = Dict.empty
     }
 
 
@@ -518,3 +730,25 @@ initProExperience =
     , website = ""
     , contact = ""
     }
+
+
+initMedal : Year -> Medal
+initMedal currentYear =
+    { competition = OlympicGames
+    , year = currentYear
+    , specialty = Slalom
+    , medalType = Gold
+    }
+
+
+medalTypeToDisplay : MedalType -> String
+medalTypeToDisplay medalType =
+    case medalType of
+        Gold ->
+            "Or"
+
+        Silver ->
+            "Argent"
+
+        Bronze ->
+            "Bronze"

@@ -4,6 +4,8 @@ import Aisf.Scalar exposing (Id(..))
 import Api
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
+import Dict exposing (Dict)
+import Editable exposing (Editable(..))
 import Graphql.Http
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
@@ -65,17 +67,29 @@ update msg model =
         PressedAddProExperienceButton ->
             addProExperience model
 
-        PressedDeleteProExperienceButton proExperience ->
-            deleteProExperience proExperience model
+        PressedDeleteProExperienceButton id ->
+            deleteProExperience id model
 
-        UpdatedProExperienceField proExperience field val ->
-            updateProExperience proExperience field val model
+        UpdatedProExperienceField id field val ->
+            updateProExperience id field val model
 
         PressedAddYearInFrenchTeamButton ->
-            showYearSelector model
+            addYearInFrenchTeam model
 
-        SelectedAYear str ->
-            addChampionYearInFrenchTeam str model
+        SelectedAYearInFrenchTeam id str ->
+            updateYearInFrenchTeam id str model
+
+        PressedAddMedalButton ->
+            addMedal model
+
+        PressedDeleteMedalButton id ->
+            deleteMedal id model
+
+        SelectedACompetition id str ->
+            updateMedalCompetition id str model
+
+        SelectedAMedalYear id str ->
+            updateMedalYear id str model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -112,7 +126,7 @@ getPageAndCmdFromRoute route =
             ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
 
         NewChampionRoute ->
-            ( NewChampionPage { champion = Model.initChampion, showYearSelector = False }, Cmd.none )
+            ( NewChampionPage { champion = Model.initChampionForm }, Cmd.none )
 
 
 updateNewChampion : FormField -> String -> Model -> ( Model, Cmd Msg )
@@ -178,8 +192,13 @@ addProExperience model =
     case model.currentPage of
         NewChampionPage ({ champion } as m) ->
             let
+                newKey =
+                    getDictNextKey champion.proExperiences
+
                 newProExperiences =
-                    champion.proExperiences ++ [ Model.initProExperience ]
+                    champion.proExperiences
+                        |> Dict.map (\_ v -> Editable.save v)
+                        |> Dict.insert newKey (ReadOnly Model.initProExperience |> Editable.edit)
 
                 newChampion =
                     { champion | proExperiences = newProExperiences }
@@ -190,13 +209,13 @@ addProExperience model =
             ( model, Cmd.none )
 
 
-deleteProExperience : ProExperience -> Model -> ( Model, Cmd Msg )
-deleteProExperience proExperience model =
+deleteProExperience : Int -> Model -> ( Model, Cmd Msg )
+deleteProExperience id model =
     case model.currentPage of
         NewChampionPage ({ champion } as m) ->
             let
                 newProExperiences =
-                    champion.proExperiences |> List.filter ((/=) proExperience)
+                    champion.proExperiences |> Dict.remove id
 
                 newChampion =
                     { champion | proExperiences = newProExperiences }
@@ -207,40 +226,40 @@ deleteProExperience proExperience model =
             ( model, Cmd.none )
 
 
-updateProExperience : ProExperience -> FormField -> String -> Model -> ( Model, Cmd Msg )
-updateProExperience proExperience field val model =
+updateProExperience : Int -> FormField -> String -> Model -> ( Model, Cmd Msg )
+updateProExperience id field val model =
     case model.currentPage of
         NewChampionPage ({ champion } as m) ->
             let
                 newProExperiences =
                     champion.proExperiences
-                        |> List.map
-                            (\exp ->
-                                if exp == proExperience then
-                                    case field of
-                                        OccupationalCategory ->
-                                            { exp | occupationalCategory = val }
+                        |> Dict.update id
+                            (Maybe.map
+                                (Editable.map
+                                    (\proExperience ->
+                                        case field of
+                                            OccupationalCategory ->
+                                                { proExperience | occupationalCategory = val }
 
-                                        Title ->
-                                            { exp | title = val }
+                                            Title ->
+                                                { proExperience | title = val }
 
-                                        CompanyName ->
-                                            { exp | companyName = val }
+                                            CompanyName ->
+                                                { proExperience | companyName = val }
 
-                                        Description ->
-                                            { exp | description = val }
+                                            Description ->
+                                                { proExperience | description = val }
 
-                                        Website ->
-                                            { exp | website = val }
+                                            Website ->
+                                                { proExperience | website = val }
 
-                                        Contact ->
-                                            { exp | contact = val }
+                                            Contact ->
+                                                { proExperience | contact = val }
 
-                                        _ ->
-                                            exp
-
-                                else
-                                    exp
+                                            _ ->
+                                                proExperience
+                                    )
+                                )
                             )
 
                 newChampion =
@@ -252,33 +271,142 @@ updateProExperience proExperience field val model =
             ( model, Cmd.none )
 
 
-showYearSelector : Model -> ( Model, Cmd Msg )
-showYearSelector model =
+addYearInFrenchTeam : Model -> ( Model, Cmd Msg )
+addYearInFrenchTeam model =
     case model.currentPage of
-        NewChampionPage m ->
-            ( { model | currentPage = NewChampionPage { m | showYearSelector = True } }, Cmd.none )
+        NewChampionPage ({ champion } as m) ->
+            let
+                newKey =
+                    getDictNextKey champion.yearsInFrenchTeam
+
+                newYears =
+                    champion.yearsInFrenchTeam
+                        |> Dict.map (\_ v -> Editable.save v)
+                        |> Dict.insert newKey (ReadOnly model.currentYear |> Editable.edit)
+
+                newChampion =
+                    { champion | yearsInFrenchTeam = newYears }
+            in
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-addChampionYearInFrenchTeam : String -> Model -> ( Model, Cmd Msg )
-addChampionYearInFrenchTeam str model =
+updateYearInFrenchTeam : Int -> String -> Model -> ( Model, Cmd Msg )
+updateYearInFrenchTeam id str model =
     case model.currentPage of
         NewChampionPage ({ champion } as m) ->
             case String.toInt str of
                 Just year ->
                     let
                         newYears =
-                            champion.yearsInFrenchTeam ++ [ year ]
+                            champion.yearsInFrenchTeam
+                                |> Dict.update id (Maybe.map (Editable.map (\y -> Year year)))
+                                |> Dict.map (\_ v -> Editable.save v)
 
                         newChampion =
                             { champion | yearsInFrenchTeam = newYears }
                     in
-                    ( { model | currentPage = NewChampionPage { m | champion = newChampion, showYearSelector = False } }, Cmd.none )
+                    ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
 
                 Nothing ->
                     ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
+
+
+addMedal : Model -> ( Model, Cmd Msg )
+addMedal model =
+    case model.currentPage of
+        NewChampionPage ({ champion } as m) ->
+            let
+                newKey =
+                    getDictNextKey champion.yearsInFrenchTeam
+
+                newMedals =
+                    champion.medals
+                        |> Dict.map (\_ v -> Editable.save v)
+                        |> Dict.insert newKey (ReadOnly (Model.initMedal model.currentYear) |> Editable.edit)
+
+                newChampion =
+                    { champion | medals = newMedals }
+            in
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+deleteMedal : Int -> Model -> ( Model, Cmd Msg )
+deleteMedal id model =
+    case model.currentPage of
+        NewChampionPage ({ champion } as m) ->
+            let
+                newMedals =
+                    champion.medals |> Dict.remove id
+
+                newChampion =
+                    { champion | medals = newMedals }
+            in
+            ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateMedalCompetition : Int -> String -> Model -> ( Model, Cmd Msg )
+updateMedalCompetition id str model =
+    case model.currentPage of
+        NewChampionPage ({ champion } as m) ->
+            case Model.competitionFromString str of
+                Just competition ->
+                    let
+                        newMedals =
+                            champion.medals
+                                |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | competition = competition })))
+
+                        newChampion =
+                            { champion | medals = newMedals }
+                    in
+                    ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateMedalYear : Int -> String -> Model -> ( Model, Cmd Msg )
+updateMedalYear id str model =
+    case model.currentPage of
+        NewChampionPage ({ champion } as m) ->
+            case String.toInt str of
+                Just year ->
+                    let
+                        newMedals =
+                            champion.medals
+                                |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | year = Year year })))
+
+                        newChampion =
+                            { champion | medals = newMedals }
+                    in
+                    ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+getDictNextKey : Dict Int a -> Int
+getDictNextKey =
+    Dict.keys
+        >> List.sort
+        >> List.reverse
+        >> List.head
+        >> Maybe.map ((+) 1)
+        >> Maybe.withDefault 0

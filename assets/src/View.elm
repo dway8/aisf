@@ -3,6 +3,8 @@ module View exposing (view)
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (Document)
 import Browser.Navigation as Nav
+import Dict
+import Editable exposing (Editable(..))
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
@@ -45,7 +47,7 @@ viewBody model =
                 viewChampionPage championModel
 
             NewChampionPage newChampionModel ->
-                viewNewChampionPage newChampionModel
+                viewNewChampionPage model.currentYear newChampionModel
 
 
 viewListPage : ListPageModel -> Element Msg
@@ -116,17 +118,14 @@ viewChampionPage { id, champion } =
                         [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
                         , column [ spacing 7 ]
                             (champ.proExperiences
-                                |> List.map
-                                    (\exp ->
-                                        column [ spacing 4 ]
-                                            [ viewField "Catégorie professionnelle" exp.occupationalCategory
-                                            , viewField "Titre" exp.title
-                                            , viewField "Nom de l'entreprise" exp.companyName
-                                            , viewField "Description" exp.description
-                                            , viewField "Site internet" exp.website
-                                            , viewField "Contact" exp.contact
-                                            ]
-                                    )
+                                |> List.map viewProExperience
+                            )
+                        ]
+                    , column [ spacing 10 ]
+                        [ el [ Font.bold, Font.size 18 ] <| text "PALMARÈS"
+                        , column [ spacing 7 ]
+                            (champ.medals
+                                |> List.map viewMedal
                             )
                         ]
                     , column [ spacing 10 ]
@@ -137,6 +136,7 @@ viewChampionPage { id, champion } =
 
                              else
                                 champ.yearsInFrenchTeam
+                                    |> List.map Model.getYear
                                     |> List.sort
                                     |> List.map
                                         (\year ->
@@ -157,13 +157,25 @@ viewChampionPage { id, champion } =
         ]
 
 
+viewProExperience : ProExperience -> Element Msg
+viewProExperience exp =
+    column [ spacing 4 ]
+        [ viewField "Catégorie professionnelle" exp.occupationalCategory
+        , viewField "Titre" exp.title
+        , viewField "Nom de l'entreprise" exp.companyName
+        , viewField "Description" exp.description
+        , viewField "Site internet" exp.website
+        , viewField "Contact" exp.contact
+        ]
+
+
 viewField : String -> String -> Element Msg
 viewField label value =
     row [ spacing 10 ] [ text label, el [ Font.bold ] <| text value ]
 
 
-viewNewChampionPage : NewChampionPageModel -> Element Msg
-viewNewChampionPage { champion, showYearSelector } =
+viewNewChampionPage : Year -> NewChampionPageModel -> Element Msg
+viewNewChampionPage currentYear { champion } =
     column [ spacing 10 ]
         [ el [ Font.bold, Font.size 18 ] <| text "AJOUTER CHAMPION"
         , column []
@@ -172,57 +184,112 @@ viewNewChampionPage { champion, showYearSelector } =
             , viewChampionTextInput Email champion
             , sportSelector False SelectedASport (Just champion.sport)
             , editProExperiences champion
-            , editYearsInFrenchTeam showYearSelector champion
+            , editMedals currentYear champion
+            , editYearsInFrenchTeam currentYear champion
             , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
             ]
         ]
 
 
-editProExperiences : Champion -> Element Msg
-editProExperiences champion =
+editProExperiences : ChampionForm -> Element Msg
+editProExperiences { proExperiences } =
     column [ spacing 10 ]
         [ column []
-            (champion.proExperiences
-                |> List.map viewProExperienceForm
+            (proExperiences
+                |> Dict.map
+                    (\id exp ->
+                        case exp of
+                            ReadOnly e ->
+                                viewProExperience e
+
+                            Editable oldE newE ->
+                                viewProExperienceForm id newE
+                    )
+                |> Dict.values
             )
         , Input.button [ Font.bold ] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience" }
         ]
 
 
-editYearsInFrenchTeam : Bool -> Champion -> Element Msg
-editYearsInFrenchTeam showYearSelector champion =
+editMedals : Year -> ChampionForm -> Element Msg
+editMedals currentYear { medals } =
+    column [ spacing 10 ]
+        [ column []
+            (medals
+                |> Dict.map
+                    (\id medal ->
+                        case medal of
+                            ReadOnly m ->
+                                viewMedal m
+
+                            Editable oldM newM ->
+                                viewMedalForm currentYear id newM
+                    )
+                |> Dict.values
+            )
+        , Input.button [ Font.bold ] { onPress = Just PressedAddMedalButton, label = text "Ajouter une médaille" }
+        ]
+
+
+viewMedal : Medal -> Element Msg
+viewMedal { competition, year, specialty, medalType } =
+    column [ spacing 4 ]
+        [ viewField "Compétition" (competition |> Model.competitionToDisplay)
+        , viewField "Année" (year |> Model.getYear |> String.fromInt)
+        , viewField "Spécialité" (specialty |> Model.specialtyToString)
+        , viewField "Médaille" (medalType |> Model.medalTypeToDisplay)
+        ]
+
+
+editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
+editYearsInFrenchTeam currentYear champion =
     column [ spacing 10 ]
         [ column []
             (champion.yearsInFrenchTeam
-                |> List.sort
-                |> List.map (\year -> text <| String.fromInt year)
+                |> Dict.map
+                    (\id year ->
+                        case year of
+                            ReadOnly y ->
+                                text <| String.fromInt (Model.getYear y)
+
+                            Editable _ _ ->
+                                yearSelector currentYear (SelectedAYearInFrenchTeam id)
+                    )
+                |> Dict.values
             )
         , row [ spacing 10 ]
             [ Input.button [ Font.bold ] { onPress = Just PressedAddYearInFrenchTeamButton, label = text "Ajouter une année" }
-            , viewIf showYearSelector yearSelector
             ]
         ]
 
 
-viewProExperienceForm : ProExperience -> Element Msg
-viewProExperienceForm proExperience =
+viewProExperienceForm : Int -> ProExperience -> Element Msg
+viewProExperienceForm id newE =
     let
         fields =
             [ OccupationalCategory, Title, CompanyName, Description, Website, Contact ]
     in
     column []
-        [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton proExperience, label = text "Supprimer" } ]
+        [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton id, label = text "Supprimer" } ]
         , column []
             (fields
                 |> List.map
                     (\field ->
                         let
                             ( label, value ) =
-                                getProExperienceFormFieldData field proExperience
+                                getProExperienceFormFieldData field newE
                         in
-                        viewTextInput label value (UpdatedProExperienceField proExperience field)
+                        viewTextInput label value (UpdatedProExperienceField id field)
                     )
             )
+        ]
+
+
+viewMedalForm : Year -> Int -> Medal -> Element Msg
+viewMedalForm currentYear id newM =
+    column []
+        [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
+        , column [] [ competitionSelector id, yearSelector currentYear (SelectedAMedalYear id) ]
         ]
 
 
@@ -248,17 +315,17 @@ sportSelector showOptionAll msg currentSport =
                 (List.map (viewSportOption currentSport) list)
 
 
-yearSelector : Element Msg
-yearSelector =
+yearSelector : Year -> (String -> Msg) -> Element Msg
+yearSelector currentYear msg =
     let
         list : List Int
         list =
-            List.range 1960 2019
+            List.range 1960 (Model.getYear currentYear)
     in
     el [] <|
         html <|
             Html.select
-                [ HE.onInput SelectedAYear
+                [ HE.onInput msg
                 , HA.style "font-family" "Roboto"
                 , HA.style "font-size" "15px"
                 ]
@@ -273,6 +340,26 @@ yearSelector =
                 )
 
 
+competitionSelector : Int -> Element Msg
+competitionSelector id =
+    el [] <|
+        html <|
+            Html.select
+                [ HE.onInput <| SelectedACompetition id
+                , HA.style "font-family" "Roboto"
+                , HA.style "font-size" "15px"
+                ]
+                (Model.competitionsList
+                    |> List.map
+                        (\competition ->
+                            Html.option
+                                [ HA.value <| Model.competitionToString competition
+                                ]
+                                [ Html.text <| Model.competitionToDisplay competition ]
+                        )
+                )
+
+
 viewSportOption : Maybe Sport -> String -> Html.Html msg
 viewSportOption currentSport sport =
     Html.option
@@ -282,7 +369,7 @@ viewSportOption currentSport sport =
         [ Html.text sport ]
 
 
-viewChampionTextInput : FormField -> Champion -> Element Msg
+viewChampionTextInput : FormField -> ChampionForm -> Element Msg
 viewChampionTextInput field champion =
     let
         ( label, value ) =
@@ -308,7 +395,7 @@ viewTextInput label value msg =
         }
 
 
-getChampionFormFieldData : FormField -> Champion -> ( String, String )
+getChampionFormFieldData : FormField -> ChampionForm -> ( String, String )
 getChampionFormFieldData field champion =
     case field of
         FirstName ->

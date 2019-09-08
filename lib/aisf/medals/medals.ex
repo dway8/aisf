@@ -1,4 +1,4 @@
-defmodule Aisf.Medals do
+defmodule Aisf.Medals.Medals do
   @moduledoc """
   The Medals context.
   """
@@ -39,18 +39,10 @@ defmodule Aisf.Medals do
 
   @doc """
   Creates a medal.
-
-  ## Examples
-
-      iex> create_medal(%{field: value})
-      {:ok, %Medal{}}
-
-      iex> create_medal(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def create_medal(attrs \\ %{}) do
-    %Medal{}
+  def create_medal(champion, attrs \\ %{}) do
+    champion
+    |> Ecto.build_assoc(:medals)
     |> Medal.changeset(attrs)
     |> Repo.insert()
   end

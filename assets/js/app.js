@@ -24,7 +24,7 @@ for (var i = 0; i < cookies.length; ++i) {
     var pair = cookies[i].trim().split("=");
     if (pair[0] == "isAdmin") isAdmin = true;
 }
-var flags = { isAdmin };
+var flags = { isAdmin, currentYear: new Date().getFullYear() };
 
 var app = Elm.Main.init({
     node: document.getElementById("elm-main"),

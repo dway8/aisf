@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (ProExperienceParams, ProExperienceParamsRequiredFields, buildProExperienceParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildMedalParams, buildProExperienceParams, encodeMedalParams, encodeProExperienceParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -15,6 +15,37 @@ import Graphql.Internal.Encode as Encode exposing (Value)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
+
+
+buildMedalParams : MedalParamsRequiredFields -> MedalParams
+buildMedalParams required =
+    { competition = required.competition, medalType = required.medalType, specialty = required.specialty, year = required.year }
+
+
+type alias MedalParamsRequiredFields =
+    { competition : String
+    , medalType : Int
+    , specialty : String
+    , year : Int
+    }
+
+
+{-| Type for the MedalParams input object.
+-}
+type alias MedalParams =
+    { competition : String
+    , medalType : Int
+    , specialty : String
+    , year : Int
+    }
+
+
+{-| Encode a MedalParams into a value that can be used as an argument.
+-}
+encodeMedalParams : MedalParams -> Value
+encodeMedalParams input =
+    Encode.maybeObject
+        [ ( "competition", Encode.string input.competition |> Just ), ( "medalType", Encode.int input.medalType |> Just ), ( "specialty", Encode.string input.specialty |> Just ), ( "year", Encode.int input.year |> Just ) ]
 
 
 buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams

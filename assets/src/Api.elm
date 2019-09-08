@@ -8,11 +8,13 @@ import Aisf.Object.ProExperience as ProExperience
 import Aisf.Object.Sport as Sport
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
+import Dict
+import Editable
 import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Json.Decode as D
-import Model exposing (Champion, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..))
+import Model exposing (Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..), Year(..))
 import RemoteData
 
 
@@ -48,7 +50,7 @@ championSelection =
         Champion.email
         (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) (Champion.sport Sport.name))
         (Champion.proExperiences proExperienceSelection)
-        (SelectionSet.map (Maybe.withDefault []) Champion.yearsInFrenchTeam)
+        (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
         (Champion.medals medalSelection)
 
 
@@ -67,7 +69,7 @@ medalSelection : SelectionSet Medal Aisf.Object.Medal
 medalSelection =
     SelectionSet.map4 Medal
         (SelectionSet.map (Model.competitionFromString >> Maybe.withDefault OlympicGames) Medal.competition)
-        Medal.year
+        (SelectionSet.map Year Medal.year)
         (SelectionSet.map (Model.specialtyFromString >> Maybe.withDefault Slalom) Medal.specialty)
         (SelectionSet.map (Model.medalTypeFromInt >> Maybe.withDefault Bronze) Medal.medalType)
 
@@ -77,15 +79,28 @@ sportDecoder =
     D.succeed (Just SkiAlpin)
 
 
-createChampion : Champion -> Cmd Msg
-createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam } =
+createChampion : ChampionForm -> Cmd Msg
+createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals } =
     Mutation.createChampion
         { email = email
         , firstName = firstName
         , lastName = lastName
         , sport = Model.sportToString sport
-        , proExperiences = proExperiences
-        , yearsInFrenchTeam = yearsInFrenchTeam
+        , proExperiences = proExperiences |> Dict.values |> List.map Editable.value
+        , yearsInFrenchTeam = yearsInFrenchTeam |> Dict.values |> List.map (Editable.value >> Model.getYear)
+        , medals =
+            medals
+                |> Dict.values
+                |> List.map
+                    (Editable.value
+                        >> (\{ competition, year, specialty, medalType } ->
+                                { competition = Model.competitionToString competition
+                                , year = Model.getYear year
+                                , specialty = Model.specialtyToString specialty
+                                , medalType = Model.medalTypeToInt medalType
+                                }
+                           )
+                    )
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint

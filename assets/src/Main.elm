@@ -37,6 +37,7 @@ init flags url key =
     ( { currentPage = page
       , key = key
       , isAdmin = flags.isAdmin
+      , currentYear = Year flags.currentYear
       }
     , cmd
     )

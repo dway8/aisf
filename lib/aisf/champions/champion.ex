@@ -26,8 +26,7 @@ defmodule Aisf.Champions.Champion do
       :email,
       :password,
       :sport_id,
-      :years_in_french_team,
-      :medals
+      :years_in_french_team
     ])
     |> validate_required([
       :first_name,
@@ -35,8 +34,7 @@ defmodule Aisf.Champions.Champion do
       :email,
       :password,
       :sport_id,
-      :years_in_french_team,
-      :medals
+      :years_in_french_team
     ])
   end
 end

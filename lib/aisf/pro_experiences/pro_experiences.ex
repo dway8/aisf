@@ -1,4 +1,4 @@
-defmodule Aisf.ProExperiences do
+defmodule Aisf.ProExperiences.ProExperiences do
   @moduledoc """
   The ProExperiences context.
   """
