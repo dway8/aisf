@@ -79,27 +79,24 @@ sportDecoder =
     D.succeed (Just SkiAlpin)
 
 
-createChampion : ChampionForm -> Cmd Msg
+createChampion : Champion -> Cmd Msg
 createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals } =
     Mutation.createChampion
         { email = email
         , firstName = firstName
         , lastName = lastName
         , sport = Model.sportToString sport
-        , proExperiences = proExperiences |> Dict.values |> List.map Editable.value
-        , yearsInFrenchTeam = yearsInFrenchTeam |> Dict.values |> List.map (Editable.value >> Model.getYear)
+        , proExperiences = proExperiences
+        , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
         , medals =
             medals
-                |> Dict.values
                 |> List.map
-                    (Editable.value
-                        >> (\{ competition, year, specialty, medalType } ->
-                                { competition = Model.competitionToString competition
-                                , year = Model.getYear year
-                                , specialty = Model.specialtyToString specialty
-                                , medalType = Model.medalTypeToInt medalType
-                                }
-                           )
+                    (\{ competition, year, specialty, medalType } ->
+                        { competition = Model.competitionToString competition
+                        , year = Model.getYear year
+                        , specialty = Model.specialtyToString specialty
+                        , medalType = Model.medalTypeToInt medalType
+                        }
                     )
         }
         championSelection

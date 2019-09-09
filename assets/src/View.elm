@@ -182,7 +182,7 @@ viewNewChampionPage currentYear { champion } =
             [ viewChampionTextInput FirstName champion
             , viewChampionTextInput LastName champion
             , viewChampionTextInput Email champion
-            , sportSelector False SelectedASport (Just champion.sport)
+            , sportSelector False SelectedASport champion.sport
             , editProExperiences champion
             , editMedals currentYear champion
             , editYearsInFrenchTeam currentYear champion
@@ -212,7 +212,7 @@ editProExperiences { proExperiences } =
 
 
 editMedals : Year -> ChampionForm -> Element Msg
-editMedals currentYear { medals } =
+editMedals currentYear { medals, sport } =
     column [ spacing 10 ]
         [ column []
             (medals
@@ -289,7 +289,12 @@ viewMedalForm : Year -> Int -> Medal -> Element Msg
 viewMedalForm currentYear id newM =
     column []
         [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
-        , column [] [ competitionSelector id, yearSelector currentYear (SelectedAMedalYear id) ]
+        , column []
+            [ competitionSelector id
+            , yearSelector currentYear (SelectedAMedalYear id)
+
+            -- , specialtySelector
+            ]
         ]
 
 

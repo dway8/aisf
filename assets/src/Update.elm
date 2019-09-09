@@ -53,7 +53,16 @@ update msg model =
         PressedSaveChampionButton ->
             case model.currentPage of
                 NewChampionPage { champion } ->
-                    ( model, Api.createChampion champion )
+                    champion
+                        |> validateChampionForm
+                        |> Maybe.map (\champ -> ( model, Api.createChampion champ ))
+                        |> Maybe.withDefault
+                            (let
+                                _ =
+                                    Debug.log "errors" champion
+                             in
+                             ( model, Cmd.none )
+                            )
 
                 _ ->
                     ( model, Cmd.none )
@@ -170,7 +179,7 @@ updateCurrentSport sportStr model =
         NewChampionPage ({ champion } as m) ->
             let
                 newChamp =
-                    { champion | sport = Model.sportFromString sportStr |> Maybe.withDefault champion.sport }
+                    { champion | sport = Model.sportFromString sportStr }
             in
             ( { model | currentPage = NewChampionPage { m | champion = newChamp } }, Cmd.none )
 
@@ -410,3 +419,22 @@ getDictNextKey =
         >> List.head
         >> Maybe.map ((+) 1)
         >> Maybe.withDefault 0
+
+
+validateChampionForm : ChampionForm -> Maybe Champion
+validateChampionForm c =
+    case c.sport of
+        Nothing ->
+            Nothing
+
+        Just sport ->
+            Just
+                { id = Id "NEW"
+                , email = c.email
+                , firstName = c.firstName
+                , lastName = c.lastName
+                , sport = sport
+                , proExperiences = c.proExperiences |> Dict.values |> List.map Editable.value
+                , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
+                , medals = c.medals |> Dict.values |> List.map Editable.value
+                }

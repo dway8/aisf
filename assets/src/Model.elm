@@ -68,7 +68,7 @@ type alias ChampionForm =
     , lastName : String
     , firstName : String
     , email : String
-    , sport : Sport
+    , sport : Maybe Sport
     , proExperiences : Dict Int (Editable ProExperience)
     , yearsInFrenchTeam : Dict Int (Editable Year)
     , medals : Dict Int (Editable Medal)
@@ -649,7 +649,7 @@ initChampionForm =
     , lastName = ""
     , firstName = ""
     , email = ""
-    , sport = SkiAlpin
+    , sport = Nothing
     , proExperiences = Dict.empty
     , yearsInFrenchTeam = Dict.empty
     , medals = Dict.empty
