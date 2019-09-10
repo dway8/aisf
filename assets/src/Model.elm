@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getYear, initChampionForm, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getSpecialtiesForSport, getYear, initChampionForm, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -20,6 +20,7 @@ type alias Model =
 
 type Page
     = ListPage ListPageModel
+    | MedalsPage MedalsPageModel
     | ChampionPage ChampionPageModel
     | NewChampionPage NewChampionPageModel
 
@@ -27,6 +28,11 @@ type Page
 type alias ListPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
+    }
+
+
+type alias MedalsPageModel =
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions
     }
 
 
@@ -388,6 +394,9 @@ specialtyToString specialty =
         MassStart ->
             "MassStart"
 
+        MassStartGeneral ->
+            "MassStartGeneral"
+
         ParEquipeGeneral ->
             "ParEquipeGeneral"
 
@@ -455,6 +464,148 @@ specialtyToString specialty =
             "SnowAlpinGeneral"
 
 
+specialtyToDisplay : Specialty -> String
+specialtyToDisplay specialty =
+    case specialty of
+        Slalom ->
+            "Slalom"
+
+        SlalomGeneral ->
+            "Slalom cl. général"
+
+        Descente ->
+            "Descente"
+
+        DescenteGeneral ->
+            "Descente cl. général"
+
+        SuperG ->
+            "Super G"
+
+        SuperGGeneral ->
+            "SuperG cl. général"
+
+        SuperCombine ->
+            "Super combiné"
+
+        SuperCombineGeneral ->
+            "Super combiné cl. général"
+
+        Geant ->
+            "Géant"
+
+        General ->
+            "Cl. général"
+
+        Combine ->
+            "Combiné"
+
+        ParEquipe ->
+            "Par équipe"
+
+        Individuel ->
+            "Individuel"
+
+        IndividuelGeneral ->
+            "Individuel cl. général"
+
+        Sprint ->
+            "Sprint"
+
+        SprintGeneral ->
+            "Sprint cl. général"
+
+        Poursuite ->
+            "Poursuite"
+
+        PoursuiteGeneral ->
+            "Poursuite cl. général"
+
+        Relais ->
+            "Relais"
+
+        RelaisGeneral ->
+            "Relais cl. général"
+
+        SprintX2 ->
+            "Sprint x2"
+
+        SprintX2General ->
+            "Sprint x2 cl. général"
+
+        MassStart ->
+            "Mass start"
+
+        MassStartGeneral ->
+            "Mass start cl. général"
+
+        ParEquipeGeneral ->
+            "Par équipe cl. général"
+
+        Bosses ->
+            "Bosses"
+
+        BossesGeneral ->
+            "Bosses cl. général"
+
+        SautBigAir ->
+            "Saut big air"
+
+        SautBigAirGeneral ->
+            "Saut big air cl. général"
+
+        SkiCross ->
+            "Ski cross"
+
+        SkiCrossGeneral ->
+            "Ski cros cl. général"
+
+        HalfPipe ->
+            "Half pipe"
+
+        HalfPipeGeneral ->
+            "Half pipe cl. général"
+
+        Slopestyle ->
+            "Slopestyle"
+
+        Acrobatique ->
+            "Acrobatique"
+
+        Artistique ->
+            "Artistique"
+
+        SautSpecial ->
+            "Saut spécial"
+
+        SautSpecialGeneral ->
+            "Saut spécial cl. général"
+
+        VolASki ->
+            "Vol à ski"
+
+        VolASkiGeneral ->
+            "Vol à ski cl. général"
+
+        Cross ->
+            "Cross"
+
+        CrossGeneral ->
+            "Cross cl. général"
+
+        SnowFreestyle ->
+            "Freestyle"
+
+        SnowFreestyleGeneral ->
+            "Freestyle cl. général"
+
+        SnowAlpin ->
+            "Alpin"
+
+        SnowAlpinGeneral ->
+            "Alpin cl. général"
+
+
 type Specialty
     = -- Alpin
       Slalom
@@ -482,6 +633,7 @@ type Specialty
     | SprintX2General
       -- Biathlon
     | MassStart
+    | MassStartGeneral
       -- CombineNordique
     | ParEquipeGeneral
       -- Freestyle
@@ -508,6 +660,31 @@ type Specialty
     | SnowFreestyleGeneral
     | SnowAlpin
     | SnowAlpinGeneral
+
+
+getSpecialtiesForSport : Sport -> List Specialty
+getSpecialtiesForSport sport =
+    case sport of
+        SkiAlpin ->
+            [ Slalom, SlalomGeneral, Descente, DescenteGeneral, SuperG, SuperGGeneral, SuperCombine, SuperCombineGeneral, Geant, General, Combine, ParEquipe ]
+
+        SkiDeFond ->
+            [ Individuel, IndividuelGeneral, Sprint, SprintGeneral, Poursuite, PoursuiteGeneral, Relais, RelaisGeneral, SprintX2, SprintX2General, General ]
+
+        Biathlon ->
+            [ Individuel, IndividuelGeneral, Sprint, SprintGeneral, Relais, RelaisGeneral, MassStart, MassStartGeneral, Poursuite, PoursuiteGeneral, General, SprintX2, SprintX2General ]
+
+        CombineNordique ->
+            [ Individuel, IndividuelGeneral, Poursuite, PoursuiteGeneral, ParEquipe, ParEquipeGeneral, General ]
+
+        Freestyle ->
+            [ Bosses, BossesGeneral, SautBigAir, SautBigAirGeneral, SkiCross, SkiCrossGeneral, HalfPipe, HalfPipeGeneral, Slopestyle, Acrobatique, Artistique, General ]
+
+        Saut ->
+            [ SautSpecial, SautSpecialGeneral, VolASki, VolASkiGeneral ]
+
+        Snowboard ->
+            [ Cross, CrossGeneral, SnowFreestyle, SnowFreestyleGeneral, SnowAlpin, SnowAlpinGeneral, HalfPipe, HalfPipeGeneral, SautBigAir, Slopestyle, General ]
 
 
 
@@ -641,6 +818,7 @@ type Msg
     | PressedDeleteMedalButton Int
     | SelectedACompetition Int String
     | SelectedAMedalYear Int String
+    | SelectedASpecialty Int String
 
 
 initChampionForm : ChampionForm
@@ -732,11 +910,11 @@ initProExperience =
     }
 
 
-initMedal : Year -> Medal
-initMedal currentYear =
+initMedal : Sport -> Year -> Medal
+initMedal sport currentYear =
     { competition = OlympicGames
     , year = currentYear
-    , specialty = Slalom
+    , specialty = sport |> getSpecialtiesForSport |> List.head |> Maybe.withDefault Slalom
     , medalType = Gold
     }
 

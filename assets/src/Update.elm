@@ -100,6 +100,9 @@ update msg model =
         SelectedAMedalYear id str ->
             updateMedalYear id str model
 
+        SelectedASpecialty id str ->
+            updateMedalSpecialty id str model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -335,9 +338,14 @@ addMedal model =
                     getDictNextKey champion.yearsInFrenchTeam
 
                 newMedals =
-                    champion.medals
-                        |> Dict.map (\_ v -> Editable.save v)
-                        |> Dict.insert newKey (ReadOnly (Model.initMedal model.currentYear) |> Editable.edit)
+                    case champion.sport of
+                        Just sport ->
+                            champion.medals
+                                |> Dict.map (\_ v -> Editable.save v)
+                                |> Dict.insert newKey (ReadOnly (Model.initMedal sport model.currentYear) |> Editable.edit)
+
+                        Nothing ->
+                            champion.medals
 
                 newChampion =
                     { champion | medals = newMedals }
@@ -409,6 +417,29 @@ updateMedalYear id str model =
 
         _ ->
             ( model, Cmd.none )
+
+
+updateMedalSpecialty : Int -> String -> Model -> ( Model, Cmd Msg )
+updateMedalSpecialty id str model =
+    -- case model.currentPage of
+    --     NewChampionPage ({ champion } as m) ->
+    --         case Model. str of
+    --             Just year ->
+    --                 let
+    --                     newMedals =
+    --                         champion.medals
+    --                             |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | year = Year year })))
+    --
+    --                     newChampion =
+    --                         { champion | medals = newMedals }
+    --                 in
+    --                 ( { model | currentPage = NewChampionPage { m | champion = newChampion } }, Cmd.none )
+    --
+    --             Nothing ->
+    --                 ( model, Cmd.none )
+    --
+    --     _ ->
+    ( model, Cmd.none )
 
 
 getDictNextKey : Dict Int a -> Int
