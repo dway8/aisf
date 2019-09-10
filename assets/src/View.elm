@@ -1,24 +1,15 @@
 module View exposing (view)
 
-import Aisf.Scalar exposing (Id(..))
 import Browser exposing (Document)
-import Browser.Navigation as Nav
-import Common
-import Dict
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
-import Graphql.Http
 import Html exposing (Html)
-import Html.Attributes as HA
-import Html.Events as HE
-import Model exposing (..)
+import Model exposing (Model, Msg, Page(..))
 import Page.Champion
 import Page.List
 import Page.Medals
 import Page.NewChampion
-import RemoteData exposing (RemoteData(..), WebData)
 
 
 view : Model -> Document Msg
@@ -41,17 +32,30 @@ viewBody model =
         , alignLeft
         , Font.size 16
         , padding 20
+        , width fill
+        , height fill
         ]
     <|
-        case model.currentPage of
-            ListPage listModel ->
-                Page.List.view listModel
+        column [ width fill, height fill, spacing 30 ]
+            [ viewMenu model.currentPage
+            , case model.currentPage of
+                ListPage listModel ->
+                    Page.List.view listModel
 
-            MedalsPage medalsModel ->
-                Page.Medals.view medalsModel
+                MedalsPage medalsModel ->
+                    Page.Medals.view medalsModel
 
-            ChampionPage championModel ->
-                Page.Champion.view championModel
+                ChampionPage championModel ->
+                    Page.Champion.view championModel
 
-            NewChampionPage newChampionModel ->
-                Page.NewChampion.view model.currentYear newChampionModel
+                NewChampionPage newChampionModel ->
+                    Page.NewChampion.view model.currentYear newChampionModel
+            ]
+
+
+viewMenu : Page -> Element Msg
+viewMenu page =
+    row [ spacing 20 ]
+        [ link [ Border.width 1, padding 5 ] { url = "/champions", label = text "Liste" }
+        , link [ Border.width 1, padding 5 ] { url = "/medals", label = text "Palmarès" }
+        ]

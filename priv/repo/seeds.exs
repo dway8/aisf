@@ -19,9 +19,9 @@ for sport <- sports do
 end
 
 %Champion{
-  last_name: "Pipitsu",
+  last_name: "Pitsu",
   first_name: "Rowena",
-  email: "rowena@pipitsu.com",
+  email: "rowena@pitsu.com",
   password: "azeaze",
   sport_id: 1,
   years_in_french_team: [2001, 2003]

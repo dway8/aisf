@@ -49,6 +49,7 @@ type alias NewChampionPageModel =
 
 type Route
     = ListRoute
+    | MedalsRoute
     | ChampionRoute Id
     | NewChampionRoute
 

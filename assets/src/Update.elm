@@ -121,6 +121,7 @@ parseUrl url =
             (oneOf
                 [ map ListRoute top
                 , map ListRoute (s "champions")
+                , map MedalsRoute (s "medals")
                 , map NewChampionRoute (s "champions" </> s "new")
                 , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                 ]
@@ -133,6 +134,9 @@ getPageAndCmdFromRoute route =
     case route of
         ListRoute ->
             ( ListPage (ListPageModel Loading Nothing), Api.getChampions )
+
+        MedalsRoute ->
+            ( MedalsPage (MedalsPageModel Loading), Cmd.none )
 
         ChampionRoute id ->
             ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
