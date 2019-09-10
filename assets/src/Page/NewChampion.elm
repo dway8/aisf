@@ -22,7 +22,7 @@ view currentYear { champion } =
             [ viewChampionTextInput FirstName champion
             , viewChampionTextInput LastName champion
             , viewChampionTextInput Email champion
-            , Common.sportSelector False SelectedASport champion.sport
+            , Common.sportSelector False champion.sport
             , editProExperiences champion
             , editMedals currentYear champion
             , editYearsInFrenchTeam currentYear champion
@@ -122,38 +122,9 @@ viewMedalForm currentYear id sport medal =
         , column []
             [ competitionSelector id
             , yearSelector currentYear (SelectedAMedalYear id)
-            , specialtySelector sport id
+            , Common.specialtySelector False sport (SelectedAMedalSpecialty id)
             ]
         ]
-
-
-specialtySelector : Maybe Sport -> Int -> Element Msg
-specialtySelector maybeSport id =
-    case maybeSport of
-        Nothing ->
-            text "Veuillez choisir d'abord une discipline"
-
-        Just sport ->
-            let
-                list =
-                    Model.getSpecialtiesForSport sport
-            in
-            el [] <|
-                html <|
-                    Html.select
-                        [ HE.onInput <| SelectedASpecialty id
-                        , HA.style "font-family" "Roboto"
-                        , HA.style "font-size" "15px"
-                        ]
-                        (list
-                            |> List.map
-                                (\specialty ->
-                                    Html.option
-                                        [ HA.value <| Model.specialtyToString specialty
-                                        ]
-                                        [ Html.text <| Model.specialtyToDisplay specialty ]
-                                )
-                        )
 
 
 yearSelector : Year -> (String -> Msg) -> Element Msg

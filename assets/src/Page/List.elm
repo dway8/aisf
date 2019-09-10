@@ -12,7 +12,7 @@ view model =
         [ case model.champions of
             Success champions ->
                 column [ spacing 20 ]
-                    [ Common.sportSelector True SelectedASport model.sport
+                    [ Common.sportSelector True model.sport
                     , row [ spacing 20 ]
                         [ column [ spacing 5 ]
                             (champions

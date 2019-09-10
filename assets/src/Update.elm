@@ -100,8 +100,11 @@ update msg model =
         SelectedAMedalYear id str ->
             updateMedalYear id str model
 
-        SelectedASpecialty id str ->
+        SelectedAMedalSpecialty id str ->
             updateMedalSpecialty id str model
+
+        SelectedASpecialty str ->
+            updateCurrentSpecialty str model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -136,7 +139,7 @@ getPageAndCmdFromRoute route =
             ( ListPage (ListPageModel Loading Nothing), Api.getChampions )
 
         MedalsRoute ->
-            ( MedalsPage (MedalsPageModel Loading), Cmd.none )
+            ( MedalsPage (MedalsPageModel Loading Nothing Nothing), Cmd.none )
 
         ChampionRoute id ->
             ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
@@ -195,6 +198,15 @@ updateCurrentSport sportStr model =
                 | currentPage =
                     ListPage
                         { lModel | sport = Model.sportFromString sportStr }
+              }
+            , Cmd.none
+            )
+
+        MedalsPage mModel ->
+            ( { model
+                | currentPage =
+                    MedalsPage
+                        { mModel | sport = Model.sportFromString sportStr }
               }
             , Cmd.none
             )
@@ -473,3 +485,19 @@ validateChampionForm c =
                 , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 }
+
+
+updateCurrentSpecialty : String -> Model -> ( Model, Cmd Msg )
+updateCurrentSpecialty str model =
+    -- case model.currentPage of
+    -- MedalsPage mModel ->
+    --     ( { model
+    --         | currentPage =
+    --             ListPage
+    --                 { mModel | sport = Model.sportFromString sportStr }
+    --       }
+    --     , Cmd.none
+    --     )
+    --
+    -- _ ->
+    ( model, Cmd.none )

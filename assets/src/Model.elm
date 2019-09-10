@@ -33,6 +33,8 @@ type alias ListPageModel =
 
 type alias MedalsPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
+    , sport : Maybe Sport
+    , specialty : Maybe Specialty
     }
 
 
@@ -673,7 +675,7 @@ getSpecialtiesForSport sport =
             [ Individuel, IndividuelGeneral, Sprint, SprintGeneral, Poursuite, PoursuiteGeneral, Relais, RelaisGeneral, SprintX2, SprintX2General, General ]
 
         Biathlon ->
-            [ Individuel, IndividuelGeneral, Sprint, SprintGeneral, Relais, RelaisGeneral, MassStart, MassStartGeneral, Poursuite, PoursuiteGeneral, General, SprintX2, SprintX2General ]
+            [ Individuel, IndividuelGeneral, Sprint, SprintGeneral, Relais, RelaisGeneral, MassStart, MassStartGeneral, Poursuite, PoursuiteGeneral, SprintX2, SprintX2General, General ]
 
         CombineNordique ->
             [ Individuel, IndividuelGeneral, Poursuite, PoursuiteGeneral, ParEquipe, ParEquipeGeneral, General ]
@@ -819,7 +821,8 @@ type Msg
     | PressedDeleteMedalButton Int
     | SelectedACompetition Int String
     | SelectedAMedalYear Int String
-    | SelectedASpecialty Int String
+    | SelectedAMedalSpecialty Int String
+    | SelectedASpecialty String
 
 
 initChampionForm : ChampionForm

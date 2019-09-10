@@ -1,4 +1,4 @@
-module Common exposing (sportSelector, viewField, viewIf, viewMedal, viewProExperience)
+module Common exposing (specialtySelector, sportSelector, viewField, viewIf, viewMedal, viewProExperience)
 
 import Browser.Navigation as Nav
 import Dict
@@ -11,8 +11,8 @@ import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
-sportSelector : Bool -> (String -> Msg) -> Maybe Sport -> Element Msg
-sportSelector showOptionAll msg currentSport =
+sportSelector : Bool -> Maybe Sport -> Element Msg
+sportSelector showOptionAll currentSport =
     let
         list =
             (if showOptionAll then
@@ -26,7 +26,7 @@ sportSelector showOptionAll msg currentSport =
     el [] <|
         html <|
             Html.select
-                [ HE.onInput msg
+                [ HE.onInput SelectedASport
                 , HA.style "font-family" "Roboto"
                 , HA.style "font-size" "15px"
                 ]
@@ -76,3 +76,38 @@ viewIf condition elem =
 
     else
         none
+
+
+specialtySelector : Bool -> Maybe Sport -> (String -> Msg) -> Element Msg
+specialtySelector showOptionAll maybeSport msg =
+    case maybeSport of
+        Nothing ->
+            text "Veuillez choisir d'abord une discipline"
+
+        Just sport ->
+            el [] <|
+                html <|
+                    Html.select
+                        [ HE.onInput msg
+                        , HA.style "font-family" "Roboto"
+                        , HA.style "font-size" "15px"
+                        ]
+                        ((if showOptionAll then
+                            [ Html.option
+                                []
+                                [ Html.text "Toutes les spécialités" ]
+                            ]
+
+                          else
+                            []
+                         )
+                            ++ (Model.getSpecialtiesForSport sport
+                                    |> List.map
+                                        (\specialty ->
+                                            Html.option
+                                                [ HA.value <| Model.specialtyToString specialty
+                                                ]
+                                                [ Html.text <| Model.specialtyToDisplay specialty ]
+                                        )
+                               )
+                        )
