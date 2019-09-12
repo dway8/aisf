@@ -789,7 +789,7 @@ sportsList =
     ]
 
 
-getId : Champion -> String
+getId : { a | id : Id } -> String
 getId { id } =
     case id of
         Id str ->
