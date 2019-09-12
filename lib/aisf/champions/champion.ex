@@ -1,7 +1,6 @@
 defmodule Aisf.Champions.Champion do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Aisf.Sport
   alias Aisf.ProExperiences.ProExperience
   alias Aisf.Medals.Medal
 
@@ -10,7 +9,7 @@ defmodule Aisf.Champions.Champion do
     field(:last_name, :string)
     field(:email, :string)
     field(:password, :string)
-    belongs_to(:sport, Sport)
+    field(:sport, :string)
     has_many(:pro_experiences, ProExperience)
     field(:years_in_french_team, {:array, :integer})
     has_many(:medals, Medal)
@@ -25,7 +24,7 @@ defmodule Aisf.Champions.Champion do
       :last_name,
       :email,
       :password,
-      :sport_id,
+      :sport,
       :years_in_french_team
     ])
     |> validate_required([
@@ -33,7 +32,7 @@ defmodule Aisf.Champions.Champion do
       :last_name,
       :email,
       :password,
-      :sport_id,
+      :sport,
       :years_in_french_team
     ])
   end

@@ -7,22 +7,23 @@ defmodule Aisf.Champions do
   alias Aisf.Repo
 
   alias Aisf.Champions.Champion
-  alias Aisf.Sport
   alias Aisf.ProExperiences.ProExperiences
   alias Aisf.Medals.Medals
 
   @doc """
   Returns the list of champions.
-
-  ## Examples
-
-      iex> list_champions()
-      [%Champion{}, ...]
-
   """
   def list_champions do
     Repo.all(Champion)
-    |> Repo.preload([:sport, :pro_experiences, :medals])
+    |> Repo.preload([:pro_experiences, :medals])
+  end
+
+  @doc """
+  Returns the list of champions with medals in a sport.
+  """
+  def list_champions_with_medal_in_sport(sport) do
+    Repo.all(from(c in Champion, where: c.sport == ^sport))
+    |> Repo.preload([:pro_experiences, :medals])
   end
 
   @doc """
@@ -41,7 +42,7 @@ defmodule Aisf.Champions do
   """
   def get_champion!(id) do
     Repo.get!(Champion, id)
-    |> Repo.preload([:sport, :pro_experiences, :medals])
+    |> Repo.preload([:pro_experiences, :medals])
   end
 
   @doc """
@@ -49,7 +50,7 @@ defmodule Aisf.Champions do
   """
   def get_champion(id) do
     Repo.get(Champion, id)
-    |> Repo.preload([:sport, :pro_experiences, :medals])
+    |> Repo.preload([:pro_experiences, :medals])
   end
 
   @doc """
@@ -59,7 +60,6 @@ defmodule Aisf.Champions do
     attrs =
       attrs
       |> add_pass_hash()
-      |> link_to_sport()
 
     %Champion{}
     |> Champion.changeset(attrs)
@@ -80,15 +80,6 @@ defmodule Aisf.Champions do
 
     attrs
     |> Map.put(:password, Bcrypt.hash_pwd_salt(password))
-  end
-
-  defp link_to_sport(attrs) do
-    sport_name = attrs.sport
-    sport = Sport.get_sport_by_name(sport_name)
-
-    attrs = Map.put(attrs, :sport_id, sport.id)
-
-    Map.delete(attrs, attrs.sport)
   end
 
   @doc """

@@ -49,9 +49,9 @@ proExperiences object_ =
     Object.selectionForCompositeField "proExperiences" [] object_ (identity >> Decode.list)
 
 
-sport : SelectionSet decodesTo Aisf.Object.Sport -> SelectionSet decodesTo Aisf.Object.Champion
-sport object_ =
-    Object.selectionForCompositeField "sport" [] object_ identity
+sport : SelectionSet String Aisf.Object.Champion
+sport =
+    Object.selectionForField "String" "sport" [] Decode.string
 
 
 yearsInFrenchTeam : SelectionSet (Maybe (List Int)) Aisf.Object.Champion

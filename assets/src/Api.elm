@@ -1,11 +1,10 @@
-module Api exposing (createChampion, getChampion, getChampions)
+module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedalInSport)
 
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
 import Aisf.Object.Medal as Medal
 import Aisf.Object.ProExperience as ProExperience
-import Aisf.Object.Sport as Sport
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Dict
@@ -41,6 +40,14 @@ getChampion id =
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampion)
 
 
+getChampionsWithMedalInSport : Sport -> Cmd Msg
+getChampionsWithMedalInSport sport =
+    Query.championsWithMedalInSport { sport = Model.sportToString sport } championSelection
+        |> Graphql.Http.queryRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
+
+
 championSelection : SelectionSet Champion Aisf.Object.Champion
 championSelection =
     SelectionSet.map8 Champion
@@ -48,7 +55,7 @@ championSelection =
         Champion.lastName
         Champion.firstName
         Champion.email
-        (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) (Champion.sport Sport.name))
+        (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Champion.sport)
         (Champion.proExperiences proExperienceSelection)
         (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
         (Champion.medals medalSelection)

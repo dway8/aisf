@@ -31,7 +31,7 @@ update msg model =
                     ( model, Cmd.none )
 
         GotChampions resp ->
-            ( { model | currentPage = ListPage { champions = resp, sport = Nothing } }, Cmd.none )
+            handleChampionsResponse resp model
 
         GotChampion resp ->
             case ( model.currentPage, resp ) of
@@ -203,12 +203,16 @@ updateCurrentSport sportStr model =
             )
 
         MedalsPage mModel ->
+            let
+                newSport =
+                    Model.sportFromString sportStr
+            in
             ( { model
                 | currentPage =
                     MedalsPage
-                        { mModel | sport = Model.sportFromString sportStr }
+                        { mModel | sport = newSport }
               }
-            , Cmd.none
+            , newSport |> Maybe.map (\sport -> Api.getChampionsWithMedalInSport sport) |> Maybe.withDefault Cmd.none
             )
 
         _ ->
@@ -501,3 +505,16 @@ updateCurrentSpecialty str model =
     --
     -- _ ->
     ( model, Cmd.none )
+
+
+handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
+handleChampionsResponse resp model =
+    case model.currentPage of
+        ListPage _ ->
+            ( { model | currentPage = ListPage { champions = resp, sport = Nothing } }, Cmd.none )
+
+        MedalsPage mModel ->
+            ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )

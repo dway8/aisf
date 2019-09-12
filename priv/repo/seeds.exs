@@ -1,29 +1,23 @@
 alias Aisf.Champions.Champion
-alias Aisf.Sport
 alias Aisf.ProExperiences.ProExperience
 alias Aisf.Repo
 
-sports = [
-  "Ski alpin",
-  "Ski de fond",
-  "Biathlon",
-  "Combiné nordique",
-  "Freestyle",
-  "Saut",
-  "Snowboard"
-]
-
-for sport <- sports do
-  %Sport{name: sport}
-  |> Repo.insert!()
-end
+# sports = [
+#   "Ski alpin",
+#   "Ski de fond",
+#   "Biathlon",
+#   "Combiné nordique",
+#   "Freestyle",
+#   "Saut",
+#   "Snowboard"
+# ]
 
 %Champion{
   last_name: "Pitsu",
   first_name: "Rowena",
   email: "rowena@pitsu.com",
   password: "azeaze",
-  sport_id: 1,
+  sport: "Ski alpin",
   years_in_french_team: [2001, 2003]
 }
 |> Repo.insert!()
@@ -33,7 +27,7 @@ end
   first_name: "Emile",
   email: "allais@hotmail.com",
   password: "azeaze",
-  sport_id: 2
+  sport: "Ski de fond"
 }
 |> Repo.insert!()
 

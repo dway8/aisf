@@ -13,6 +13,11 @@ defmodule AisfWeb.ChampionsResolver do
     end
   end
 
+  def get_by_medal_in_sport(%{sport: sport}, _info) do
+    champions = Champions.list_champions_with_medal_in_sport(sport)
+    {:ok, champions}
+  end
+
   def create(args, _info) do
     Champions.create_champion(args)
   end
