@@ -71,7 +71,7 @@ defmodule Aisf.Champions do
           attrs.medals
           |> Enum.map(fn m -> Medals.create_medal(champion, m) end)
 
-          {:ok, champion |> Repo.preload([:sport, :pro_experiences, :medals])}
+          {:ok, champion |> Repo.preload([:pro_experiences, :medals])}
         end).()
   end
 

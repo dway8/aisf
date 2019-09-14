@@ -24,6 +24,5 @@ config :aisf, Aisf.Repo,
 config :wallaby,
   chrome: [headless: false],
   driver: Wallaby.Experimental.Chrome,
-  screenshot_dir: "screenshots",
-  screenshot_on_failure: true,
-  chromedriver: "/home/diane/Spottt/devops/scripts/ressources/chromedriver"
+  chromedriver: "/home/diane/Spottt/devops/scripts/ressources/chromedriver",
+  screenshot_on_failure: true
