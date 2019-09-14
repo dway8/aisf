@@ -4,7 +4,9 @@ use Mix.Config
 # you can enable the server option below.
 config :aisf, AisfWeb.Endpoint,
   http: [port: 4002],
-  server: false
+  server: true
+
+config :aisf, :sql_sandbox, true
 
 # Print only warnings and errors during test
 config :logger, level: :warn
@@ -17,3 +19,11 @@ config :aisf, Aisf.Repo,
   database: "aisf_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+# Chrome
+config :wallaby,
+  chrome: [headless: false],
+  driver: Wallaby.Experimental.Chrome,
+  screenshot_dir: "screenshots",
+  screenshot_on_failure: true,
+  chromedriver: "/home/diane/Spottt/devops/scripts/ressources/chromedriver"

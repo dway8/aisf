@@ -5,7 +5,13 @@ defmodule AisfWeb.Endpoint do
     websocket: true,
     longpoll: false
 
+  if Application.get_env(:aisf, :sql_sandbox) do
+    plug Phoenix.Ecto.SQL.Sandbox
+  end
+
   # Serve at "/" the static files from "priv/static" directory.
+  #
+  #
   #
   # You should set gzip to true if you are running phx.digest
   # when deploying your static files in production.
