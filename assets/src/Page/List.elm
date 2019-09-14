@@ -2,6 +2,7 @@ module Page.List exposing (view)
 
 import Common
 import Element exposing (..)
+import Html.Attributes as HA
 import Model exposing (Champion, ListPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -19,7 +20,7 @@ view model =
                                 |> filterBySport model.sport
                                 |> List.map
                                     (\champ ->
-                                        link []
+                                        link [ htmlAttribute <| HA.class "champion-item" ]
                                             { url = "/champions/" ++ Model.getId champ
                                             , label = text <| champ.firstName ++ " " ++ champ.lastName
                                             }

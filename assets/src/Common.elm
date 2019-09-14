@@ -7,6 +7,7 @@ import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
+import Json.Decode as D
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -26,9 +27,10 @@ sportSelector showOptionAll currentSport =
     el [] <|
         html <|
             Html.select
-                [ HE.onInput SelectedASport
+                [ HE.on "change" <| D.map SelectedASport <| HE.targetValue
                 , HA.style "font-family" "Roboto"
                 , HA.style "font-size" "15px"
+                , HA.id "sport-selector"
                 ]
                 (List.map (viewSportOption currentSport) list)
 
@@ -88,7 +90,7 @@ specialtySelector showOptionAll maybeSport msg =
             el [] <|
                 html <|
                     Html.select
-                        [ HE.onInput msg
+                        [ HE.on "change" <| D.map msg <| HE.targetValue
                         , HA.style "font-family" "Roboto"
                         , HA.style "font-size" "15px"
                         ]

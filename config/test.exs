@@ -22,7 +22,7 @@ config :aisf, Aisf.Repo,
 
 # Chrome
 config :wallaby,
-  chrome: [headless: false],
+  # chrome: [headless: false],
   driver: Wallaby.Experimental.Chrome,
   chromedriver: "/home/diane/Spottt/devops/scripts/ressources/chromedriver",
   screenshot_on_failure: true

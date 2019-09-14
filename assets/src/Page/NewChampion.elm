@@ -10,6 +10,7 @@ import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
+import Json.Decode as D
 import Model exposing (ChampionForm, FormField(..), Medal, Msg(..), NewChampionPageModel, ProExperience, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -137,7 +138,7 @@ yearSelector currentYear msg =
     el [] <|
         html <|
             Html.select
-                [ HE.onInput msg
+                [ HE.on "change" <| D.map msg <| HE.targetValue
                 , HA.style "font-family" "Roboto"
                 , HA.style "font-size" "15px"
                 ]
@@ -157,7 +158,7 @@ competitionSelector id =
     el [] <|
         html <|
             Html.select
-                [ HE.onInput <| SelectedACompetition id
+                [ HE.on "change" <| D.map (SelectedACompetition id) <| HE.targetValue
                 , HA.style "font-family" "Roboto"
                 , HA.style "font-size" "15px"
                 ]
