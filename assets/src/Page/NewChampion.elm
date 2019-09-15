@@ -103,7 +103,7 @@ editYearsInFrenchTeam currentYear champion =
                                 text <| String.fromInt (Model.getYear y)
 
                             Editable _ _ ->
-                                yearSelector currentYear (SelectedAYearInFrenchTeam id)
+                                Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id)
                     )
                 |> Dict.values
             )
@@ -141,35 +141,10 @@ viewMedalForm currentYear id sport medal =
         [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
         , column []
             [ competitionSelector id
-            , yearSelector currentYear (SelectedAMedalYear id)
+            , Common.yearSelector False currentYear (SelectedAMedalYear id)
             , Common.specialtySelector False sport (SelectedAMedalSpecialty id)
             ]
         ]
-
-
-yearSelector : Year -> (String -> Msg) -> Element Msg
-yearSelector currentYear msg =
-    let
-        list : List Int
-        list =
-            List.range 1960 (Model.getYear currentYear)
-    in
-    el [] <|
-        html <|
-            Html.select
-                [ HE.on "change" <| D.map msg <| HE.targetValue
-                , HA.style "font-family" "Roboto"
-                , HA.style "font-size" "15px"
-                ]
-                (list
-                    |> List.map
-                        (\year ->
-                            Html.option
-                                [ HA.value <| String.fromInt year
-                                ]
-                                [ Html.text <| String.fromInt year ]
-                        )
-                )
 
 
 competitionSelector : Int -> Element Msg

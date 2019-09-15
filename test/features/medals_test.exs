@@ -70,9 +70,9 @@ defmodule AisfWeb.MedalsTest do
   test "filtering medals by sport and medals", %{session: session, champion1: champion1} do
     session
     |> visit("/medals")
-    |> click(Query.text("Tous les sports"))
+    |> click(Query.option("Tous les sports"))
     |> click(Query.option("Ski de fond"))
-    |> click(Query.text("Toutes les spécialités"))
+    |> click(Query.option("Toutes les spécialités"))
     |> click(Query.option("Poursuite"))
     |> find(Query.css("#medals-list"), fn element ->
       element
@@ -83,14 +83,36 @@ defmodule AisfWeb.MedalsTest do
     end)
 
     session
-    |> click(Query.option("Cl. général"))
+    |> click(Query.option("Toutes les spécialités"))
+    |> assert_has(Query.css(".champion-item", count: 2))
+  end
+
+  test "filtering medals by sport and year", %{session: session} do
+    session
+    |> visit("/medals")
+    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Ski de fond"))
+    |> click(Query.option("Toutes les années"))
+    |> click(Query.option("1992"))
+    |> find(Query.css("#medals-list"), fn element ->
+      element
+      |> assert_has(Query.css(".champion-item", count: 1))
+      |> assert_has(Query.text("Argent"))
+      |> assert_has(Query.text("1992"))
+    end)
+
+    session
+    |> click(Query.option("1981"))
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 1))
       |> assert_has(Query.text("Or"))
       |> assert_has(Query.text("1981"))
-      |> assert_has(Query.text(champion1.first_name, count: 1))
     end)
+
+    session
+    |> click(Query.option("Toutes les années"))
+    |> assert_has(Query.css(".champion-item", count: 2))
   end
 
   test "selecting a champion in the list", %{

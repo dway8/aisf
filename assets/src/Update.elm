@@ -117,13 +117,16 @@ update msg model =
         TableMsg tableState ->
             handleTableMsg tableState model
 
+        SelectedAYear str ->
+            updateCurrentYear str model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
     let
         ( page, cmd ) =
             parseUrl newLocation
-                |> getPageAndCmdFromRoute
+                |> getPageAndCmdFromRoute model.currentYear
     in
     ( { model | currentPage = page }, cmd )
 
@@ -143,15 +146,15 @@ parseUrl url =
         |> Maybe.withDefault ListRoute
 
 
-getPageAndCmdFromRoute : Route -> ( Page, Cmd Msg )
-getPageAndCmdFromRoute route =
+getPageAndCmdFromRoute : Year -> Route -> ( Page, Cmd Msg )
+getPageAndCmdFromRoute currentYear route =
     case route of
         ListRoute ->
             Page.List.init
                 |> Tuple.mapFirst ListPage
 
         MedalsRoute ->
-            Page.Medals.init
+            Page.Medals.init currentYear
                 |> Tuple.mapFirst MedalsPage
 
         ChampionRoute id ->
@@ -514,6 +517,22 @@ updateCurrentSpecialty str model =
                 | currentPage =
                     MedalsPage
                         { mModel | specialty = Model.specialtyFromString str }
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateCurrentYear : String -> Model -> ( Model, Cmd Msg )
+updateCurrentYear str model =
+    case model.currentPage of
+        MedalsPage mModel ->
+            ( { model
+                | currentPage =
+                    MedalsPage
+                        { mModel | selectedYear = str |> String.toInt |> Maybe.map Year }
               }
             , Cmd.none
             )

@@ -10,12 +10,14 @@ import RemoteData exposing (RemoteData(..))
 import Table
 
 
-init : ( MedalsPageModel, Cmd Msg )
-init =
+init : Year -> ( MedalsPageModel, Cmd Msg )
+init year =
     ( { champions = Loading
       , sport = Nothing
       , specialty = Nothing
       , tableState = Table.initialSort ""
+      , currentYear = year
+      , selectedYear = Nothing
       }
     , Cmd.none
     )
@@ -29,12 +31,14 @@ view model =
             , model.sport
                 |> Maybe.map (\sport -> Common.specialtySelector True (Just sport) SelectedASpecialty)
                 |> Maybe.withDefault none
+            , Common.yearSelector True model.currentYear SelectedAYear
             ]
         , case model.champions of
             Success champions ->
                 champions
                     |> getMedalsFromChampions
                     |> filterBySpecialty model.specialty
+                    |> filterByYear model.selectedYear
                     |> Table.view tableConfig model.tableState
                     |> html
                     |> el [ htmlAttribute <| HA.id "medals-list" ]
@@ -82,6 +86,17 @@ filterBySpecialty specialty medals =
         Just s ->
             medals
                 |> List.filter (.specialty >> (==) s)
+
+
+filterByYear : Maybe Year -> List MedalFromChampion -> List MedalFromChampion
+filterByYear year medals =
+    case year of
+        Nothing ->
+            medals
+
+        Just y ->
+            medals
+                |> List.filter (.year >> (==) y)
 
 
 tableConfig : Table.Config MedalFromChampion Msg

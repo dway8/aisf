@@ -30,14 +30,17 @@ subscriptions model =
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
+        currentYear =
+            Year flags.currentYear
+
         ( page, cmd ) =
             Update.parseUrl url
-                |> Update.getPageAndCmdFromRoute
+                |> Update.getPageAndCmdFromRoute currentYear
     in
     ( { currentPage = page
       , key = key
       , isAdmin = flags.isAdmin
-      , currentYear = Year flags.currentYear
+      , currentYear = currentYear
       }
     , cmd
     )

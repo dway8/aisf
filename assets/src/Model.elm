@@ -38,6 +38,8 @@ type alias MedalsPageModel =
     , sport : Maybe Sport
     , specialty : Maybe Specialty
     , tableState : Table.State
+    , currentYear : Year
+    , selectedYear : Maybe Year
     }
 
 
@@ -828,6 +830,7 @@ type Msg
     | SelectedASpecialty String
     | TableMsg Table.State
     | ChampionSelected Id
+    | SelectedAYear String
 
 
 type FormField

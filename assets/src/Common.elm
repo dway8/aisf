@@ -1,4 +1,4 @@
-module Common exposing (capitalize, defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewIf, viewMedal, viewProExperience)
+module Common exposing (capitalize, defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewIf, viewMedal, viewProExperience, yearSelector)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
@@ -68,7 +68,7 @@ viewMedal { competition, year, specialty, medalType } =
     column [ spacing 4 ]
         [ viewField "Compétition" (competition |> Model.competitionToDisplay)
         , viewField "Année" (year |> Model.getYear |> String.fromInt)
-        , viewField "Spécialité" (specialty |> Model.specialtyToString)
+        , viewField "Spécialité" (specialty |> Model.specialtyToDisplay)
         , viewField "Médaille" (medalType |> Model.medalTypeToDisplay)
         ]
 
@@ -156,3 +156,36 @@ defaultCell attrs htmlEl =
 -----------------------
 -----------------------
 -----------------------
+
+
+yearSelector : Bool -> Year -> (String -> Msg) -> Element Msg
+yearSelector showOptionAll currentYear msg =
+    let
+        list : List String
+        list =
+            (if showOptionAll then
+                [ "Toutes les années" ]
+
+             else
+                []
+            )
+                ++ (List.range 1960 (Model.getYear currentYear)
+                        |> List.map String.fromInt
+                   )
+    in
+    el [] <|
+        html <|
+            Html.select
+                [ HE.on "change" <| D.map msg <| HE.targetValue
+                , HA.style "font-family" "Roboto"
+                , HA.style "font-size" "15px"
+                ]
+                (list
+                    |> List.map
+                        (\year ->
+                            Html.option
+                                [ HA.value year
+                                ]
+                                [ Html.text year ]
+                        )
+                )
