@@ -1,5 +1,6 @@
-module Page.NewChampion exposing (view)
+module Page.NewChampion exposing (init, view)
 
+import Aisf.Scalar exposing (Id(..))
 import Common
 import Dict
 import Editable exposing (Editable(..))
@@ -13,6 +14,24 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (ChampionForm, FormField(..), Medal, Msg(..), NewChampionPageModel, ProExperience, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
+
+
+init : ( NewChampionPageModel, Cmd Msg )
+init =
+    ( { champion = initChampionForm }, Cmd.none )
+
+
+initChampionForm : ChampionForm
+initChampionForm =
+    { id = Id "new"
+    , lastName = ""
+    , firstName = ""
+    , email = ""
+    , sport = Nothing
+    , proExperiences = Dict.empty
+    , yearsInFrenchTeam = Dict.empty
+    , medals = Dict.empty
+    }
 
 
 view : Year -> NewChampionPageModel -> Element Msg

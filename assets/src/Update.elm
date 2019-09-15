@@ -8,7 +8,12 @@ import Dict exposing (Dict)
 import Editable exposing (Editable(..))
 import Graphql.Http
 import Model exposing (..)
+import Page.Champion
+import Page.List
+import Page.Medals
+import Page.NewChampion
 import RemoteData exposing (RemoteData(..), WebData)
+import Table
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
 
@@ -29,6 +34,9 @@ update msg model =
 
                 External _ ->
                     ( model, Cmd.none )
+
+        ChampionSelected (Id id) ->
+            ( model, Nav.pushUrl model.key ("/champions/" ++ id) )
 
         GotChampions resp ->
             handleChampionsResponse resp model
@@ -106,6 +114,9 @@ update msg model =
         SelectedASpecialty str ->
             updateCurrentSpecialty str model
 
+        TableMsg tableState ->
+            handleTableMsg tableState model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -136,16 +147,20 @@ getPageAndCmdFromRoute : Route -> ( Page, Cmd Msg )
 getPageAndCmdFromRoute route =
     case route of
         ListRoute ->
-            ( ListPage (ListPageModel Loading Nothing), Api.getChampions )
+            Page.List.init
+                |> Tuple.mapFirst ListPage
 
         MedalsRoute ->
-            ( MedalsPage (MedalsPageModel Loading Nothing Nothing), Cmd.none )
+            Page.Medals.init
+                |> Tuple.mapFirst MedalsPage
 
         ChampionRoute id ->
-            ( ChampionPage (ChampionPageModel id Loading), Api.getChampion id )
+            Page.Champion.init id
+                |> Tuple.mapFirst ChampionPage
 
         NewChampionRoute ->
-            ( NewChampionPage { champion = Model.initChampionForm }, Cmd.none )
+            Page.NewChampion.init
+                |> Tuple.mapFirst NewChampionPage
 
 
 updateNewChampion : FormField -> String -> Model -> ( Model, Cmd Msg )
@@ -510,11 +525,24 @@ updateCurrentSpecialty str model =
 handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
 handleChampionsResponse resp model =
     case model.currentPage of
-        ListPage _ ->
-            ( { model | currentPage = ListPage { champions = resp, sport = Nothing } }, Cmd.none )
+        ListPage lModel ->
+            ( { model | currentPage = ListPage { lModel | champions = resp, sport = Nothing } }, Cmd.none )
 
         MedalsPage mModel ->
             ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleTableMsg : Table.State -> Model -> ( Model, Cmd msg )
+handleTableMsg tableState model =
+    case model.currentPage of
+        ListPage lModel ->
+            ( { model | currentPage = ListPage { lModel | tableState = tableState } }, Cmd.none )
+
+        MedalsPage mModel ->
+            ( { model | currentPage = MedalsPage { mModel | tableState = tableState } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

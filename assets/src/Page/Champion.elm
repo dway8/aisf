@@ -1,11 +1,18 @@
-module Page.Champion exposing (view)
+module Page.Champion exposing (init, view)
 
+import Aisf.Scalar exposing (Id(..))
+import Api
 import Common
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
 import Model exposing (Champion, ChampionPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
+
+
+init : Id -> ( ChampionPageModel, Cmd Msg )
+init id =
+    ( { id = id, champion = Loading }, Api.getChampion id )
 
 
 view : ChampionPageModel -> Element Msg

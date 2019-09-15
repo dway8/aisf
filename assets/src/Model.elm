@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getSpecialtiesForSport, getYear, initChampionForm, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -7,6 +7,7 @@ import Dict exposing (Dict)
 import Editable exposing (Editable)
 import Graphql.Http
 import RemoteData exposing (RemoteData(..), WebData)
+import Table
 import Url exposing (Url)
 
 
@@ -28,6 +29,7 @@ type Page
 type alias ListPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
+    , tableState : Table.State
     }
 
 
@@ -35,6 +37,7 @@ type alias MedalsPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , specialty : Maybe Specialty
+    , tableState : Table.State
     }
 
 
@@ -823,19 +826,8 @@ type Msg
     | SelectedAMedalYear Int String
     | SelectedAMedalSpecialty Int String
     | SelectedASpecialty String
-
-
-initChampionForm : ChampionForm
-initChampionForm =
-    { id = Id "new"
-    , lastName = ""
-    , firstName = ""
-    , email = ""
-    , sport = Nothing
-    , proExperiences = Dict.empty
-    , yearsInFrenchTeam = Dict.empty
-    , medals = Dict.empty
-    }
+    | TableMsg Table.State
+    | ChampionSelected Id
 
 
 type FormField

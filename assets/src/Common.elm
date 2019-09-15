@@ -1,5 +1,6 @@
-module Common exposing (specialtySelector, sportSelector, viewField, viewIf, viewMedal, viewProExperience)
+module Common exposing (capitalize, defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewIf, viewMedal, viewProExperience)
 
+import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
 import Dict
 import Element exposing (..)
@@ -10,6 +11,7 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
+import Table
 
 
 sportSelector : Bool -> Maybe Sport -> Element Msg
@@ -113,3 +115,44 @@ specialtySelector showOptionAll maybeSport msg =
                                         )
                                )
                         )
+
+
+capitalize : String -> String
+capitalize string =
+    case String.uncons string of
+        Just ( firstLetter, rest ) ->
+            String.cons (Char.toUpper firstLetter) rest
+
+        Nothing ->
+            ""
+
+
+
+-----------------------
+------- TABLE ---------
+-----------------------
+
+
+tableCustomizations : Table.Customizations data msg
+tableCustomizations =
+    let
+        default =
+            Table.defaultCustomizations
+    in
+    { default | tableAttrs = [ HA.class "table table-hover table-striped table-middle" ] }
+
+
+toRowAttrs : { a | id : Id } -> List (Html.Attribute Msg)
+toRowAttrs champion =
+    [ HA.class "champion-item", HE.onClick <| ChampionSelected champion.id, HA.style "cursor" "pointer" ]
+
+
+defaultCell : List (Html.Attribute msg) -> Html.Html msg -> Table.HtmlDetails msg
+defaultCell attrs htmlEl =
+    Table.HtmlDetails (HA.style "vertical-align" "middle" :: attrs) [ htmlEl ]
+
+
+
+-----------------------
+-----------------------
+-----------------------
