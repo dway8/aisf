@@ -5,7 +5,7 @@ import Common
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, MedalType, MedalsPageModel, Msg(..), Specialty, Year)
+import Model exposing (Champion, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 
@@ -33,10 +33,11 @@ view model =
         , case model.champions of
             Success champions ->
                 champions
-                    |> sortByMedals
+                    |> getMedalsFromChampions
+                    |> filterBySpecialty model.specialty
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el []
+                    |> el [ htmlAttribute <| HA.id "medals-list" ]
 
             _ ->
                 none
@@ -52,8 +53,8 @@ type alias MedalFromChampion =
     }
 
 
-sortByMedals : List Champion -> List MedalFromChampion
-sortByMedals champions =
+getMedalsFromChampions : List Champion -> List MedalFromChampion
+getMedalsFromChampions champions =
     champions
         |> List.foldl
             (\({ medals } as champion) acc ->
@@ -70,6 +71,17 @@ sortByMedals champions =
                     |> (++) acc
             )
             []
+
+
+filterBySpecialty : Maybe Specialty -> List MedalFromChampion -> List MedalFromChampion
+filterBySpecialty specialty medals =
+    case specialty of
+        Nothing ->
+            medals
+
+        Just s ->
+            medals
+                |> List.filter (.specialty >> (==) s)
 
 
 tableConfig : Table.Config MedalFromChampion Msg

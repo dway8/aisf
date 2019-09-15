@@ -81,11 +81,6 @@ medalSelection =
         (SelectionSet.map (Model.medalTypeFromInt >> Maybe.withDefault Bronze) Medal.medalType)
 
 
-sportDecoder : D.Decoder (Maybe Sport)
-sportDecoder =
-    D.succeed (Just SkiAlpin)
-
-
 createChampion : Champion -> Cmd Msg
 createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals } =
     Mutation.createChampion

@@ -38,13 +38,10 @@ defmodule AisfWeb.ChampionsTest do
     |> click(Query.option("Biathlon"))
     |> assert_has(Query.css(".champion-item", count: 1))
     |> assert_has(Query.text(champion2.first_name))
-    |> refute_has(Query.text(champion1.first_name))
-    |> refute_has(Query.text(champion3.first_name))
     |> click(Query.option("Ski alpin"))
     |> assert_has(Query.css(".champion-item", count: 2))
     |> assert_has(Query.text(champion1.first_name))
     |> assert_has(Query.text(champion3.first_name))
-    |> refute_has(Query.text(champion2.first_name))
   end
 
   test "selecting a champion in the list", %{

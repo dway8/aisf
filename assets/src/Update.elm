@@ -508,18 +508,18 @@ validateChampionForm c =
 
 updateCurrentSpecialty : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSpecialty str model =
-    -- case model.currentPage of
-    -- MedalsPage mModel ->
-    --     ( { model
-    --         | currentPage =
-    --             ListPage
-    --                 { mModel | sport = Model.sportFromString sportStr }
-    --       }
-    --     , Cmd.none
-    --     )
-    --
-    -- _ ->
-    ( model, Cmd.none )
+    case model.currentPage of
+        MedalsPage mModel ->
+            ( { model
+                | currentPage =
+                    MedalsPage
+                        { mModel | specialty = Model.specialtyFromString str }
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
