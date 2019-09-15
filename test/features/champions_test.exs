@@ -1,12 +1,11 @@
 defmodule AisfWeb.ChampionsTest do
   use AisfWeb.FeatureCase, async: true
-
-  alias Aisf.Champions
+  alias AisfWeb.Factory
 
   setup do
-    {:ok, champion1} = create_champion_with_sport("Ski alpin")
-    {:ok, champion2} = create_champion_with_sport("Biathlon")
-    {:ok, champion3} = create_champion_with_sport("Ski alpin")
+    {:ok, champion1} = Factory.create_champion_with_sport("Ski alpin")
+    {:ok, champion2} = Factory.create_champion_with_sport("Biathlon")
+    {:ok, champion3} = Factory.create_champion_with_sport("Ski alpin")
 
     {:ok, champion1: champion1, champion2: champion2, champion3: champion3}
   end
@@ -59,20 +58,5 @@ defmodule AisfWeb.ChampionsTest do
         "/champions/" <> to_string(champion1.id)
       )
     )
-  end
-
-  defp create_champion_with_sport(sport) do
-    champion = %{
-      last_name: Faker.Name.last_name(),
-      first_name: Faker.Name.first_name(),
-      email: Faker.Internet.free_email(),
-      password: Faker.UUID.v4(),
-      sport: sport,
-      years_in_french_team: [],
-      pro_experiences: [],
-      medals: []
-    }
-
-    Champions.create_champion(champion)
   end
 end

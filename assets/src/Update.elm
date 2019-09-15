@@ -12,6 +12,7 @@ import Page.Champion
 import Page.List
 import Page.Medals
 import Page.NewChampion
+import Page.Teams
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import Url exposing (Url)
@@ -139,6 +140,7 @@ parseUrl url =
                 [ map ListRoute top
                 , map ListRoute (s "champions")
                 , map MedalsRoute (s "medals")
+                , map TeamsRoute (s "teams")
                 , map NewChampionRoute (s "champions" </> s "new")
                 , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                 ]
@@ -156,6 +158,10 @@ getPageAndCmdFromRoute currentYear route =
         MedalsRoute ->
             Page.Medals.init currentYear
                 |> Tuple.mapFirst MedalsPage
+
+        TeamsRoute ->
+            Page.Teams.init currentYear
+                |> Tuple.mapFirst TeamsPage
 
         ChampionRoute id ->
             Page.Champion.init id
@@ -231,6 +237,15 @@ updateCurrentSport sportStr model =
                         { mModel | sport = newSport }
               }
             , newSport |> Maybe.map (\sport -> Api.getChampionsWithMedalInSport sport) |> Maybe.withDefault Cmd.none
+            )
+
+        TeamsPage tModel ->
+            let
+                newSport =
+                    Model.sportFromString sportStr
+            in
+            ( { model | currentPage = TeamsPage { tModel | sport = newSport } }
+            , Cmd.none
             )
 
         _ ->
@@ -527,13 +542,18 @@ updateCurrentSpecialty str model =
 
 updateCurrentYear : String -> Model -> ( Model, Cmd Msg )
 updateCurrentYear str model =
+    let
+        updateFn m =
+            { m | selectedYear = str |> String.toInt |> Maybe.map Year }
+    in
     case model.currentPage of
         MedalsPage mModel ->
-            ( { model
-                | currentPage =
-                    MedalsPage
-                        { mModel | selectedYear = str |> String.toInt |> Maybe.map Year }
-              }
+            ( { model | currentPage = MedalsPage (updateFn mModel) }
+            , Cmd.none
+            )
+
+        TeamsPage tModel ->
+            ( { model | currentPage = TeamsPage (updateFn tModel) }
             , Cmd.none
             )
 
@@ -549,6 +569,9 @@ handleChampionsResponse resp model =
 
         MedalsPage mModel ->
             ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
+
+        TeamsPage tModel ->
+            ( { model | currentPage = TeamsPage { tModel | champions = resp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

@@ -77,7 +77,7 @@ tableColumns : List (Table.Column Champion Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "NOM / PRÉNOM"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| String.toUpper champion.lastName ++ " " ++ Common.capitalize champion.firstName)
+        , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.getName champion)
         , sorter = Table.decreasingOrIncreasingBy .lastName
         }
     , Table.veryCustomColumn

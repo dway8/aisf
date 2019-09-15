@@ -1,4 +1,4 @@
-module Common exposing (capitalize, defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewIf, viewMedal, viewProExperience, yearSelector)
+module Common exposing (defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewMedal, viewProExperience, yearSelector)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
@@ -73,15 +73,6 @@ viewMedal { competition, year, specialty, medalType } =
         ]
 
 
-viewIf : Bool -> Element Msg -> Element Msg
-viewIf condition elem =
-    if condition then
-        elem
-
-    else
-        none
-
-
 specialtySelector : Bool -> Maybe Sport -> (String -> Msg) -> Element Msg
 specialtySelector showOptionAll maybeSport msg =
     case maybeSport of
@@ -115,16 +106,6 @@ specialtySelector showOptionAll maybeSport msg =
                                         )
                                )
                         )
-
-
-capitalize : String -> String
-capitalize string =
-    case String.uncons string of
-        Just ( firstLetter, rest ) ->
-            String.cons (Char.toUpper firstLetter) rest
-
-        Nothing ->
-            ""
 
 
 

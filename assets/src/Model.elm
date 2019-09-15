@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -9,6 +9,7 @@ import Graphql.Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import Url exposing (Url)
+import Utils
 
 
 type alias Model =
@@ -22,6 +23,7 @@ type alias Model =
 type Page
     = ListPage ListPageModel
     | MedalsPage MedalsPageModel
+    | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
     | NewChampionPage NewChampionPageModel
 
@@ -43,6 +45,15 @@ type alias MedalsPageModel =
     }
 
 
+type alias TeamsPageModel =
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions
+    , sport : Maybe Sport
+    , tableState : Table.State
+    , currentYear : Year
+    , selectedYear : Maybe Year
+    }
+
+
 type alias ChampionPageModel =
     { id : Id
     , champion : RemoteData (Graphql.Http.Error Champion) Champion
@@ -57,6 +68,7 @@ type alias NewChampionPageModel =
 type Route
     = ListRoute
     | MedalsRoute
+    | TeamsRoute
     | ChampionRoute Id
     | NewChampionRoute
 
@@ -695,67 +707,6 @@ getSpecialtiesForSport sport =
             [ Cross, CrossGeneral, SnowFreestyle, SnowFreestyleGeneral, SnowAlpin, SnowAlpinGeneral, HalfPipe, HalfPipeGeneral, SautBigAir, Slopestyle, General ]
 
 
-
--- ALPIN 1
--- slalom + cl général
--- descente + cl général
--- super G + cl général
--- super combiné + cl général
--- géant
--- cl général
--- combiné
--- par équipe
---
--- FOND 2
--- individuel + cl général
--- sprint + cl général
--- poursuite + cl général
--- relais + cl général
--- sprint x2 + cl général
--- cl général
---
---
--- BIATHLON 3
--- individuel + cl général
--- sprint + cl général
--- relais + cl général
--- mass start + cl général
--- poursuite + cl général
--- cl général
--- sprint x2 cl général
---
--- COMBINÉ NORDIQUE 4
--- individuel + cl général
--- poursuite + cl général
--- par équipe + cl général
--- cl général
---
---
--- FREESTYLE 5
--- bosses + cl général
--- saut big air + cl général
--- ski cross + cl général
--- half pipe + cl général
--- slopestyle
--- acrobatique
--- artistique
--- cl général
---
--- SAUT 6
--- saut spécial + cl général
--- vol à ski + cl général
---
--- SNOWBOARD 8
--- cross + cl général
--- freestyle + cl général
--- alpin  + cl général
--- half pipe + cl général
--- big air
--- slopestyle
--- cl général
---
-
-
 type MedalType
     = Gold
     | Silver
@@ -799,6 +750,11 @@ getId { id } =
     case id of
         Id str ->
             str
+
+
+getName : Champion -> String
+getName { firstName, lastName } =
+    String.toUpper lastName ++ " " ++ Utils.capitalize firstName
 
 
 type alias Flags =

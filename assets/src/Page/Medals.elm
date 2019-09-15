@@ -66,7 +66,7 @@ getMedalsFromChampions champions =
                     |> List.map
                         (\medal ->
                             { id = champion.id
-                            , name = champion.firstName ++ " " ++ champion.lastName
+                            , name = Model.getName champion
                             , medalType = medal.medalType
                             , specialty = medal.specialty
                             , year = medal.year

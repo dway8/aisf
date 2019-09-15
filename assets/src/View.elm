@@ -10,6 +10,7 @@ import Page.Champion
 import Page.List
 import Page.Medals
 import Page.NewChampion
+import Page.Teams
 
 
 view : Model -> Document Msg
@@ -45,6 +46,9 @@ viewBody model =
                 MedalsPage medalsModel ->
                     Page.Medals.view medalsModel
 
+                TeamsPage teamsModel ->
+                    Page.Teams.view teamsModel
+
                 ChampionPage championModel ->
                     Page.Champion.view championModel
 
@@ -58,4 +62,5 @@ viewMenu page =
     row [ spacing 20 ]
         [ link [ Border.width 1, padding 5 ] { url = "/champions", label = text "Liste" }
         , link [ Border.width 1, padding 5 ] { url = "/medals", label = text "Palmarès" }
+        , link [ Border.width 1, padding 5 ] { url = "/teams", label = text "Équipes" }
         ]

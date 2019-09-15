@@ -6,16 +6,7 @@ defmodule Aisf.DatabaseSeeder do
 
   @numberOfChampions Enum.random(6..20)
 
-  @sports [
-    "Ski alpin",
-    "Ski de fond",
-    "Biathlon",
-    "Combiné nordique",
-    "Freestyle",
-    "Saut",
-    "Snowboard"
-  ]
-
+  @sports Champion.sports()
   @years 1960..2019
 
   def insert_champions do

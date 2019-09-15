@@ -36,4 +36,16 @@ defmodule Aisf.Champions.Champion do
       :years_in_french_team
     ])
   end
+
+  def sports do
+    [
+      "Ski alpin",
+      "Ski de fond",
+      "Biathlon",
+      "Combiné nordique",
+      "Freestyle",
+      "Saut",
+      "Snowboard"
+    ]
+  end
 end

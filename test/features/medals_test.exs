@@ -1,7 +1,6 @@
 defmodule AisfWeb.MedalsTest do
   use AisfWeb.FeatureCase, async: true
-
-  alias Aisf.Champions
+  alias AisfWeb.Factory
 
   setup do
     medals1 = [
@@ -28,8 +27,8 @@ defmodule AisfWeb.MedalsTest do
       }
     ]
 
-    {:ok, champion1} = create_champion_with_sport_and_medals("Ski de fond", medals1)
-    {:ok, champion2} = create_champion_with_sport_and_medals("Combiné nordique", medals2)
+    {:ok, champion1} = Factory.create_champion_with_sport_and_medals("Ski de fond", medals1)
+    {:ok, champion2} = Factory.create_champion_with_sport_and_medals("Combiné nordique", medals2)
 
     {:ok, champion1: champion1, champion2: champion2}
   end
@@ -40,12 +39,8 @@ defmodule AisfWeb.MedalsTest do
     |> assert_has(Query.css(".champion-item", count: 0))
   end
 
-  test "filtering medals by sport", %{
-    session: session,
-    champion1: champion1,
-    champion2: champion2
-  } do
-    session
+  test "filtering medals by sport", context do
+    context[:session]
     |> visit("/medals")
     |> click(Query.text("Tous les sports"))
     |> click(Query.option("Ski de fond"))
@@ -54,15 +49,15 @@ defmodule AisfWeb.MedalsTest do
       |> assert_has(Query.css(".champion-item", count: 2))
       |> assert_has(Query.text("Argent"))
       |> assert_has(Query.text("Cl. général"))
-      |> assert_has(Query.text(champion1.first_name, count: 2))
+      |> assert_has(Query.text(context[:champion1].first_name, count: 2))
     end)
 
-    session
+    context[:session]
     |> click(Query.option("Combiné nordique"))
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 1))
-      |> assert_has(Query.text(champion2.first_name))
+      |> assert_has(Query.text(context[:champion2].first_name))
       |> assert_has(Query.text("Bronze"))
     end)
   end
@@ -131,20 +126,5 @@ defmodule AisfWeb.MedalsTest do
         "/champions/" <> to_string(champion1.id)
       )
     )
-  end
-
-  defp create_champion_with_sport_and_medals(sport, medals) do
-    champion = %{
-      last_name: Faker.Name.last_name(),
-      first_name: Faker.Name.first_name(),
-      email: Faker.Internet.free_email(),
-      password: Faker.UUID.v4(),
-      sport: sport,
-      years_in_french_team: [],
-      pro_experiences: [],
-      medals: medals
-    }
-
-    Champions.create_champion(champion)
   end
 end
