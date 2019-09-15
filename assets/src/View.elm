@@ -11,6 +11,7 @@ import Page.List
 import Page.Medals
 import Page.NewChampion
 import Page.Teams
+import Route exposing (Route(..))
 
 
 view : Model -> Document Msg
@@ -58,9 +59,39 @@ viewBody model =
 
 
 viewMenu : Page -> Element Msg
-viewMenu page =
+viewMenu currentPage =
+    let
+        menuItem route label =
+            let
+                attrs =
+                    (if isCurrentPage route currentPage then
+                        [ Font.bold ]
+
+                     else
+                        []
+                    )
+                        ++ [ Border.width 1, padding 5 ]
+            in
+            link attrs { url = Route.routeToString route, label = text label }
+    in
     row [ spacing 20 ]
-        [ link [ Border.width 1, padding 5 ] { url = "/champions", label = text "Liste" }
-        , link [ Border.width 1, padding 5 ] { url = "/medals", label = text "Palmarès" }
-        , link [ Border.width 1, padding 5 ] { url = "/teams", label = text "Équipes" }
+        [ menuItem ListRoute "Liste"
+        , menuItem MedalsRoute "Palmarès"
+        , menuItem TeamsRoute "Équipes de France"
         ]
+
+
+isCurrentPage : Route -> Page -> Bool
+isCurrentPage route currentPage =
+    case currentPage of
+        ListPage _ ->
+            route == ListRoute
+
+        MedalsPage _ ->
+            route == MedalsRoute
+
+        TeamsPage _ ->
+            route == TeamsRoute
+
+        _ ->
+            False

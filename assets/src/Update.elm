@@ -1,4 +1,4 @@
-module Update exposing (getPageAndCmdFromRoute, parseUrl, update)
+module Update exposing (getPageAndCmdFromRoute, update)
 
 import Aisf.Scalar exposing (Id(..))
 import Api
@@ -14,9 +14,9 @@ import Page.Medals
 import Page.NewChampion
 import Page.Teams
 import RemoteData exposing (RemoteData(..), WebData)
+import Route exposing (Route(..))
 import Table
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -126,26 +126,10 @@ handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
     let
         ( page, cmd ) =
-            parseUrl newLocation
+            Route.parseUrl newLocation
                 |> getPageAndCmdFromRoute model.currentYear
     in
     ( { model | currentPage = page }, cmd )
-
-
-parseUrl : Url -> Route
-parseUrl url =
-    url
-        |> parse
-            (oneOf
-                [ map ListRoute top
-                , map ListRoute (s "champions")
-                , map MedalsRoute (s "medals")
-                , map TeamsRoute (s "teams")
-                , map NewChampionRoute (s "champions" </> s "new")
-                , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
-                ]
-            )
-        |> Maybe.withDefault ListRoute
 
 
 getPageAndCmdFromRoute : Year -> Route -> ( Page, Cmd Msg )

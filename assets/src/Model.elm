@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Route(..), Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -63,14 +63,6 @@ type alias ChampionPageModel =
 type alias NewChampionPageModel =
     { champion : ChampionForm
     }
-
-
-type Route
-    = ListRoute
-    | MedalsRoute
-    | TeamsRoute
-    | ChampionRoute Id
-    | NewChampionRoute
 
 
 type alias Champions =

@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Http
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
+import Route
 import Update
 import Url exposing (Url)
 import View exposing (view)
@@ -34,7 +35,7 @@ init flags url key =
             Year flags.currentYear
 
         ( page, cmd ) =
-            Update.parseUrl url
+            Route.parseUrl url
                 |> Update.getPageAndCmdFromRoute currentYear
     in
     ( { currentPage = page
