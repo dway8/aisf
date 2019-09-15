@@ -8,6 +8,7 @@ import Dict exposing (Dict)
 import Editable exposing (Editable(..))
 import Graphql.Http
 import Model exposing (..)
+import Page.Admin
 import Page.Champion
 import Page.Medals
 import Page.Members
@@ -127,13 +128,13 @@ handleUrlChange newLocation model =
     let
         ( page, cmd ) =
             Route.parseUrl newLocation
-                |> getPageAndCmdFromRoute model.currentYear
+                |> getPageAndCmdFromRoute model.currentYear model.isAdmin model.key
     in
     ( { model | currentPage = page }, cmd )
 
 
-getPageAndCmdFromRoute : Year -> Route -> ( Page, Cmd Msg )
-getPageAndCmdFromRoute currentYear route =
+getPageAndCmdFromRoute : Year -> Bool -> Nav.Key -> Route -> ( Page, Cmd Msg )
+getPageAndCmdFromRoute currentYear isAdmin key route =
     case route of
         MembersRoute ->
             Page.Members.init
@@ -154,6 +155,15 @@ getPageAndCmdFromRoute currentYear route =
         NewChampionRoute ->
             Page.NewChampion.init
                 |> Tuple.mapFirst NewChampionPage
+
+        AdminRoute ->
+            if isAdmin then
+                Page.Admin.init
+                    |> Tuple.mapFirst AdminPage
+
+            else
+                Page.Members.init
+                    |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key "/")
 
 
 updateNewChampion : FormField -> String -> Model -> ( Model, Cmd Msg )

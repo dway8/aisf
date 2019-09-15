@@ -1,37 +1,40 @@
-module Page.Members exposing (init, view)
+module Page.Admin exposing (init, view)
 
 import Api
 import Common
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, MembersPageModel, Msg(..), Sport)
+import Model exposing (AdminPageModel, Champion, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 
 
-init : ( MembersPageModel, Cmd Msg )
+init : ( AdminPageModel, Cmd Msg )
 init =
     ( { champions = Loading
       , sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
       }
-    , Api.getMembers
+    , Api.getChampions
     )
 
 
-view : MembersPageModel -> Element Msg
+view : AdminPageModel -> Element Msg
 view model =
     column [ spacing 10 ]
         [ case model.champions of
             Success champions ->
                 column [ spacing 20 ]
                     [ Common.sportSelector True model.sport
-                    , champions
-                        |> filterBySport model.sport
-                        |> Table.view tableConfig model.tableState
-                        |> html
-                        |> el []
+                    , row [ spacing 20 ]
+                        [ champions
+                            |> filterBySport model.sport
+                            |> Table.view tableConfig model.tableState
+                            |> html
+                            |> el []
+                        , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
+                        ]
                     ]
 
             NotAsked ->

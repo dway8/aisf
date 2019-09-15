@@ -36,7 +36,7 @@ init flags url key =
 
         ( page, cmd ) =
             Route.parseUrl url
-                |> Update.getPageAndCmdFromRoute currentYear
+                |> Update.getPageAndCmdFromRoute currentYear flags.isAdmin key
     in
     ( { currentPage = page
       , key = key

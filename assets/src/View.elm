@@ -6,6 +6,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
 import Model exposing (Model, Msg, Page(..))
+import Page.Admin
 import Page.Champion
 import Page.Medals
 import Page.Members
@@ -55,6 +56,9 @@ viewBody model =
 
                 NewChampionPage newChampionModel ->
                     Page.NewChampion.view model.currentYear newChampionModel
+
+                AdminPage adminModel ->
+                    Page.Admin.view adminModel
             ]
 
 

@@ -11,6 +11,7 @@ type Route
     | TeamsRoute
     | ChampionRoute Id
     | NewChampionRoute
+    | AdminRoute
 
 
 parseUrl : Url -> Route
@@ -24,6 +25,7 @@ parseUrl url =
                 , map TeamsRoute (s "teams")
                 , map NewChampionRoute (s "champions" </> s "new")
                 , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
+                , map AdminRoute (s "admin")
                 ]
             )
         |> Maybe.withDefault MembersRoute
@@ -46,3 +48,6 @@ routeToString route =
 
         NewChampionRoute ->
             "/champions/new"
+
+        AdminRoute ->
+            "/admin"

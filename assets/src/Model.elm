@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (AdminPageModel, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -26,9 +26,17 @@ type Page
     | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
     | NewChampionPage NewChampionPageModel
+    | AdminPage AdminPageModel
 
 
 type alias MembersPageModel =
+    { champions : RemoteData (Graphql.Http.Error Champions) Champions
+    , sport : Maybe Sport
+    , tableState : Table.State
+    }
+
+
+type alias AdminPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , tableState : Table.State
