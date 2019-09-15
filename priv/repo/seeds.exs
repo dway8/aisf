@@ -21,7 +21,8 @@ defmodule Aisf.DatabaseSeeder do
           email: Faker.Internet.free_email(),
           password: Faker.UUID.v4(),
           sport: sport,
-          years_in_french_team: years_in_french_team
+          years_in_french_team: years_in_french_team,
+          is_member: Enum.random([true, false])
         }
         |> Repo.insert!()
 

@@ -6,7 +6,7 @@ import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
 
 
 type Route
-    = ListRoute
+    = MembersRoute
     | MedalsRoute
     | TeamsRoute
     | ChampionRoute Id
@@ -18,21 +18,21 @@ parseUrl url =
     url
         |> parse
             (oneOf
-                [ map ListRoute top
-                , map ListRoute (s "champions")
+                [ map MembersRoute top
+                , map MembersRoute (s "champions")
                 , map MedalsRoute (s "medals")
                 , map TeamsRoute (s "teams")
                 , map NewChampionRoute (s "champions" </> s "new")
                 , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                 ]
             )
-        |> Maybe.withDefault ListRoute
+        |> Maybe.withDefault MembersRoute
 
 
 routeToString : Route -> String
 routeToString route =
     case route of
-        ListRoute ->
+        MembersRoute ->
             "/champions"
 
         MedalsRoute ->

@@ -31,6 +31,7 @@ initChampionForm =
     , proExperiences = Dict.empty
     , yearsInFrenchTeam = Dict.empty
     , medals = Dict.empty
+    , isMember = False
     }
 
 

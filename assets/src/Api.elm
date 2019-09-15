@@ -1,4 +1,4 @@
-module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedalInSport)
+module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedalInSport, getMembers)
 
 import Aisf.Mutation as Mutation
 import Aisf.Object
@@ -11,7 +11,7 @@ import Dict
 import Editable
 import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
-import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
 import Model exposing (Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..), Year(..))
 import RemoteData
@@ -25,6 +25,15 @@ endpoint =
 getChampions : Cmd Msg
 getChampions =
     Query.allChampions championSelection
+        |> Graphql.Http.queryRequest endpoint
+        -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
+
+
+getMembers : Cmd Msg
+getMembers =
+    Query.getMembers championSelection
         |> Graphql.Http.queryRequest endpoint
         -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
         |> Graphql.Http.withCredentials
@@ -50,15 +59,16 @@ getChampionsWithMedalInSport sport =
 
 championSelection : SelectionSet Champion Aisf.Object.Champion
 championSelection =
-    SelectionSet.map8 Champion
-        Champion.id
-        Champion.lastName
-        Champion.firstName
-        Champion.email
-        (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Champion.sport)
-        (Champion.proExperiences proExperienceSelection)
-        (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
-        (Champion.medals medalSelection)
+    SelectionSet.succeed Champion
+        |> with Champion.id
+        |> with Champion.lastName
+        |> with Champion.firstName
+        |> with Champion.email
+        |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Champion.sport)
+        |> with (Champion.proExperiences proExperienceSelection)
+        |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
+        |> with (Champion.medals medalSelection)
+        |> with Champion.isMember
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience

@@ -13,6 +13,7 @@ defmodule AisfWeb.Schema do
     field(:pro_experiences, non_null(list_of(non_null(:pro_experience))))
     field(:years_in_french_team, list_of(non_null(:integer)))
     field(:medals, non_null(list_of(non_null(:medal))))
+    field(:is_member, non_null(:boolean))
   end
 
   object :pro_experience do
@@ -34,6 +35,10 @@ defmodule AisfWeb.Schema do
   query do
     field :all_champions, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.all/3)
+    end
+
+    field :get_members, non_null(list_of(non_null(:champion))) do
+      resolve(&ChampionsResolver.get_members/3)
     end
 
     field :champion, non_null(:champion) do

@@ -7,8 +7,8 @@ import Element.Font as Font
 import Html exposing (Html)
 import Model exposing (Model, Msg, Page(..))
 import Page.Champion
-import Page.List
 import Page.Medals
+import Page.Members
 import Page.NewChampion
 import Page.Teams
 import Route exposing (Route(..))
@@ -41,8 +41,8 @@ viewBody model =
         column [ width fill, height fill, spacing 30 ]
             [ viewMenu model.currentPage
             , case model.currentPage of
-                ListPage listModel ->
-                    Page.List.view listModel
+                MembersPage membersModel ->
+                    Page.Members.view membersModel
 
                 MedalsPage medalsModel ->
                     Page.Medals.view medalsModel
@@ -75,7 +75,7 @@ viewMenu currentPage =
             link attrs { url = Route.routeToString route, label = text label }
     in
     row [ spacing 20 ]
-        [ menuItem ListRoute "Liste"
+        [ menuItem MembersRoute "Membres AISF"
         , menuItem MedalsRoute "Palmarès"
         , menuItem TeamsRoute "Équipes de France"
         ]
@@ -84,8 +84,8 @@ viewMenu currentPage =
 isCurrentPage : Route -> Page -> Bool
 isCurrentPage route currentPage =
     case currentPage of
-        ListPage _ ->
-            route == ListRoute
+        MembersPage _ ->
+            route == MembersRoute
 
         MedalsPage _ ->
             route == MedalsRoute

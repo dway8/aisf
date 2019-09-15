@@ -42,7 +42,7 @@ defmodule AisfWeb.MedalsTest do
   test "filtering medals by sport", context do
     context[:session]
     |> visit("/medals")
-    |> click(Query.text("Tous les sports"))
+    |> click(Query.text("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> find(Query.css("#medals-list"), fn element ->
       element
@@ -65,7 +65,7 @@ defmodule AisfWeb.MedalsTest do
   test "filtering medals by sport and medals", %{session: session, champion1: champion1} do
     session
     |> visit("/medals")
-    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> click(Query.option("Toutes les spécialités"))
     |> click(Query.option("Poursuite"))
@@ -85,7 +85,7 @@ defmodule AisfWeb.MedalsTest do
   test "filtering medals by sport and year", %{session: session} do
     session
     |> visit("/medals")
-    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> click(Query.option("Toutes les années"))
     |> click(Query.option("1992"))

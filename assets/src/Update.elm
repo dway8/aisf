@@ -9,8 +9,8 @@ import Editable exposing (Editable(..))
 import Graphql.Http
 import Model exposing (..)
 import Page.Champion
-import Page.List
 import Page.Medals
+import Page.Members
 import Page.NewChampion
 import Page.Teams
 import RemoteData exposing (RemoteData(..), WebData)
@@ -135,9 +135,9 @@ handleUrlChange newLocation model =
 getPageAndCmdFromRoute : Year -> Route -> ( Page, Cmd Msg )
 getPageAndCmdFromRoute currentYear route =
     case route of
-        ListRoute ->
-            Page.List.init
-                |> Tuple.mapFirst ListPage
+        MembersRoute ->
+            Page.Members.init
+                |> Tuple.mapFirst MembersPage
 
         MedalsRoute ->
             Page.Medals.init currentYear
@@ -201,11 +201,11 @@ updateCurrentSport sportStr model =
             in
             ( { model | currentPage = NewChampionPage { m | champion = newChamp } }, Cmd.none )
 
-        ListPage lModel ->
+        MembersPage memModel ->
             ( { model
                 | currentPage =
-                    ListPage
-                        { lModel | sport = Model.sportFromString sportStr }
+                    MembersPage
+                        { memModel | sport = Model.sportFromString sportStr }
               }
             , Cmd.none
             )
@@ -505,6 +505,7 @@ validateChampionForm c =
                 , proExperiences = c.proExperiences |> Dict.values |> List.map Editable.value
                 , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
                 , medals = c.medals |> Dict.values |> List.map Editable.value
+                , isMember = c.isMember
                 }
 
 
@@ -548,8 +549,8 @@ updateCurrentYear str model =
 handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
 handleChampionsResponse resp model =
     case model.currentPage of
-        ListPage lModel ->
-            ( { model | currentPage = ListPage { lModel | champions = resp, sport = Nothing } }, Cmd.none )
+        MembersPage memModel ->
+            ( { model | currentPage = MembersPage { memModel | champions = resp, sport = Nothing } }, Cmd.none )
 
         MedalsPage mModel ->
             ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
@@ -564,8 +565,8 @@ handleChampionsResponse resp model =
 handleTableMsg : Table.State -> Model -> ( Model, Cmd msg )
 handleTableMsg tableState model =
     case model.currentPage of
-        ListPage lModel ->
-            ( { model | currentPage = ListPage { lModel | tableState = tableState } }, Cmd.none )
+        MembersPage memModel ->
+            ( { model | currentPage = MembersPage { memModel | tableState = tableState } }, Cmd.none )
 
         MedalsPage mModel ->
             ( { model | currentPage = MedalsPage { mModel | tableState = tableState } }, Cmd.none )

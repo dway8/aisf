@@ -27,7 +27,7 @@ defmodule AisfWeb.TeamsTest do
   test "filtering champions by sport", context do
     context.session
     |> visit("/teams")
-    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Saut"))
     |> find(Query.css("#teams-list"), fn element ->
       element
@@ -46,7 +46,7 @@ defmodule AisfWeb.TeamsTest do
     end)
 
     context.session
-    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Toutes les disciplines"))
     |> find(Query.css("#teams-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 5))
@@ -67,7 +67,7 @@ defmodule AisfWeb.TeamsTest do
   test "filtering champions by sport and year", context do
     context.session
     |> visit("/teams")
-    |> click(Query.option("Tous les sports"))
+    |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Snowboard"))
     |> click(Query.option("Toutes les années"))
     |> click(Query.option("2018"))

@@ -1,4 +1,4 @@
-module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), ListPageModel, Medal, MedalType(..), MedalsPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -21,14 +21,14 @@ type alias Model =
 
 
 type Page
-    = ListPage ListPageModel
+    = MembersPage MembersPageModel
     | MedalsPage MedalsPageModel
     | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
     | NewChampionPage NewChampionPageModel
 
 
-type alias ListPageModel =
+type alias MembersPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , tableState : Table.State
@@ -78,6 +78,7 @@ type alias Champion =
     , proExperiences : List ProExperience
     , yearsInFrenchTeam : List Year
     , medals : List Medal
+    , isMember : Bool
     }
 
 
@@ -90,6 +91,7 @@ type alias ChampionForm =
     , proExperiences : Dict Int (Editable ProExperience)
     , yearsInFrenchTeam : Dict Int (Editable Year)
     , medals : Dict Int (Editable Medal)
+    , isMember : Bool
     }
 
 

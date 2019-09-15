@@ -13,6 +13,7 @@ defmodule Aisf.Champions.Champion do
     has_many(:pro_experiences, ProExperience)
     field(:years_in_french_team, {:array, :integer})
     has_many(:medals, Medal)
+    field(:is_member, :boolean)
 
     timestamps()
   end
@@ -25,7 +26,8 @@ defmodule Aisf.Champions.Champion do
       :email,
       :password,
       :sport,
-      :years_in_french_team
+      :years_in_french_team,
+      :is_member
     ])
     |> validate_required([
       :first_name,
@@ -33,7 +35,8 @@ defmodule Aisf.Champions.Champion do
       :email,
       :password,
       :sport,
-      :years_in_french_team
+      :years_in_french_team,
+      :is_member
     ])
   end
 

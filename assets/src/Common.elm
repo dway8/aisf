@@ -19,7 +19,7 @@ sportSelector showOptionAll currentSport =
     let
         list =
             (if showOptionAll then
-                [ "Tous les sports" ]
+                [ "Toutes les disciplines" ]
 
              else
                 []

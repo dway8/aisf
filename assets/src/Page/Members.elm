@@ -1,26 +1,26 @@
-module Page.List exposing (init, view)
+module Page.Members exposing (init, view)
 
 import Api
 import Common
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, ListPageModel, Msg(..), Sport)
+import Model exposing (Champion, MembersPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 
 
-init : ( ListPageModel, Cmd Msg )
+init : ( MembersPageModel, Cmd Msg )
 init =
     ( { champions = Loading
       , sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
       }
-    , Api.getChampions
+    , Api.getMembers
     )
 
 
-view : ListPageModel -> Element Msg
+view : MembersPageModel -> Element Msg
 view model =
     column [ spacing 10 ]
         [ case model.champions of
