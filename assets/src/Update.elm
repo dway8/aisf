@@ -203,20 +203,20 @@ handleCreateChampionResponse response model =
 
 updateCurrentSport : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSport sportStr model =
+    let
+        updateFn m =
+            { m | sport = Model.sportFromString sportStr }
+    in
     case model.currentPage of
         NewChampionPage ({ champion } as m) ->
             let
                 newChamp =
-                    { champion | sport = Model.sportFromString sportStr }
+                    updateFn champion
             in
             ( { model | currentPage = NewChampionPage { m | champion = newChamp } }, Cmd.none )
 
         MembersPage memModel ->
-            ( { model
-                | currentPage =
-                    MembersPage
-                        { memModel | sport = Model.sportFromString sportStr }
-              }
+            ( { model | currentPage = MembersPage (updateFn memModel) }
             , Cmd.none
             )
 
@@ -225,20 +225,17 @@ updateCurrentSport sportStr model =
                 newSport =
                     Model.sportFromString sportStr
             in
-            ( { model
-                | currentPage =
-                    MedalsPage
-                        { mModel | sport = newSport }
-              }
+            ( { model | currentPage = MedalsPage { mModel | sport = newSport } }
             , newSport |> Maybe.map (\sport -> Api.getChampionsWithMedalInSport sport) |> Maybe.withDefault Cmd.none
             )
 
         TeamsPage tModel ->
-            let
-                newSport =
-                    Model.sportFromString sportStr
-            in
-            ( { model | currentPage = TeamsPage { tModel | sport = newSport } }
+            ( { model | currentPage = TeamsPage (updateFn tModel) }
+            , Cmd.none
+            )
+
+        AdminPage aModel ->
+            ( { model | currentPage = AdminPage (updateFn aModel) }
             , Cmd.none
             )
 
@@ -567,6 +564,9 @@ handleChampionsResponse resp model =
 
         TeamsPage tModel ->
             ( { model | currentPage = TeamsPage { tModel | champions = resp } }, Cmd.none )
+
+        AdminPage aModel ->
+            ( { model | currentPage = AdminPage { aModel | champions = resp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

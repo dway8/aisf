@@ -22,17 +22,15 @@ init =
 
 view : MembersPageModel -> Element Msg
 view model =
-    column [ spacing 10 ]
-        [ case model.champions of
+    column [ spacing 20 ]
+        [ Common.sportSelector True model.sport
+        , case model.champions of
             Success champions ->
-                column [ spacing 20 ]
-                    [ Common.sportSelector True model.sport
-                    , champions
-                        |> filterBySport model.sport
-                        |> Table.view tableConfig model.tableState
-                        |> html
-                        |> el []
-                    ]
+                champions
+                    |> filterBySport model.sport
+                    |> Table.view tableConfig model.tableState
+                    |> html
+                    |> el []
 
             NotAsked ->
                 none

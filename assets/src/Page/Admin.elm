@@ -22,20 +22,16 @@ init =
 
 view : AdminPageModel -> Element Msg
 view model =
-    column [ spacing 10 ]
-        [ case model.champions of
+    column [ spacing 20 ]
+        [ Common.sportSelector True model.sport
+        , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
+        , case model.champions of
             Success champions ->
-                column [ spacing 20 ]
-                    [ Common.sportSelector True model.sport
-                    , row [ spacing 20 ]
-                        [ champions
-                            |> filterBySport model.sport
-                            |> Table.view tableConfig model.tableState
-                            |> html
-                            |> el []
-                        , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
-                        ]
-                    ]
+                champions
+                    |> filterBySport model.sport
+                    |> Table.view tableConfig model.tableState
+                    |> html
+                    |> el [ htmlAttribute <| HA.id "admin-list" ]
 
             NotAsked ->
                 none

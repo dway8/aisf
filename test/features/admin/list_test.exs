@@ -2,11 +2,15 @@ defmodule AisfWeb.Admin.ListTest do
   use AisfWeb.FeatureCase, async: true
   alias AisfWeb.Factory
 
-  setup do
+  setup(context) do
     {:ok, champion1} = Factory.create_champion_with_membership_and_sport(true, "Ski alpin")
     {:ok, champion2} = Factory.create_champion_with_membership_and_sport(true, "Biathlon")
     {:ok, champion3} = Factory.create_champion_with_sport("Ski alpin")
     {:ok, champion4} = Factory.create_champion_with_sport("Ski de fond")
+
+    context.session
+    |> visit("/")
+    |> set_cookie("isAdmin", "1")
 
     {:ok, champion1: champion1, champion2: champion2, champion3: champion3, champion4: champion4}
   end
@@ -28,9 +32,8 @@ defmodule AisfWeb.Admin.ListTest do
     champion3: champion3
   } do
     session
-    |> visit("/champions")
-    |> assert_has(Query.css(".champion-item", count: 3))
-    |> click(Query.text("Toutes les disciplines"))
+    |> visit("/admin")
+    |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Biathlon"))
     |> assert_has(Query.css(".champion-item", count: 1))
     |> assert_has(Query.text(champion2.first_name))
@@ -45,7 +48,7 @@ defmodule AisfWeb.Admin.ListTest do
     champion1: champion1
   } do
     session
-    |> visit("/champions")
+    |> visit("/admin")
     |> click(Query.text(champion1.first_name))
     |> assert_has(Query.text("EXPÉRIENCES PROFESSIONNELLES"))
 

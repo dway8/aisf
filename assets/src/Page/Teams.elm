@@ -25,7 +25,7 @@ init year =
 
 view : TeamsPageModel -> Element Msg
 view model =
-    column [ width fill ]
+    column [ width fill, spacing 20 ]
         [ row [ width fill, spacing 20 ]
             [ Common.sportSelector True model.sport
             , Common.yearSelector True model.currentYear SelectedAYear
