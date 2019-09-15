@@ -8,9 +8,9 @@ import Html exposing (Html)
 import Model exposing (Model, Msg, Page(..))
 import Page.Admin
 import Page.Champion
+import Page.EditChampion
 import Page.Medals
 import Page.Members
-import Page.NewChampion
 import Page.Teams
 import Route exposing (Route(..))
 
@@ -54,8 +54,8 @@ viewBody model =
                 ChampionPage championModel ->
                     Page.Champion.view championModel
 
-                NewChampionPage newChampionModel ->
-                    Page.NewChampion.view model.currentYear newChampionModel
+                EditChampionPage editChampionModel ->
+                    Page.EditChampion.view model.currentYear editChampionModel
 
                 AdminPage adminModel ->
                     Page.Admin.view adminModel

@@ -43,19 +43,19 @@ defmodule AisfWeb.Admin.ListTest do
     |> assert_has(Query.text(champion3.first_name))
   end
 
-  test "selecting a champion in the list", %{
+  test "selecting a champion in the list goes the champion edit page", %{
     session: session,
     champion1: champion1
   } do
     session
     |> visit("/admin")
     |> click(Query.text(champion1.first_name))
-    |> assert_has(Query.text("EXPÉRIENCES PROFESSIONNELLES"))
+    |> assert_has(Query.text("ÉDITER CHAMPION"))
 
     assert(
       String.ends_with?(
         current_url(session),
-        "/champions/" <> to_string(champion1.id)
+        "/champions/edit/" <> to_string(champion1.id)
       )
     )
   end

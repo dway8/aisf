@@ -1,6 +1,7 @@
-module Page.NewChampion exposing (init, view)
+module Page.EditChampion exposing (championToForm, init, view)
 
 import Aisf.Scalar exposing (Id(..))
+import Api
 import Common
 import Dict
 import Editable exposing (Editable(..))
@@ -12,13 +13,22 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (ChampionForm, FormField(..), Medal, Msg(..), NewChampionPageModel, ProExperience, Sport, Year)
+import Model exposing (Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
-init : ( NewChampionPageModel, Cmd Msg )
-init =
-    ( { champion = initChampionForm }, Cmd.none )
+init : Maybe Id -> ( EditChampionPageModel, Cmd Msg )
+init maybeId =
+    case maybeId of
+        Just id ->
+            ( { id = Just id, champion = Loading }
+            , Api.getChampion id
+            )
+
+        Nothing ->
+            ( { id = Nothing, champion = Success initChampionForm }
+            , Cmd.none
+            )
 
 
 initChampionForm : ChampionForm
@@ -35,20 +45,50 @@ initChampionForm =
     }
 
 
-view : Year -> NewChampionPageModel -> Element Msg
-view currentYear { champion } =
-    column [ spacing 10 ]
-        [ el [ Font.bold, Font.size 18 ] <| text "AJOUTER CHAMPION"
-        , column []
-            [ viewChampionTextInput FirstName champion
-            , viewChampionTextInput LastName champion
-            , viewChampionTextInput Email champion
-            , Common.sportSelector False champion.sport
-            , editProExperiences champion
-            , editMedals currentYear champion
-            , editYearsInFrenchTeam currentYear champion
-            , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
-            ]
+championToForm : Champion -> ChampionForm
+championToForm champion =
+    let
+        toEditableDict =
+            List.map Editable.ReadOnly >> List.indexedMap Tuple.pair >> Dict.fromList
+    in
+    { id = champion.id
+    , lastName = champion.lastName
+    , firstName = champion.firstName
+    , email = champion.email
+    , sport = Just champion.sport
+    , proExperiences = champion.proExperiences |> toEditableDict
+    , yearsInFrenchTeam = champion.yearsInFrenchTeam |> toEditableDict
+    , medals = champion.medals |> toEditableDict
+    , isMember = champion.isMember
+    }
+
+
+view : Year -> EditChampionPageModel -> Element Msg
+view currentYear model =
+    column [ spacing 20 ]
+        [ el [ Font.bold, Font.size 18 ] <|
+            text
+                (if model.id == Nothing then
+                    "AJOUTER CHAMPION"
+
+                 else
+                    "ÉDITER CHAMPION"
+                )
+        , case model.champion of
+            Success champion ->
+                column [ spacing 10 ]
+                    [ viewChampionTextInput FirstName champion
+                    , viewChampionTextInput LastName champion
+                    , viewChampionTextInput Email champion
+                    , Common.sportSelector False champion.sport
+                    , editProExperiences champion
+                    , editMedals currentYear champion
+                    , editYearsInFrenchTeam currentYear champion
+                    , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+                    ]
+
+            _ ->
+                text "..."
         ]
 
 

@@ -1,4 +1,4 @@
-module Model exposing (AdminPageModel, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), NewChampionPageModel, Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (AdminPageModel, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -25,7 +25,7 @@ type Page
     | MedalsPage MedalsPageModel
     | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
-    | NewChampionPage NewChampionPageModel
+    | EditChampionPage EditChampionPageModel
     | AdminPage AdminPageModel
 
 
@@ -68,8 +68,9 @@ type alias ChampionPageModel =
     }
 
 
-type alias NewChampionPageModel =
-    { champion : ChampionForm
+type alias EditChampionPageModel =
+    { id : Maybe Id
+    , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
     }
 
 
