@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Medal exposing (competition, medalType, specialty, year)
+module Aisf.Object.Medal exposing (competition, id, medalType, specialty, year)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -22,6 +22,11 @@ import Json.Decode as Decode
 competition : SelectionSet String Aisf.Object.Medal
 competition =
     Object.selectionForField "String" "competition" [] Decode.string
+
+
+id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.Medal
+id =
+    Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 medalType : SelectionSet Int Aisf.Object.Medal

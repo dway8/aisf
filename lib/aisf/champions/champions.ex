@@ -94,18 +94,36 @@ defmodule Aisf.Champions do
   Updates a champion.
 
   ## Examples
-
-      iex> update_champion(champion, %{field: new_value})
-      {:ok, %Champion{}}
-
-      iex> update_champion(champion, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
   def update_champion(%Champion{} = champion, attrs) do
     champion
     |> Champion.changeset(attrs)
     |> Repo.update()
+    |> (fn {:ok, _champion} ->
+          attrs.pro_experiences
+          |> Enum.map(fn p ->
+            if p.id == "new" do
+              ProExperiences.create_pro_experience(champion, p)
+            else
+              p.id
+              |> ProExperiences.get_pro_experience!()
+              |> ProExperiences.update_pro_experience(p)
+            end
+          end)
+
+          attrs.medals
+          |> Enum.map(fn m ->
+            if m.id == "new" do
+              Medals.create_medal(champion, m)
+            else
+              m.id
+              |> Medals.get_medal!()
+              |> Medals.update_medal(m)
+            end
+          end)
+
+          {:ok, champion |> Repo.preload([:pro_experiences, :medals])}
+        end).()
   end
 
   @doc """

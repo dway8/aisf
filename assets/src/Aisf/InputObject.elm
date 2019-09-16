@@ -19,11 +19,12 @@ import Json.Decode as Decode
 
 buildMedalParams : MedalParamsRequiredFields -> MedalParams
 buildMedalParams required =
-    { competition = required.competition, medalType = required.medalType, specialty = required.specialty, year = required.year }
+    { competition = required.competition, id = required.id, medalType = required.medalType, specialty = required.specialty, year = required.year }
 
 
 type alias MedalParamsRequiredFields =
     { competition : String
+    , id : String
     , medalType : Int
     , specialty : String
     , year : Int
@@ -34,6 +35,7 @@ type alias MedalParamsRequiredFields =
 -}
 type alias MedalParams =
     { competition : String
+    , id : String
     , medalType : Int
     , specialty : String
     , year : Int
@@ -45,18 +47,19 @@ type alias MedalParams =
 encodeMedalParams : MedalParams -> Value
 encodeMedalParams input =
     Encode.maybeObject
-        [ ( "competition", Encode.string input.competition |> Just ), ( "medalType", Encode.int input.medalType |> Just ), ( "specialty", Encode.string input.specialty |> Just ), ( "year", Encode.int input.year |> Just ) ]
+        [ ( "competition", Encode.string input.competition |> Just ), ( "id", Encode.string input.id |> Just ), ( "medalType", Encode.int input.medalType |> Just ), ( "specialty", Encode.string input.specialty |> Just ), ( "year", Encode.int input.year |> Just ) ]
 
 
 buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams
 buildProExperienceParams required =
-    { companyName = required.companyName, contact = required.contact, description = required.description, occupationalCategory = required.occupationalCategory, title = required.title, website = required.website }
+    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, occupationalCategory = required.occupationalCategory, title = required.title, website = required.website }
 
 
 type alias ProExperienceParamsRequiredFields =
     { companyName : String
     , contact : String
     , description : String
+    , id : String
     , occupationalCategory : String
     , title : String
     , website : String
@@ -69,6 +72,7 @@ type alias ProExperienceParams =
     { companyName : String
     , contact : String
     , description : String
+    , id : String
     , occupationalCategory : String
     , title : String
     , website : String
@@ -80,4 +84,4 @@ type alias ProExperienceParams =
 encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
-        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "occupationalCategory", Encode.string input.occupationalCategory |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
+        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "occupationalCategory", Encode.string input.occupationalCategory |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]

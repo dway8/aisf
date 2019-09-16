@@ -57,22 +57,25 @@ update msg model =
                             (\champion ->
                                 champion
                                     |> validateChampionForm
-                                    |> Maybe.map (\champ -> ( model, Api.createChampion champ ))
-                                    |> Maybe.withDefault
-                                        (let
-                                            _ =
-                                                Debug.log "errors" champion
-                                         in
-                                         ( model, Cmd.none )
+                                    |> Maybe.map
+                                        (\champ ->
+                                            ( model
+                                            , if champ.id == Id "new" then
+                                                Api.createChampion champ
+
+                                              else
+                                                Api.updateChampion champ
+                                            )
                                         )
+                                    |> Maybe.withDefault ( model, Cmd.none )
                             )
                         |> RD.withDefault ( model, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
 
-        GotCreateChampionResponse resp ->
-            handleCreateChampionResponse resp model
+        GotSaveChampionResponse resp ->
+            handleSaveChampionResponse resp model
 
         SelectedASport sportStr ->
             updateCurrentSport sportStr model
@@ -115,6 +118,12 @@ update msg model =
 
         SelectedAYear str ->
             updateCurrentYear str model
+
+        PressedEditProExperienceButton id ->
+            editProExperience id model
+
+        PressedEditMedalButton id ->
+            editMedal id model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -190,8 +199,8 @@ updateChampionForm field val model =
             ( model, Cmd.none )
 
 
-handleCreateChampionResponse : RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
-handleCreateChampionResponse response model =
+handleSaveChampionResponse : RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
+handleSaveChampionResponse response model =
     case response of
         Success _ ->
             ( model, Nav.pushUrl model.key "/" )
@@ -260,7 +269,6 @@ addProExperience model =
 
                             newProExperiences =
                                 champion.proExperiences
-                                    |> Dict.map (\_ v -> Editable.save v)
                                     |> Dict.insert newKey (ReadOnly Model.initProExperience |> Editable.edit)
 
                             newChampion =
@@ -411,13 +419,12 @@ addMedal model =
                     (\champion ->
                         let
                             newKey =
-                                getDictNextKey champion.yearsInFrenchTeam
+                                getDictNextKey champion.medals
 
                             newMedals =
                                 case champion.sport of
                                     Just sport ->
                                         champion.medals
-                                            |> Dict.map (\_ v -> Editable.save v)
                                             |> Dict.insert newKey (ReadOnly (Model.initMedal sport model.currentYear) |> Editable.edit)
 
                                     Nothing ->
@@ -558,7 +565,7 @@ validateChampionForm c =
 
         Just sport ->
             Just
-                { id = Id "NEW"
+                { id = c.id
                 , email = c.email
                 , firstName = c.firstName
                 , lastName = c.lastName
@@ -669,6 +676,52 @@ handleChampionResponse resp model =
 
             else
                 ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+editProExperience : Int -> Model -> ( Model, Cmd Msg )
+editProExperience id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newProExp =
+                                champion.proExperiences
+                                    |> Dict.update id (Maybe.map Editable.edit)
+
+                            newChampion =
+                                { champion | proExperiences = newProExp }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+editMedal : Int -> Model -> ( Model, Cmd Msg )
+editMedal id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newMedals =
+                                champion.medals
+                                    |> Dict.update id (Maybe.map Editable.edit)
+
+                            newChampion =
+                                { champion | medals = newMedals }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

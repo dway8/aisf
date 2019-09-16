@@ -109,7 +109,8 @@ type Year
 
 
 type alias Medal =
-    { competition : Competition
+    { id : Id
+    , competition : Competition
     , year : Year
     , specialty : Specialty
     , medalType : MedalType
@@ -727,7 +728,8 @@ type Sport
 
 
 type alias ProExperience =
-    { occupationalCategory : String
+    { id : Id
+    , occupationalCategory : String
     , title : String
     , companyName : String
     , description : String
@@ -774,7 +776,7 @@ type Msg
     | GotChampion (RemoteData (Graphql.Http.Error Champion) Champion)
     | UpdatedChampionField FormField String
     | PressedSaveChampionButton
-    | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
+    | GotSaveChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
     | SelectedASport String
     | PressedAddProExperienceButton
     | PressedDeleteProExperienceButton Int
@@ -790,6 +792,8 @@ type Msg
     | TableMsg Table.State
     | ChampionSelected Id
     | SelectedAYear String
+    | PressedEditProExperienceButton Int
+    | PressedEditMedalButton Int
 
 
 type FormField
@@ -859,7 +863,8 @@ sportFromString str =
 
 initProExperience : ProExperience
 initProExperience =
-    { occupationalCategory = ""
+    { id = Id "new"
+    , occupationalCategory = ""
     , title = ""
     , companyName = ""
     , description = ""
@@ -870,7 +875,8 @@ initProExperience =
 
 initMedal : Sport -> Year -> Medal
 initMedal sport currentYear =
-    { competition = OlympicGames
+    { id = Id "new"
+    , competition = OlympicGames
     , year = currentYear
     , specialty = sport |> getSpecialtiesForSport |> List.head |> Maybe.withDefault Slalom
     , medalType = Gold

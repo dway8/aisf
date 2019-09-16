@@ -17,6 +17,7 @@ defmodule AisfWeb.Schema do
   end
 
   object :pro_experience do
+    field(:id, non_null(:id))
     field(:company_name, non_null(:string))
     field(:contact, non_null(:string))
     field(:description, non_null(:string))
@@ -26,6 +27,7 @@ defmodule AisfWeb.Schema do
   end
 
   object :medal do
+    field(:id, non_null(:id))
     field(:competition, non_null(:string))
     field(:year, non_null(:integer))
     field(:specialty, non_null(:string))
@@ -61,12 +63,28 @@ defmodule AisfWeb.Schema do
       arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
       arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
       arg(:medals, non_null(list_of(non_null(:medal_params))))
+      arg(:is_member, non_null(:boolean))
 
       resolve(&ChampionsResolver.create/2)
+    end
+
+    field :update_champion, type: :champion do
+      arg(:id, non_null(:string))
+      arg(:first_name, non_null(:string))
+      arg(:last_name, non_null(:string))
+      arg(:email, non_null(:string))
+      arg(:sport, non_null(:string))
+      arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
+      arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
+      arg(:medals, non_null(list_of(non_null(:medal_params))))
+      arg(:is_member, non_null(:boolean))
+
+      resolve(&ChampionsResolver.update/2)
     end
   end
 
   input_object :pro_experience_params do
+    field(:id, non_null(:string))
     field(:company_name, non_null(:string))
     field(:contact, non_null(:string))
     field(:description, non_null(:string))
@@ -76,6 +94,7 @@ defmodule AisfWeb.Schema do
   end
 
   input_object :medal_params do
+    field(:id, non_null(:string))
     field(:competition, non_null(:string))
     field(:year, non_null(:integer))
     field(:specialty, non_null(:string))

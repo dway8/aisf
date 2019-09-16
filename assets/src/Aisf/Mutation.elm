@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Mutation exposing (CreateChampionRequiredArguments, createChampion)
+module Aisf.Mutation exposing (CreateChampionRequiredArguments, UpdateChampionRequiredArguments, createChampion, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -22,6 +22,7 @@ import Json.Decode as Decode exposing (Decoder)
 type alias CreateChampionRequiredArguments =
     { email : String
     , firstName : String
+    , isMember : Bool
     , lastName : String
     , medals : List Aisf.InputObject.MedalParams
     , proExperiences : List Aisf.InputObject.ProExperienceParams
@@ -32,4 +33,22 @@ type alias CreateChampionRequiredArguments =
 
 createChampion : CreateChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (Maybe decodesTo) RootMutation
 createChampion requiredArgs object_ =
-    Object.selectionForCompositeField "createChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ] object_ (identity >> Decode.nullable)
+    Object.selectionForCompositeField "createChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ] object_ (identity >> Decode.nullable)
+
+
+type alias UpdateChampionRequiredArguments =
+    { email : String
+    , firstName : String
+    , id : String
+    , isMember : Bool
+    , lastName : String
+    , medals : List Aisf.InputObject.MedalParams
+    , proExperiences : List Aisf.InputObject.ProExperienceParams
+    , sport : String
+    , yearsInFrenchTeam : List Int
+    }
+
+
+updateChampion : UpdateChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (Maybe decodesTo) RootMutation
+updateChampion requiredArgs object_ =
+    Object.selectionForCompositeField "updateChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "id" requiredArgs.id Encode.string, Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ] object_ (identity >> Decode.nullable)

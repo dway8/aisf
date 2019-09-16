@@ -26,4 +26,14 @@ defmodule AisfWeb.ChampionsResolver do
   def create(args, _info) do
     Champions.create_champion(args)
   end
+
+  def update(args, _info) do
+    case Champions.get_champion(args.id) do
+      nil ->
+        {:error, "Champion with id #{args.id} not found! Not updating."}
+
+      champion ->
+        Champions.update_champion(champion, args)
+    end
+  end
 end

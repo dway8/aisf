@@ -101,7 +101,10 @@ editProExperiences { proExperiences } =
                     (\id exp ->
                         case exp of
                             ReadOnly e ->
-                                Common.viewProExperience e
+                                column [ spacing 5 ]
+                                    [ Input.button [ Font.bold ] { onPress = Just <| PressedEditProExperienceButton id, label = text "Éditer" }
+                                    , Common.viewProExperience e
+                                    ]
 
                             Editable oldE newE ->
                                 viewProExperienceForm id newE
@@ -121,7 +124,10 @@ editMedals currentYear { medals, sport } =
                     (\id medal ->
                         case medal of
                             ReadOnly m ->
-                                Common.viewMedal m
+                                column [ spacing 5 ]
+                                    [ Input.button [ Font.bold ] { onPress = Just <| PressedEditMedalButton id, label = text "Éditer" }
+                                    , Common.viewMedal m
+                                    ]
 
                             Editable _ newM ->
                                 viewMedalForm currentYear id sport newM
