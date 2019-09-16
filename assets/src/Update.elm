@@ -202,8 +202,8 @@ updateChampionForm field val model =
 handleSaveChampionResponse : RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
 handleSaveChampionResponse response model =
     case response of
-        Success _ ->
-            ( model, Nav.pushUrl model.key "/" )
+        Success (Just { id }) ->
+            ( model, Nav.pushUrl model.key (Route.routeToString (ChampionRoute id)) )
 
         _ ->
             ( model, Cmd.none )

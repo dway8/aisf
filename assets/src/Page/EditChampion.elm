@@ -84,7 +84,7 @@ view currentYear model =
                     , editProExperiences champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
-                    , Input.button [ Font.bold ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+                    , Input.button [ Font.bold, htmlAttribute <| HA.id "save-champion-btn" ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
                     ]
 
             _ ->
