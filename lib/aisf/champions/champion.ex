@@ -14,6 +14,7 @@ defmodule Aisf.Champions.Champion do
     field(:years_in_french_team, {:array, :integer})
     has_many(:medals, Medal)
     field(:is_member, :boolean)
+    field(:intro, :string)
 
     timestamps()
   end
@@ -27,7 +28,8 @@ defmodule Aisf.Champions.Champion do
       :password,
       :sport,
       :years_in_french_team,
-      :is_member
+      :is_member,
+      :intro
     ])
     |> validate_required([
       :first_name,
@@ -36,7 +38,8 @@ defmodule Aisf.Champions.Champion do
       :password,
       :sport,
       :years_in_french_team,
-      :is_member
+      :is_member,
+      :intro
     ])
   end
 

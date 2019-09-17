@@ -14,6 +14,7 @@ defmodule AisfWeb.Schema do
     field(:years_in_french_team, list_of(non_null(:integer)))
     field(:medals, non_null(list_of(non_null(:medal))))
     field(:is_member, non_null(:boolean))
+    field(:intro, non_null(:string))
   end
 
   object :pro_experience do
@@ -64,6 +65,7 @@ defmodule AisfWeb.Schema do
       arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
       arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
+      arg(:intro, non_null(:string))
 
       resolve(&ChampionsResolver.create/2)
     end
@@ -78,6 +80,7 @@ defmodule AisfWeb.Schema do
       arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
       arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
+      arg(:intro, non_null(:string))
 
       resolve(&ChampionsResolver.update/2)
     end

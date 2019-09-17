@@ -68,6 +68,7 @@ championSelection =
         |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
         |> with (Champion.medals medalSelection)
         |> with Champion.isMember
+        |> with Champion.intro
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience
@@ -93,7 +94,7 @@ medalSelection =
 
 
 createChampion : Champion -> Cmd Msg
-createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember } =
+createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } =
     Mutation.createChampion
         { email = email
         , firstName = firstName
@@ -103,6 +104,7 @@ createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenc
         , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
         , medals = medals |> List.map medalToParams
         , isMember = isMember
+        , intro = intro
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
@@ -111,7 +113,7 @@ createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenc
 
 
 updateChampion : Champion -> Cmd Msg
-updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember } as champion) =
+updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } as champion) =
     Mutation.updateChampion
         { id = Model.getId champion
         , email = email
@@ -122,6 +124,7 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
         , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
         , medals = medals |> List.map medalToParams
         , isMember = isMember
+        , intro = intro
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint

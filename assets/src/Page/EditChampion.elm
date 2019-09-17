@@ -42,6 +42,7 @@ initChampionForm =
     , yearsInFrenchTeam = Dict.empty
     , medals = Dict.empty
     , isMember = False
+    , intro = ""
     }
 
 
@@ -60,6 +61,7 @@ championToForm champion =
     , yearsInFrenchTeam = champion.yearsInFrenchTeam |> toEditableDict
     , medals = champion.medals |> toEditableDict
     , isMember = champion.isMember
+    , intro = champion.intro
     }
 
 
@@ -70,7 +72,6 @@ view currentYear model =
             text
                 (if model.id == Nothing then
                     "AJOUTER CHAMPION"
-
                  else
                     "ÉDITER CHAMPION"
                 )
@@ -81,6 +82,11 @@ view currentYear model =
                     , viewChampionTextInput LastName champion
                     , viewChampionTextInput Email champion
                     , Common.sportSelector False champion.sport
+                    , let
+                        ( label, value ) =
+                            getChampionFormFieldData Intro champion
+                      in
+                      viewTextArea label value (UpdatedChampionField Intro)
                     , editProExperiences champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
@@ -229,7 +235,6 @@ viewTextInput label value msg =
         [ Border.solid
         , Border.rounded 8
         , paddingXY 13 7
-        , Border.width 3
         ]
         { onChange = msg
         , text = value
@@ -237,6 +242,24 @@ viewTextInput label value msg =
         , label =
             Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
                 paragraph [] [ text label ]
+        }
+
+
+viewTextArea : String -> String -> (String -> Msg) -> Element Msg
+viewTextArea label value msg =
+    Input.multiline
+        [ Border.solid
+        , Border.rounded 8
+        , paddingXY 13 7
+        , Border.width 1
+        ]
+        { onChange = msg
+        , text = value
+        , placeholder = Nothing
+        , label =
+            Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
+                paragraph [] [ text label ]
+        , spellcheck = False
         }
 
 
@@ -251,6 +274,9 @@ getChampionFormFieldData field champion =
 
         Email ->
             ( "Email", champion.email )
+
+        Intro ->
+            ( "Intro", champion.intro )
 
         _ ->
             ( "", "" )

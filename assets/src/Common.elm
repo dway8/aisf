@@ -1,4 +1,4 @@
-module Common exposing (defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewMedal, viewProExperience, yearSelector)
+module Common exposing (defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewMedal, viewProExperience, viewTextArea, yearSelector)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
@@ -61,6 +61,11 @@ viewProExperience exp =
 viewField : String -> String -> Element Msg
 viewField label value =
     row [ spacing 10 ] [ text label, el [ Font.bold ] <| text value ]
+
+
+viewTextArea : String -> String -> Element Msg
+viewTextArea label value =
+    column [ spacing 5 ] [ text label, el [ Font.bold ] <| text value ]
 
 
 viewMedal : Medal -> Element Msg

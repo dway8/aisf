@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (email, firstName, id, isMember, lastName, medals, proExperiences, sport, yearsInFrenchTeam)
+module Aisf.Object.Champion exposing (email, firstName, id, intro, isMember, lastName, medals, proExperiences, sport, yearsInFrenchTeam)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -32,6 +32,11 @@ firstName =
 id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.Champion
 id =
     Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
+
+
+intro : SelectionSet String Aisf.Object.Champion
+intro =
+    Object.selectionForField "String" "intro" [] Decode.string
 
 
 isMember : SelectionSet Bool Aisf.Object.Champion

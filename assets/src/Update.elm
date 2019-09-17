@@ -188,6 +188,9 @@ updateChampionForm field val model =
                                     Email ->
                                         { champion | email = val }
 
+                                    Intro ->
+                                        { champion | intro = val }
+
                                     _ ->
                                         champion
                         in
@@ -574,6 +577,7 @@ validateChampionForm c =
                 , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 , isMember = c.isMember
+                , intro = c.intro
                 }
 
 

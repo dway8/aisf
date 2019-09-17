@@ -88,6 +88,7 @@ type alias Champion =
     , yearsInFrenchTeam : List Year
     , medals : List Medal
     , isMember : Bool
+    , intro : String
     }
 
 
@@ -101,6 +102,7 @@ type alias ChampionForm =
     , yearsInFrenchTeam : Dict Int (Editable Year)
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
+    , intro : String
     }
 
 
@@ -800,6 +802,7 @@ type FormField
     = FirstName
     | LastName
     | Email
+    | Intro
     | OccupationalCategory
     | Title
     | CompanyName

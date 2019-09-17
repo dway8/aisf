@@ -33,4 +33,13 @@ defmodule AisfWeb.Admin.EditChampionTest do
       )
     )
   end
+
+  test "adding a pro experience" do
+  end
+
+  test "editing a medal" do
+  end
+
+  test "removing a medal" do
+  end
 end

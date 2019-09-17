@@ -33,6 +33,7 @@ view { id, champion } =
                             , Common.viewField "Prénom" champ.firstName
                             , Common.viewField "Discipline" (Model.sportToString champ.sport)
                             ]
+                        , Common.viewTextArea "Intro" champ.intro
                         ]
                     , column [ spacing 10 ]
                         [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
