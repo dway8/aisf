@@ -15,6 +15,9 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
+import UI.Button as Button
+import UI.Color
 
 
 init : Maybe Id -> ( EditChampionPageModel, Cmd Msg )
@@ -68,13 +71,16 @@ championToForm champion =
 view : Year -> EditChampionPageModel -> Element Msg
 view currentYear model =
     column [ spacing 20 ]
-        [ el [ Font.bold, Font.size 18 ] <|
-            text
-                (if model.id == Nothing then
-                    "AJOUTER CHAMPION"
-                 else
-                    "ÉDITER CHAMPION"
-                )
+        [ UI.heading 1
+            (el [ Font.bold, Font.size 18 ] <|
+                text
+                    (if model.id == Nothing then
+                        "AJOUTER CHAMPION"
+
+                     else
+                        "ÉDITER CHAMPION"
+                    )
+            )
         , case model.champion of
             Success champion ->
                 column [ spacing 10 ]
@@ -90,7 +96,11 @@ view currentYear model =
                     , editProExperiences champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
-                    , Input.button [ Font.bold, htmlAttribute <| HA.id "save-champion-btn" ] { onPress = Just PressedSaveChampionButton, label = text "Enregistrer" }
+                    , text "Enregistrer"
+                        |> Button.makeButton (Just PressedSaveChampionButton)
+                        |> Button.withBackgroundColor UI.Color.green
+                        |> Button.withAttrs [ htmlAttribute <| HA.id "save-champion-btn" ]
+                        |> Button.viewButton
                     ]
 
             _ ->
@@ -117,7 +127,10 @@ editProExperiences { proExperiences } =
                     )
                 |> Dict.values
             )
-        , Input.button [ Font.bold ] { onPress = Just PressedAddProExperienceButton, label = text "Ajouter une expérience" }
+        , text "Ajouter une expérience"
+            |> Button.makeButton (Just PressedAddProExperienceButton)
+            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
         ]
 
 
@@ -140,7 +153,10 @@ editMedals currentYear { medals, sport } =
                     )
                 |> Dict.values
             )
-        , Input.button [ Font.bold ] { onPress = Just PressedAddMedalButton, label = text "Ajouter une médaille" }
+        , text "Ajouter une médaille"
+            |> Button.makeButton (Just PressedAddMedalButton)
+            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
         ]
 
 
@@ -160,9 +176,10 @@ editYearsInFrenchTeam currentYear champion =
                     )
                 |> Dict.values
             )
-        , row [ spacing 10 ]
-            [ Input.button [ Font.bold ] { onPress = Just PressedAddYearInFrenchTeamButton, label = text "Ajouter une année" }
-            ]
+        , text "Ajouter une année"
+            |> Button.makeButton (Just PressedAddYearInFrenchTeamButton)
+            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
         ]
 
 

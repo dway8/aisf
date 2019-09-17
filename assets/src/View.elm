@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Browser exposing (Document)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
@@ -13,6 +14,8 @@ import Page.Medals
 import Page.Members
 import Page.Teams
 import Route exposing (Route(..))
+import UI
+import UI.Color
 
 
 view : Model -> Document Msg
@@ -69,14 +72,14 @@ viewMenu currentPage =
             let
                 attrs =
                     (if isCurrentPage route currentPage then
-                        [ Font.bold ]
+                        [ Background.color <| UI.Color.makeOpaque 0.5 UI.Color.blue ]
 
                      else
                         []
                     )
-                        ++ [ Border.width 1, padding 5 ]
+                        ++ []
             in
-            link attrs { url = Route.routeToString route, label = text label }
+            link ([ Font.bold, UI.defaultPadding, Border.rounded 3, UI.largestFont, Background.color UI.Color.blue, Font.color UI.Color.white, mouseOver [ Background.color <| UI.Color.makeOpaque 0.5 UI.Color.blue ] ] ++ attrs) { url = Route.routeToString route, label = text label }
     in
     row [ spacing 20 ]
         [ menuItem MembersRoute "Membres AISF"

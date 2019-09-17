@@ -8,6 +8,9 @@ import Element.Border as Border
 import Element.Font as Font
 import Model exposing (Champion, ChampionPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
+import UI.Button as Button
+import UI.Color
 
 
 init : Id -> ( ChampionPageModel, Cmd Msg )
@@ -20,8 +23,12 @@ view { id, champion } =
     column [ spacing 10 ]
         [ link []
             { url = "/champions"
-            , label = el [ Border.width 1, padding 5 ] <| text <| "Retour à la liste"
+            , label = row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
             }
+            |> Button.makeButton Nothing
+            |> Button.withBackgroundColor UI.Color.lighterGrey
+            |> Button.withAttrs []
+            |> Button.viewButton
         , case champion of
             Success champ ->
                 column [ spacing 15 ]
