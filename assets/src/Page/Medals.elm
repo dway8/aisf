@@ -1,6 +1,7 @@
 module Page.Medals exposing (init, view)
 
 import Aisf.Scalar exposing (Id(..))
+import Api
 import Common
 import Element exposing (..)
 import Html
@@ -19,7 +20,7 @@ init year =
       , currentYear = year
       , selectedYear = Nothing
       }
-    , Cmd.none
+    , Api.getChampionsWithMedals
     )
 
 
@@ -37,7 +38,7 @@ view model =
             Success champions ->
                 champions
                     |> getMedalsFromChampions
-                    |> filterBySpecialty model.specialty
+                    |> filterBySportAndSpecialty model.sport model.specialty
                     |> filterByYear model.selectedYear
                     |> Table.view tableConfig model.tableState
                     |> html
@@ -52,6 +53,7 @@ type alias MedalFromChampion =
     { id : Id
     , name : String
     , medalType : MedalType
+    , sport : Sport
     , specialty : Specialty
     , year : Year
     }
@@ -68,6 +70,7 @@ getMedalsFromChampions champions =
                             { id = champion.id
                             , name = Model.getName champion
                             , medalType = medal.medalType
+                            , sport = champion.sport
                             , specialty = medal.specialty
                             , year = medal.year
                             }
@@ -77,15 +80,16 @@ getMedalsFromChampions champions =
             []
 
 
-filterBySpecialty : Maybe Specialty -> List MedalFromChampion -> List MedalFromChampion
-filterBySpecialty specialty medals =
-    case specialty of
-        Nothing ->
+filterBySportAndSpecialty : Maybe Sport -> Maybe Specialty -> List MedalFromChampion -> List MedalFromChampion
+filterBySportAndSpecialty sport specialty medals =
+    case ( sport, specialty ) of
+        ( Nothing, _ ) ->
             medals
 
-        Just s ->
+        ( Just s, maybeSpecialty ) ->
             medals
-                |> List.filter (.specialty >> (==) s)
+                |> List.filter (.sport >> (==) s)
+                |> (\list -> maybeSpecialty |> Maybe.map (\spe -> list |> List.filter (.specialty >> (==) spe)) |> Maybe.withDefault list)
 
 
 filterByYear : Maybe Year -> List MedalFromChampion -> List MedalFromChampion

@@ -49,9 +49,8 @@ defmodule AisfWeb.Schema do
       resolve(&ChampionsResolver.get/2)
     end
 
-    field :champions_with_medal_in_sport, non_null(list_of(non_null(:champion))) do
-      arg(:sport, non_null(:string))
-      resolve(&ChampionsResolver.get_by_medal_in_sport/2)
+    field :champions_with_medals, non_null(list_of(non_null(:champion))) do
+      resolve(&ChampionsResolver.get_with_medals/2)
     end
   end
 

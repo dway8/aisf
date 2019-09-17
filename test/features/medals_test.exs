@@ -29,14 +29,15 @@ defmodule AisfWeb.MedalsTest do
 
     {:ok, champion1} = Factory.create_champion_with_sport_and_medals("Ski de fond", medals1)
     {:ok, champion2} = Factory.create_champion_with_sport_and_medals("Combiné nordique", medals2)
+    {:ok, champion3} = Factory.create_champion_with_sport("Biathlon")
 
-    {:ok, champion1: champion1, champion2: champion2}
+    {:ok, champion1: champion1, champion2: champion2, champion3: champion3}
   end
 
-  test "not viewing anything if no sport selected", %{session: session} do
+  test "viewing all the champions with medals if no sport selected", %{session: session} do
     session
     |> visit("/medals")
-    |> assert_has(Query.css(".champion-item", count: 0))
+    |> assert_has(Query.css(".champion-item", count: 3))
   end
 
   test "filtering medals by sport", context do

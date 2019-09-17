@@ -15,7 +15,8 @@ defmodule AisfWeb.Factory do
       years_in_french_team: [],
       pro_experiences: [],
       medals: [],
-      is_member: is_member
+      is_member: is_member,
+      intro: Faker.Lorem.paragraph(Enum.random(2..5))
     }
 
     Champions.create_champion(champion)
@@ -31,7 +32,8 @@ defmodule AisfWeb.Factory do
       years_in_french_team: [],
       pro_experiences: [],
       medals: medals,
-      is_member: false
+      is_member: false,
+      intro: Faker.Lorem.paragraph(Enum.random(2..5))
     }
 
     Champions.create_champion(champion)
@@ -47,7 +49,8 @@ defmodule AisfWeb.Factory do
       years_in_french_team: years,
       pro_experiences: [],
       medals: [],
-      is_member: false
+      is_member: false,
+      intro: Faker.Lorem.paragraph(Enum.random(2..5))
     }
 
     Champions.create_champion(champion)

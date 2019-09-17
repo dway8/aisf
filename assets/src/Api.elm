@@ -1,4 +1,4 @@
-module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedalInSport, getMembers, updateChampion)
+module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getMembers, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -48,9 +48,9 @@ getChampion id =
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampion)
 
 
-getChampionsWithMedalInSport : Sport -> Cmd Msg
-getChampionsWithMedalInSport sport =
-    Query.championsWithMedalInSport { sport = Model.sportToString sport } championSelection
+getChampionsWithMedals : Cmd Msg
+getChampionsWithMedals =
+    Query.championsWithMedals championSelection
         |> Graphql.Http.queryRequest endpoint
         |> Graphql.Http.withCredentials
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)

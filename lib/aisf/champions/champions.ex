@@ -8,7 +8,7 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperiences
-  alias Aisf.Medals.Medals
+  alias Aisf.Medals.{Medals, Medal}
 
   @doc """
   Returns the list of champions.
@@ -27,10 +27,12 @@ defmodule Aisf.Champions do
   end
 
   @doc """
-  Returns the list of champions with medals in a sport.
+  Returns the list of champions with medals.
   """
-  def list_champions_with_medal_in_sport(sport) do
-    Repo.all(from(c in Champion, where: c.sport == ^sport))
+  def list_champions_with_medals do
+    Repo.all(
+      from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
+    )
     |> Repo.preload([:pro_experiences, :medals])
   end
 

@@ -23,7 +23,6 @@ var isAdmin = false;
 for (var i = 0; i < cookies.length; ++i) {
     var pair = cookies[i].trim().split("=");
     if (pair[0] == "isAdmin") {
-        console.log("Found admin cookie");
         isAdmin = true;
     }
 }

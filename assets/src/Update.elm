@@ -237,12 +237,8 @@ updateCurrentSport sportStr model =
             )
 
         MedalsPage mModel ->
-            let
-                newSport =
-                    Model.sportFromString sportStr
-            in
-            ( { model | currentPage = MedalsPage { mModel | sport = newSport } }
-            , newSport |> Maybe.map (\sport -> Api.getChampionsWithMedalInSport sport) |> Maybe.withDefault Cmd.none
+            ( { model | currentPage = MedalsPage (updateFn mModel) }
+            , Cmd.none
             )
 
         TeamsPage tModel ->
