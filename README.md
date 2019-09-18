@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/dway8/aisf/tree/master.svg?style=svg)](https://circleci.com/gh/dway8/aisf/tree/master)
+
 # Aisf
 
 To start your Phoenix server:

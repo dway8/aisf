@@ -25,6 +25,7 @@ config :wallaby,
   # chrome: [headless: false],
   driver: Wallaby.Experimental.Chrome,
   chromedriver: "/home/diane/Spottt/devops/scripts/ressources/chromedriver",
-  screenshot_on_failure: true
+  screenshot_on_failure: true,
+  screenshot_dir: "/tmp/screenshots"
 
 # max_wait_time: 20_000
