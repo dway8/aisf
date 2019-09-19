@@ -69,6 +69,8 @@ championSelection =
         |> with (Champion.medals medalSelection)
         |> with Champion.isMember
         |> with Champion.intro
+        --TODO
+        |> with (SelectionSet.succeed Nothing)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience

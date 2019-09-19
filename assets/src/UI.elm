@@ -127,3 +127,8 @@ largestFont =
 noAttr : Element.Attribute msg
 noAttr =
     htmlAttribute <| HA.class ""
+
+
+textColor : Color
+textColor =
+    rgb255 102 102 102

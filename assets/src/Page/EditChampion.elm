@@ -6,14 +6,16 @@ import Common
 import Dict
 import Editable exposing (Editable(..))
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import File
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sport, Year)
+import Model exposing (Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, SelectedFile, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -46,6 +48,7 @@ initChampionForm =
     , medals = Dict.empty
     , isMember = False
     , intro = ""
+    , profilePicture = Nothing
     }
 
 
@@ -65,12 +68,13 @@ championToForm champion =
     , medals = champion.medals |> toEditableDict
     , isMember = champion.isMember
     , intro = champion.intro
+    , profilePicture = champion.profilePicture |> Maybe.map (\p -> SelectedFile p.filename Nothing)
     }
 
 
 view : Year -> EditChampionPageModel -> Element Msg
 view currentYear model =
-    column [ spacing 20 ]
+    column [ UI.largeSpacing ]
         [ UI.heading 1
             (el [ Font.bold, Font.size 18 ] <|
                 text
@@ -83,10 +87,15 @@ view currentYear model =
             )
         , case model.champion of
             Success champion ->
-                column [ spacing 10 ]
-                    [ viewChampionTextInput FirstName champion
-                    , viewChampionTextInput LastName champion
-                    , viewChampionTextInput Email champion
+                column [ UI.defaultSpacing ]
+                    [ row [ UI.defaultSpacing ]
+                        [ viewProfilePicture champion.profilePicture
+                        , column [ UI.defaultSpacing ]
+                            [ viewChampionTextInput FirstName champion
+                            , viewChampionTextInput LastName champion
+                            , viewChampionTextInput Email champion
+                            ]
+                        ]
                     , Common.sportSelector False champion.sport
                     , let
                         ( label, value ) =
@@ -223,7 +232,7 @@ competitionSelector id =
         html <|
             Html.select
                 [ HE.on "change" <| D.map (SelectedACompetition id) <| HE.targetValue
-                , HA.style "font-family" "Roboto"
+                , HA.style "font-family" "Open Sans"
                 , HA.style "font-size" "15px"
                 ]
                 (Model.competitionsList
@@ -252,6 +261,7 @@ viewTextInput label value msg =
         [ Border.solid
         , Border.rounded 8
         , paddingXY 13 7
+        , width shrink
         ]
         { onChange = msg
         , text = value
@@ -269,6 +279,7 @@ viewTextArea label value msg =
         , Border.rounded 8
         , paddingXY 13 7
         , Border.width 1
+        , width <| px 400
         ]
         { onChange = msg
         , text = value
@@ -322,3 +333,43 @@ getProExperienceFormFieldData field exp =
 
         _ ->
             ( "", "" )
+
+
+viewProfilePicture : Maybe SelectedFile -> Element Msg
+viewProfilePicture profilePicture =
+    el [ width <| px 200 ] <|
+        case profilePicture of
+            Nothing ->
+                el [ width fill ] <|
+                    column [ spacing 10, padding 10, centerX ]
+                        [ Input.button
+                            [ Background.color UI.Color.green
+                            , padding 10
+                            , Border.rounded 5
+                            , Font.color UI.Color.white
+                            , width fill
+                            , Font.center
+                            ]
+                            { onPress = Just BeganFileSelection
+                            , label = text "Uploader une photo"
+                            }
+                        ]
+
+            Just { filename, base64 } ->
+                case base64 of
+                    Nothing ->
+                        row [ spacing 10 ]
+                            [ el [] <| text "Récupération du fichier en cours..."
+                            , Input.button
+                                [ Border.rounded 3
+                                , padding 10
+                                , Background.color UI.Color.red
+                                , Font.color UI.Color.white
+                                ]
+                                { onPress = Just CancelledFileSelection
+                                , label = text "Annuler"
+                                }
+                            ]
+
+                    Just url ->
+                        image [ width <| px 200 ] { src = url, description = "Photo de profil" }

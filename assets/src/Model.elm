@@ -1,10 +1,11 @@
-module Model exposing (AdminPageModel, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (AdminPageModel, Attachment, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, SelectedFile, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Editable exposing (Editable)
+import File exposing (File)
 import Graphql.Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
@@ -89,6 +90,7 @@ type alias Champion =
     , medals : List Medal
     , isMember : Bool
     , intro : String
+    , profilePicture : Maybe Attachment
     }
 
 
@@ -103,6 +105,7 @@ type alias ChampionForm =
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
     , intro : String
+    , profilePicture : Maybe SelectedFile
     }
 
 
@@ -796,6 +799,10 @@ type Msg
     | SelectedAYear String
     | PressedEditProExperienceButton Int
     | PressedEditMedalButton Int
+    | BeganFileSelection
+    | CancelledFileSelection
+    | FileSelectionDone File
+    | GotFileUrl String
 
 
 type FormField
@@ -897,3 +904,19 @@ medalTypeToDisplay medalType =
 
         Bronze ->
             "Bronze"
+
+
+type alias SelectedFile =
+    { filename : String
+    , base64 : Maybe String
+    }
+
+
+type alias Attachment =
+    { filename : String }
+
+
+type FileType
+    = Image
+    | PDF
+    | Other

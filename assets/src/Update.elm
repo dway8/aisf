@@ -6,6 +6,8 @@ import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Editable exposing (Editable(..))
+import File exposing (File)
+import File.Select as Select
 import Graphql.Http
 import Model exposing (..)
 import Page.Admin
@@ -17,6 +19,7 @@ import Page.Teams
 import RemoteData as RD exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Table
+import Task
 import Url exposing (Url)
 
 
@@ -124,6 +127,18 @@ update msg model =
 
         PressedEditMedalButton id ->
             editMedal id model
+
+        BeganFileSelection ->
+            beginFileSelection model
+
+        CancelledFileSelection ->
+            cancelFileSelection model
+
+        FileSelectionDone file ->
+            handleFileSelectionDone file model
+
+        GotFileUrl base64file ->
+            handleFileUrlReceived base64file model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -574,6 +589,7 @@ validateChampionForm c =
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 , isMember = c.isMember
                 , intro = c.intro
+                , profilePicture = Nothing
                 }
 
 
@@ -720,6 +736,67 @@ editMedal id model =
                                 { champion | medals = newMedals }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+beginFileSelection : Model -> ( Model, Cmd Msg )
+beginFileSelection model =
+    ( model, Select.file [ "image/*" ] FileSelectionDone )
+
+
+cancelFileSelection : Model -> ( Model, Cmd Msg )
+cancelFileSelection model =
+    ( model, Cmd.none )
+
+
+handleFileSelectionDone : File -> Model -> ( Model, Cmd Msg )
+handleFileSelectionDone file model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                { champion | profilePicture = Just <| SelectedFile (File.name file) Nothing }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        , Task.perform GotFileUrl <| File.toUrl file
+                        )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleFileUrlReceived : String -> Model -> ( Model, Cmd Msg )
+handleFileUrlReceived base64file model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                case champion.profilePicture of
+                                    Nothing ->
+                                        champion
+
+                                    Just oldFile ->
+                                        let
+                                            newFile =
+                                                { oldFile | base64 = Just base64file }
+                                        in
+                                        { champion | profilePicture = Just newFile }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        , Cmd.none
+                        )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 

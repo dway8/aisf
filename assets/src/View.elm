@@ -31,8 +31,8 @@ viewBody model =
     layout
         [ Font.family
             [ Font.external
-                { name = "Roboto"
-                , url = "https://fonts.googleapis.com/css?family=Roboto:100,200,200italic,300,300italic,400,400italic,600,700,800"
+                { name = "Open Sans"
+                , url = "https://fonts.googleapis.com/css?family=Open+Sans:100,100italic,400,400italic,700"
                 }
             ]
         , alignLeft
@@ -40,6 +40,7 @@ viewBody model =
         , padding 20
         , width fill
         , height fill
+        , Font.color UI.textColor
         ]
     <|
         column [ width fill, height fill, spacing 30 ]

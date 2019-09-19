@@ -50,7 +50,7 @@ darkestGrey =
 
 red : Color
 red =
-    rgb255 247 75 79
+    rgb255 247 22 53
 
 
 green : Color
@@ -60,7 +60,7 @@ green =
 
 blue : Color
 blue =
-    rgb255 55 71 172
+    rgb255 2 81 184
 
 
 lightBlue : Color

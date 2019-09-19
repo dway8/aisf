@@ -30,7 +30,7 @@ sportSelector showOptionAll currentSport =
         html <|
             Html.select
                 [ HE.on "change" <| D.map SelectedASport <| HE.targetValue
-                , HA.style "font-family" "Roboto"
+                , HA.style "font-family" "Open Sans"
                 , HA.style "font-size" "15px"
                 , HA.id "sport-selector"
                 ]
@@ -89,7 +89,7 @@ specialtySelector showOptionAll maybeSport msg =
                 html <|
                     Html.select
                         [ HE.on "change" <| D.map msg <| HE.targetValue
-                        , HA.style "font-family" "Roboto"
+                        , HA.style "font-family" "Open Sans"
                         , HA.style "font-size" "15px"
                         ]
                         ((if showOptionAll then
@@ -163,7 +163,7 @@ yearSelector showOptionAll currentYear msg =
         html <|
             Html.select
                 [ HE.on "change" <| D.map msg <| HE.targetValue
-                , HA.style "font-family" "Roboto"
+                , HA.style "font-family" "Open Sans"
                 , HA.style "font-size" "15px"
                 ]
                 (list
