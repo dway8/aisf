@@ -15,6 +15,7 @@ defmodule Aisf.Champions.Champion do
     has_many(:medals, Medal)
     field(:is_member, :boolean)
     field(:intro, :string)
+    field(:profile_picture_filename, :string)
 
     timestamps()
   end
@@ -29,7 +30,8 @@ defmodule Aisf.Champions.Champion do
       :sport,
       :years_in_french_team,
       :is_member,
-      :intro
+      :intro,
+      :profile_picture_filename
     ])
     |> validate_required([
       :first_name,

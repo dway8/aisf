@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildMedalParams, buildProExperienceParams, encodeMedalParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -15,6 +15,40 @@ import Graphql.Internal.Encode as Encode exposing (Value)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
+
+
+buildFileParams : FileParamsRequiredFields -> (FileParamsOptionalFields -> FileParamsOptionalFields) -> FileParams
+buildFileParams required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { base64 = Absent }
+    in
+    { base64 = optionals.base64, filename = required.filename }
+
+
+type alias FileParamsRequiredFields =
+    { filename : String }
+
+
+type alias FileParamsOptionalFields =
+    { base64 : OptionalArgument String }
+
+
+{-| Type for the FileParams input object.
+-}
+type alias FileParams =
+    { base64 : OptionalArgument String
+    , filename : String
+    }
+
+
+{-| Encode a FileParams into a value that can be used as an argument.
+-}
+encodeFileParams : FileParams -> Value
+encodeFileParams input =
+    Encode.maybeObject
+        [ ( "base64", Encode.string |> Encode.optional input.base64 ), ( "filename", Encode.string input.filename |> Just ) ]
 
 
 buildMedalParams : MedalParamsRequiredFields -> MedalParams

@@ -80,6 +80,7 @@ defmodule AisfWeb.Schema do
       arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
       arg(:intro, non_null(:string))
+      arg(:profile_picture, :file_params)
 
       resolve(&ChampionsResolver.update/2)
     end
@@ -101,5 +102,10 @@ defmodule AisfWeb.Schema do
     field(:year, non_null(:integer))
     field(:specialty, non_null(:string))
     field(:medal_type, non_null(:integer))
+  end
+
+  input_object :file_params do
+    field(:filename, non_null(:string))
+    field(:base64, :string)
   end
 end

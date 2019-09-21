@@ -12,9 +12,10 @@ import Dict
 import Editable
 import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
+import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..), Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..), Year(..))
 import RemoteData
 
 
@@ -117,6 +118,11 @@ createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenc
 updateChampion : Champion -> Cmd Msg
 updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } as champion) =
     Mutation.updateChampion
+        (\optional ->
+            champion.profilePicture
+                |> Maybe.map (\pp -> { profilePicture = GOA.Present (fileToParams pp) })
+                |> Maybe.withDefault optional
+        )
         { id = Model.getId champion
         , email = email
         , firstName = firstName
@@ -153,4 +159,11 @@ medalToParams ({ competition, year, specialty, medalType } as medal) =
     , year = Model.getYear year
     , specialty = Model.specialtyToString specialty
     , medalType = Model.medalTypeToInt medalType
+    }
+
+
+fileToParams : Attachment -> Aisf.InputObject.FileParams
+fileToParams { base64, filename } =
+    { base64 = base64 |> GOA.fromMaybe
+    , filename = filename
     }

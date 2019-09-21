@@ -589,7 +589,7 @@ validateChampionForm c =
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 , isMember = c.isMember
                 , intro = c.intro
-                , profilePicture = Nothing
+                , profilePicture = c.profilePicture
                 }
 
 
@@ -762,7 +762,7 @@ handleFileSelectionDone file model =
                     (\champion ->
                         let
                             newChampion =
-                                { champion | profilePicture = Just <| SelectedFile (File.name file) Nothing }
+                                { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
                         , Task.perform GotFileUrl <| File.toUrl file

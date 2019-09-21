@@ -15,7 +15,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, SelectedFile, Sport, Year)
+import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -68,7 +68,7 @@ championToForm champion =
     , medals = champion.medals |> toEditableDict
     , isMember = champion.isMember
     , intro = champion.intro
-    , profilePicture = champion.profilePicture |> Maybe.map (\p -> SelectedFile p.filename Nothing)
+    , profilePicture = champion.profilePicture
     }
 
 
@@ -335,7 +335,7 @@ getProExperienceFormFieldData field exp =
             ( "", "" )
 
 
-viewProfilePicture : Maybe SelectedFile -> Element Msg
+viewProfilePicture : Maybe Attachment -> Element Msg
 viewProfilePicture profilePicture =
     el [ width <| px 200 ] <|
         case profilePicture of

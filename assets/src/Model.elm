@@ -1,4 +1,4 @@
-module Model exposing (AdminPageModel, Attachment, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, SelectedFile, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (AdminPageModel, Attachment, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -105,7 +105,7 @@ type alias ChampionForm =
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
     , intro : String
-    , profilePicture : Maybe SelectedFile
+    , profilePicture : Maybe Attachment
     }
 
 
@@ -906,14 +906,8 @@ medalTypeToDisplay medalType =
             "Bronze"
 
 
-type alias SelectedFile =
-    { filename : String
-    , base64 : Maybe String
-    }
-
-
 type alias Attachment =
-    { filename : String }
+    { filename : String, base64 : Maybe String }
 
 
 type FileType
