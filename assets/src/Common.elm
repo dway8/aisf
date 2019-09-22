@@ -201,3 +201,27 @@ viewTextInput label placeholder value msg =
                     )
                 |> Maybe.withDefault (Input.labelHidden "")
         }
+
+
+viewSearchQuery : Maybe String -> Element Msg
+viewSearchQuery query =
+    viewTextInput Nothing (Just "Rechercher un champion...") (query |> Maybe.withDefault "") UpdatedSearchQuery
+
+
+filterBySearchQuery : Maybe String -> List Champion -> List Champion
+filterBySearchQuery query champions =
+    case query of
+        Nothing ->
+            champions
+
+        Just str ->
+            let
+                lowerStr =
+                    String.toLower str
+            in
+            champions
+                |> List.filter
+                    (\champ ->
+                        String.contains lowerStr (String.toLower champ.lastName)
+                            || String.contains lowerStr (String.toLower champ.firstName)
+                    )

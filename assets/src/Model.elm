@@ -34,6 +34,7 @@ type alias MembersPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , tableState : Table.State
+    , searchQuery : Maybe String
     }
 
 
@@ -52,6 +53,7 @@ type alias MedalsPageModel =
     , tableState : Table.State
     , currentYear : Year
     , selectedYear : Maybe Year
+    , searchQuery : Maybe String
     }
 
 
@@ -61,6 +63,7 @@ type alias TeamsPageModel =
     , tableState : Table.State
     , currentYear : Year
     , selectedYear : Maybe Year
+    , searchQuery : Maybe String
     }
 
 

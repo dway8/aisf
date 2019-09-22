@@ -8,6 +8,7 @@ import Html.Attributes as HA
 import Model exposing (Champion, MembersPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
+import UI
 
 
 init : ( MembersPageModel, Cmd Msg )
@@ -15,6 +16,7 @@ init =
     ( { champions = Loading
       , sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
+      , searchQuery = Nothing
       }
     , Api.getMembers
     )
@@ -22,11 +24,12 @@ init =
 
 view : MembersPageModel -> Element Msg
 view model =
-    column [ spacing 20 ]
-        [ Common.sportSelector True model.sport
+    column [ UI.largeSpacing ]
+        [ row [ UI.largeSpacing ] [ Common.viewSearchQuery model.searchQuery, Common.sportSelector True model.sport ]
         , case model.champions of
             Success champions ->
                 champions
+                    |> Common.filterBySearchQuery model.searchQuery
                     |> filterBySport model.sport
                     |> Table.view tableConfig model.tableState
                     |> html

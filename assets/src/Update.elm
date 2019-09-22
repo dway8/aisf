@@ -813,5 +813,14 @@ updateSearchQuery query model =
         AdminPage aModel ->
             ( { model | currentPage = AdminPage { aModel | searchQuery = Just query } }, Cmd.none )
 
+        MembersPage mModel ->
+            ( { model | currentPage = MembersPage { mModel | searchQuery = Just query } }, Cmd.none )
+
+        TeamsPage tModel ->
+            ( { model | currentPage = TeamsPage { tModel | searchQuery = Just query } }, Cmd.none )
+
+        MedalsPage medModel ->
+            ( { model | currentPage = MedalsPage { medModel | searchQuery = Just query } }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )

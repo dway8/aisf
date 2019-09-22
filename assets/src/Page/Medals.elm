@@ -19,6 +19,7 @@ init year =
       , tableState = Table.initialSort ""
       , currentYear = year
       , selectedYear = Nothing
+      , searchQuery = Nothing
       }
     , Api.getChampionsWithMedals
     )
@@ -28,7 +29,8 @@ view : MedalsPageModel -> Element Msg
 view model =
     column [ width fill, spacing 20 ]
         [ row [ width fill, spacing 20 ]
-            [ Common.sportSelector True model.sport
+            [ Common.viewSearchQuery model.searchQuery
+            , Common.sportSelector True model.sport
             , model.sport
                 |> Maybe.map (\sport -> Common.specialtySelector True (Just sport) SelectedASpecialty)
                 |> Maybe.withDefault none
@@ -37,6 +39,7 @@ view model =
         , case model.champions of
             Success champions ->
                 champions
+                    |> Common.filterBySearchQuery model.searchQuery
                     |> getMedalsFromChampions
                     |> filterBySportAndSpecialty model.sport model.specialty
                     |> filterByYear model.selectedYear

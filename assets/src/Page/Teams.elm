@@ -9,6 +9,7 @@ import Html.Attributes as HA
 import Model exposing (Champion, Msg(..), Sport, TeamsPageModel, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
+import UI
 
 
 init : Year -> ( TeamsPageModel, Cmd Msg )
@@ -18,6 +19,7 @@ init year =
       , tableState = Table.initialSort ""
       , currentYear = year
       , selectedYear = Nothing
+      , searchQuery = Nothing
       }
     , Api.getChampions
     )
@@ -25,14 +27,16 @@ init year =
 
 view : TeamsPageModel -> Element Msg
 view model =
-    column [ width fill, spacing 20 ]
-        [ row [ width fill, spacing 20 ]
-            [ Common.sportSelector True model.sport
+    column [ width fill, UI.defaultSpacing ]
+        [ row [ width fill, UI.defaultSpacing ]
+            [ Common.viewSearchQuery model.searchQuery
+            , Common.sportSelector True model.sport
             , Common.yearSelector True model.currentYear SelectedAYear
             ]
         , case model.champions of
             Success champions ->
                 champions
+                    |> Common.filterBySearchQuery model.searchQuery
                     |> getYearsInTeamsFromChampions
                     |> filterBySport model.sport
                     |> filterByYear model.selectedYear
