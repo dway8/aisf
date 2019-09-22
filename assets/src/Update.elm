@@ -140,6 +140,9 @@ update msg model =
         GotFileUrl base64file ->
             handleFileUrlReceived base64file model
 
+        UpdatedSearchQuery query ->
+            updateSearchQuery query model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -799,6 +802,16 @@ handleFileUrlReceived base64file model =
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateSearchQuery : String -> Model -> ( Model, Cmd Msg )
+updateSearchQuery query model =
+    case model.currentPage of
+        AdminPage aModel ->
+            ( { model | currentPage = AdminPage { aModel | searchQuery = Just query } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

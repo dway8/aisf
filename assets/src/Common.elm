@@ -1,10 +1,12 @@
-module Common exposing (defaultCell, specialtySelector, sportSelector, tableCustomizations, toRowAttrs, viewField, viewMedal, viewProExperience, viewTextArea, yearSelector)
+module Common exposing (..)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
 import Dict
 import Element exposing (..)
+import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
@@ -175,3 +177,27 @@ yearSelector showOptionAll currentYear msg =
                                 [ Html.text year ]
                         )
                 )
+
+
+viewTextInput : Maybe String -> Maybe String -> String -> (String -> Msg) -> Element Msg
+viewTextInput label placeholder value msg =
+    Input.text
+        [ Border.solid
+        , Border.rounded 8
+        , paddingXY 13 7
+        , width shrink
+        ]
+        { onChange = msg
+        , text = value
+        , placeholder =
+            placeholder
+                |> Maybe.map (\p -> Input.placeholder [ Font.size 14, Font.italic ] <| el [ centerY ] <| text p)
+        , label =
+            label
+                |> Maybe.map
+                    (\l ->
+                        Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
+                            paragraph [] [ text l ]
+                    )
+                |> Maybe.withDefault (Input.labelHidden "")
+        }

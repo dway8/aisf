@@ -41,6 +41,7 @@ type alias AdminPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , tableState : Table.State
+    , searchQuery : Maybe String
     }
 
 
@@ -803,6 +804,7 @@ type Msg
     | CancelledFileSelection
     | FileSelectionDone File
     | GotFileUrl String
+    | UpdatedSearchQuery String
 
 
 type FormField

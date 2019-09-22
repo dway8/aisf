@@ -8,6 +8,7 @@ import Html.Attributes as HA
 import Model exposing (AdminPageModel, Champion, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
+import UI
 
 
 init : ( AdminPageModel, Cmd Msg )
@@ -15,6 +16,7 @@ init =
     ( { champions = Loading
       , sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
+      , searchQuery = Nothing
       }
     , Api.getChampions
     )
@@ -22,12 +24,16 @@ init =
 
 view : AdminPageModel -> Element Msg
 view model =
-    column [ spacing 20 ]
-        [ Common.sportSelector True model.sport
+    column [ UI.largeSpacing ]
+        [ row [ UI.defaultSpacing ]
+            [ viewSearchQuery model.searchQuery
+            , Common.sportSelector True model.sport
+            ]
         , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
         , case model.champions of
             Success champions ->
                 champions
+                    |> filterBySearchQuery model.searchQuery
                     |> filterBySport model.sport
                     |> Table.view tableConfig model.tableState
                     |> html
@@ -42,6 +48,25 @@ view model =
             _ ->
                 text "Une erreur s'est produite."
         ]
+
+
+filterBySearchQuery : Maybe String -> List Champion -> List Champion
+filterBySearchQuery query champions =
+    case query of
+        Nothing ->
+            champions
+
+        Just str ->
+            let
+                lowerStr =
+                    String.toLower str
+            in
+            champions
+                |> List.filter
+                    (\champ ->
+                        String.contains lowerStr (String.toLower champ.lastName)
+                            || String.contains lowerStr (String.toLower champ.firstName)
+                    )
 
 
 filterBySport : Maybe Sport -> List Champion -> List Champion
@@ -82,3 +107,8 @@ tableColumns =
         , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
         }
     ]
+
+
+viewSearchQuery : Maybe String -> Element Msg
+viewSearchQuery query =
+    Common.viewTextInput Nothing (Just "Rechercher un champion...") (query |> Maybe.withDefault "") UpdatedSearchQuery
