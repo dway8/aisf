@@ -100,15 +100,16 @@ defmodule Aisf.Champions do
   def update_champion(%Champion{} = champion, attrs) do
     if attrs.profile_picture && attrs.profile_picture.base64 do
       %{filename: filename, base64: base64} = attrs.profile_picture
-      file = data_url_to_upload(base64, filename)
+      file = data_url_to_upload(base64)
+      extension = Path.extname(filename)
+      new_filename = "#{champion.id}-profile#{extension}"
 
-      IO.puts("FIIIILE")
-      IO.puts(file.path)
-      IO.puts(file.filename)
+      File.mkdir_p("media/")
+      File.cp(file.path, "media/" <> new_filename)
 
       attrs =
         attrs
-        |> Map.put(:profile_picture_filename, file.filename)
+        |> Map.put(:profile_picture_filename, new_filename)
         |> Map.delete(:profile_picture)
     end
 
@@ -142,26 +143,20 @@ defmodule Aisf.Champions do
         end).()
   end
 
-  defp data_url_to_upload(data_url, filename) do
+  defp data_url_to_upload(data_url) do
     with %{scheme: "data"} = uri <- URI.parse(data_url),
          %URL.Data{data: data} <- URL.Data.parse(uri) do
-      binary_to_upload(data, filename)
+      binary_to_upload(data)
     end
   end
 
-  defp binary_to_upload(binary, filename) do
-    with {:ok, path} <- Plug.Upload.random_file("profile_pic"),
+  defp binary_to_upload(binary) do
+    with {:ok, path} <- Plug.Upload.random_file("upload"),
          {:ok, file} <- File.open(path, [:write, :binary]),
          :ok <- IO.binwrite(file, binary),
          :ok <- File.close(file) do
-      %Plug.Upload{path: path, filename: unique_filename(filename)}
+      %Plug.Upload{path: path}
     end
-  end
-
-  defp unique_filename(suffix) do
-    Ecto.UUID.generate()
-    |> binary_part(16, 8)
-    |> (&(&1 <> "-" <> suffix)).()
   end
 
   @doc """
