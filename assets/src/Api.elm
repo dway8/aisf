@@ -71,6 +71,14 @@ championSelection =
         |> with Champion.isMember
         |> with Champion.intro
         |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) Champion.profilePictureFilename)
+        |> with Champion.frenchTeamParticipation
+        |> with Champion.olympicGamesParticipation
+        |> with Champion.worldCupParticipation
+        |> with Champion.trackRecord
+        |> with Champion.bestMemory
+        |> with Champion.decoration
+        |> with Champion.background
+        |> with Champion.volunteering
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience
@@ -96,17 +104,17 @@ medalSelection =
 
 
 createChampion : Champion -> Cmd Msg
-createChampion { firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } =
-    Mutation.createChampion
-        { email = email
-        , firstName = firstName
-        , lastName = lastName
-        , sport = Model.sportToString sport
-        , proExperiences = proExperiences |> List.map proExperienceToParams
-        , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
-        , medals = medals |> List.map medalToParams
-        , isMember = isMember
-        , intro = intro
+createChampion c =
+    Mutation.createChampion (\optional -> optional)
+        { email = c.email
+        , firstName = c.firstName
+        , lastName = c.lastName
+        , sport = Model.sportToString c.sport
+        , proExperiences = c.proExperiences |> List.map proExperienceToParams
+        , yearsInFrenchTeam = c.yearsInFrenchTeam |> List.map Model.getYear
+        , medals = c.medals |> List.map medalToParams
+        , isMember = c.isMember
+        , intro = c.intro
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint

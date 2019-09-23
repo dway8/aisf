@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Mutation exposing (CreateChampionRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, updateChampion)
+module Aisf.Mutation exposing (CreateChampionOptionalArguments, CreateChampionRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -19,6 +19,18 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode exposing (Decoder)
 
 
+type alias CreateChampionOptionalArguments =
+    { background : OptionalArgument String
+    , bestMemory : OptionalArgument String
+    , decoration : OptionalArgument String
+    , frenchTeamParticipation : OptionalArgument String
+    , olympicGamesParticipation : OptionalArgument String
+    , trackRecord : OptionalArgument String
+    , volunteering : OptionalArgument String
+    , worldCupParticipation : OptionalArgument String
+    }
+
+
 type alias CreateChampionRequiredArguments =
     { email : String
     , firstName : String
@@ -32,13 +44,30 @@ type alias CreateChampionRequiredArguments =
     }
 
 
-createChampion : CreateChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (Maybe decodesTo) RootMutation
-createChampion requiredArgs object_ =
-    Object.selectionForCompositeField "createChampion" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "intro" requiredArgs.intro Encode.string, Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ] object_ (identity >> Decode.nullable)
+createChampion : (CreateChampionOptionalArguments -> CreateChampionOptionalArguments) -> CreateChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (Maybe decodesTo) RootMutation
+createChampion fillInOptionals requiredArgs object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { background = Absent, bestMemory = Absent, decoration = Absent, frenchTeamParticipation = Absent, olympicGamesParticipation = Absent, trackRecord = Absent, volunteering = Absent, worldCupParticipation = Absent }
+
+        optionalArgs =
+            [ Argument.optional "background" filledInOptionals.background Encode.string, Argument.optional "bestMemory" filledInOptionals.bestMemory Encode.string, Argument.optional "decoration" filledInOptionals.decoration Encode.string, Argument.optional "frenchTeamParticipation" filledInOptionals.frenchTeamParticipation Encode.string, Argument.optional "olympicGamesParticipation" filledInOptionals.olympicGamesParticipation Encode.string, Argument.optional "trackRecord" filledInOptionals.trackRecord Encode.string, Argument.optional "volunteering" filledInOptionals.volunteering Encode.string, Argument.optional "worldCupParticipation" filledInOptionals.worldCupParticipation Encode.string ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "createChampion" (optionalArgs ++ [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "intro" requiredArgs.intro Encode.string, Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ]) object_ (identity >> Decode.nullable)
 
 
 type alias UpdateChampionOptionalArguments =
-    { profilePicture : OptionalArgument Aisf.InputObject.FileParams }
+    { background : OptionalArgument String
+    , bestMemory : OptionalArgument String
+    , decoration : OptionalArgument String
+    , frenchTeamParticipation : OptionalArgument String
+    , olympicGamesParticipation : OptionalArgument String
+    , profilePicture : OptionalArgument Aisf.InputObject.FileParams
+    , trackRecord : OptionalArgument String
+    , volunteering : OptionalArgument String
+    , worldCupParticipation : OptionalArgument String
+    }
 
 
 type alias UpdateChampionRequiredArguments =
@@ -59,10 +88,10 @@ updateChampion : (UpdateChampionOptionalArguments -> UpdateChampionOptionalArgum
 updateChampion fillInOptionals requiredArgs object_ =
     let
         filledInOptionals =
-            fillInOptionals { profilePicture = Absent }
+            fillInOptionals { background = Absent, bestMemory = Absent, decoration = Absent, frenchTeamParticipation = Absent, olympicGamesParticipation = Absent, profilePicture = Absent, trackRecord = Absent, volunteering = Absent, worldCupParticipation = Absent }
 
         optionalArgs =
-            [ Argument.optional "profilePicture" filledInOptionals.profilePicture Aisf.InputObject.encodeFileParams ]
+            [ Argument.optional "background" filledInOptionals.background Encode.string, Argument.optional "bestMemory" filledInOptionals.bestMemory Encode.string, Argument.optional "decoration" filledInOptionals.decoration Encode.string, Argument.optional "frenchTeamParticipation" filledInOptionals.frenchTeamParticipation Encode.string, Argument.optional "olympicGamesParticipation" filledInOptionals.olympicGamesParticipation Encode.string, Argument.optional "profilePicture" filledInOptionals.profilePicture Aisf.InputObject.encodeFileParams, Argument.optional "trackRecord" filledInOptionals.trackRecord Encode.string, Argument.optional "volunteering" filledInOptionals.volunteering Encode.string, Argument.optional "worldCupParticipation" filledInOptionals.worldCupParticipation Encode.string ]
                 |> List.filterMap identity
     in
     Object.selectionForCompositeField "updateChampion" (optionalArgs ++ [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "id" requiredArgs.id Encode.string, Argument.required "intro" requiredArgs.intro Encode.string, Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ]) object_ (identity >> Decode.nullable)

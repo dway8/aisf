@@ -49,6 +49,14 @@ initChampionForm =
     , isMember = False
     , intro = ""
     , profilePicture = Nothing
+    , frenchTeamParticipation = Nothing
+    , olympicGamesParticipation = Nothing
+    , worldCupParticipation = Nothing
+    , trackRecord = Nothing
+    , bestMemory = Nothing
+    , decoration = Nothing
+    , background = Nothing
+    , volunteering = Nothing
     }
 
 
@@ -69,6 +77,14 @@ championToForm champion =
     , isMember = champion.isMember
     , intro = champion.intro
     , profilePicture = champion.profilePicture
+    , frenchTeamParticipation = champion.frenchTeamParticipation
+    , olympicGamesParticipation = champion.olympicGamesParticipation
+    , worldCupParticipation = champion.worldCupParticipation
+    , trackRecord = champion.trackRecord
+    , bestMemory = champion.bestMemory
+    , decoration = champion.decoration
+    , background = champion.background
+    , volunteering = champion.volunteering
     }
 
 

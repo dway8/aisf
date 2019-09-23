@@ -16,6 +16,14 @@ defmodule AisfWeb.Schema do
     field(:is_member, non_null(:boolean))
     field(:intro, non_null(:string))
     field(:profile_picture_filename, :string)
+    field(:french_team_participation, :string)
+    field(:olympic_games_participation, :string)
+    field(:world_cup_participation, :string)
+    field(:track_record, :string)
+    field(:best_memory, :string)
+    field(:decoration, :string)
+    field(:background, :string)
+    field(:volunteering, :string)
   end
 
   object :pro_experience do
@@ -66,6 +74,14 @@ defmodule AisfWeb.Schema do
       arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
       arg(:intro, non_null(:string))
+      arg(:french_team_participation, :string)
+      arg(:olympic_games_participation, :string)
+      arg(:world_cup_participation, :string)
+      arg(:track_record, :string)
+      arg(:best_memory, :string)
+      arg(:decoration, :string)
+      arg(:background, :string)
+      arg(:volunteering, :string)
 
       resolve(&ChampionsResolver.create/2)
     end
@@ -82,6 +98,14 @@ defmodule AisfWeb.Schema do
       arg(:is_member, non_null(:boolean))
       arg(:intro, non_null(:string))
       arg(:profile_picture, :file_params)
+      arg(:french_team_participation, :string)
+      arg(:olympic_games_participation, :string)
+      arg(:world_cup_participation, :string)
+      arg(:track_record, :string)
+      arg(:best_memory, :string)
+      arg(:decoration, :string)
+      arg(:background, :string)
+      arg(:volunteering, :string)
 
       resolve(&ChampionsResolver.update/2)
     end

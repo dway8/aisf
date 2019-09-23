@@ -16,6 +16,14 @@ defmodule Aisf.Champions.Champion do
     field(:is_member, :boolean)
     field(:intro, :string)
     field(:profile_picture_filename, :string)
+    field(:french_team_participation, :string)
+    field(:olympic_games_participation, :string)
+    field(:world_cup_participation, :string)
+    field(:track_record, :string)
+    field(:best_memory, :string)
+    field(:decoration, :string)
+    field(:background, :string)
+    field(:volunteering, :string)
 
     timestamps()
   end

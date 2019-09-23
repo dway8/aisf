@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (email, firstName, id, intro, isMember, lastName, medals, proExperiences, profilePictureFilename, sport, yearsInFrenchTeam)
+module Aisf.Object.Champion exposing (background, bestMemory, decoration, email, firstName, frenchTeamParticipation, id, intro, isMember, lastName, medals, olympicGamesParticipation, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, worldCupParticipation, yearsInFrenchTeam)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -19,6 +19,21 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
+background : SelectionSet (Maybe String) Aisf.Object.Champion
+background =
+    Object.selectionForField "(Maybe String)" "background" [] (Decode.string |> Decode.nullable)
+
+
+bestMemory : SelectionSet (Maybe String) Aisf.Object.Champion
+bestMemory =
+    Object.selectionForField "(Maybe String)" "bestMemory" [] (Decode.string |> Decode.nullable)
+
+
+decoration : SelectionSet (Maybe String) Aisf.Object.Champion
+decoration =
+    Object.selectionForField "(Maybe String)" "decoration" [] (Decode.string |> Decode.nullable)
+
+
 email : SelectionSet String Aisf.Object.Champion
 email =
     Object.selectionForField "String" "email" [] Decode.string
@@ -27,6 +42,11 @@ email =
 firstName : SelectionSet String Aisf.Object.Champion
 firstName =
     Object.selectionForField "String" "firstName" [] Decode.string
+
+
+frenchTeamParticipation : SelectionSet (Maybe String) Aisf.Object.Champion
+frenchTeamParticipation =
+    Object.selectionForField "(Maybe String)" "frenchTeamParticipation" [] (Decode.string |> Decode.nullable)
 
 
 id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.Champion
@@ -54,6 +74,11 @@ medals object_ =
     Object.selectionForCompositeField "medals" [] object_ (identity >> Decode.list)
 
 
+olympicGamesParticipation : SelectionSet (Maybe String) Aisf.Object.Champion
+olympicGamesParticipation =
+    Object.selectionForField "(Maybe String)" "olympicGamesParticipation" [] (Decode.string |> Decode.nullable)
+
+
 proExperiences : SelectionSet decodesTo Aisf.Object.ProExperience -> SelectionSet (List decodesTo) Aisf.Object.Champion
 proExperiences object_ =
     Object.selectionForCompositeField "proExperiences" [] object_ (identity >> Decode.list)
@@ -67,6 +92,21 @@ profilePictureFilename =
 sport : SelectionSet String Aisf.Object.Champion
 sport =
     Object.selectionForField "String" "sport" [] Decode.string
+
+
+trackRecord : SelectionSet (Maybe String) Aisf.Object.Champion
+trackRecord =
+    Object.selectionForField "(Maybe String)" "trackRecord" [] (Decode.string |> Decode.nullable)
+
+
+volunteering : SelectionSet (Maybe String) Aisf.Object.Champion
+volunteering =
+    Object.selectionForField "(Maybe String)" "volunteering" [] (Decode.string |> Decode.nullable)
+
+
+worldCupParticipation : SelectionSet (Maybe String) Aisf.Object.Champion
+worldCupParticipation =
+    Object.selectionForField "(Maybe String)" "worldCupParticipation" [] (Decode.string |> Decode.nullable)
 
 
 yearsInFrenchTeam : SelectionSet (Maybe (List Int)) Aisf.Object.Champion

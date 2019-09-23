@@ -95,6 +95,14 @@ type alias Champion =
     , isMember : Bool
     , intro : String
     , profilePicture : Maybe Attachment
+    , frenchTeamParticipation : Maybe String
+    , olympicGamesParticipation : Maybe String
+    , worldCupParticipation : Maybe String
+    , trackRecord : Maybe String
+    , bestMemory : Maybe String
+    , decoration : Maybe String
+    , background : Maybe String
+    , volunteering : Maybe String
     }
 
 
@@ -110,6 +118,14 @@ type alias ChampionForm =
     , isMember : Bool
     , intro : String
     , profilePicture : Maybe Attachment
+    , frenchTeamParticipation : Maybe String
+    , olympicGamesParticipation : Maybe String
+    , worldCupParticipation : Maybe String
+    , trackRecord : Maybe String
+    , bestMemory : Maybe String
+    , decoration : Maybe String
+    , background : Maybe String
+    , volunteering : Maybe String
     }
 
 

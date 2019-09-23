@@ -593,6 +593,14 @@ validateChampionForm c =
                 , isMember = c.isMember
                 , intro = c.intro
                 , profilePicture = c.profilePicture
+                , frenchTeamParticipation = c.frenchTeamParticipation
+                , olympicGamesParticipation = c.olympicGamesParticipation
+                , worldCupParticipation = c.worldCupParticipation
+                , trackRecord = c.trackRecord
+                , bestMemory = c.bestMemory
+                , decoration = c.decoration
+                , background = c.background
+                , volunteering = c.volunteering
                 }
 
 
