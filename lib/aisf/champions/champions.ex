@@ -98,26 +98,28 @@ defmodule Aisf.Champions do
   ## Examples
   """
   def update_champion(%Champion{} = champion, attrs) do
-    if attrs.profile_picture && attrs.profile_picture.base64 do
-      %{filename: filename, base64: base64} = attrs.profile_picture
-      file = data_url_to_upload(base64)
-      extension = Path.extname(filename)
-      new_filename = "#{champion.id}-profile#{extension}"
+    new_attrs =
+      if attrs.profile_picture && attrs.profile_picture.base64 do
+        %{filename: filename, base64: base64} = attrs.profile_picture
+        file = data_url_to_upload(base64)
+        extension = Path.extname(filename)
+        new_filename = "#{champion.id}-profile#{extension}"
 
-      File.mkdir_p("media/")
-      File.cp(file.path, "media/" <> new_filename)
+        File.mkdir_p("media/")
+        File.cp(file.path, "media/" <> new_filename)
 
-      attrs =
         attrs
         |> Map.put(:profile_picture_filename, new_filename)
         |> Map.delete(:profile_picture)
-    end
+      else
+        attrs
+      end
 
     champion
-    |> Champion.changeset(attrs)
+    |> Champion.changeset(new_attrs)
     |> Repo.update()
     |> (fn {:ok, _champion} ->
-          attrs.pro_experiences
+          new_attrs.pro_experiences
           |> Enum.map(fn p ->
             if p.id == "new" do
               ProExperiences.create_pro_experience(champion, p)
@@ -128,7 +130,7 @@ defmodule Aisf.Champions do
             end
           end)
 
-          attrs.medals
+          new_attrs.medals
           |> Enum.map(fn m ->
             if m.id == "new" do
               Medals.create_medal(champion, m)

@@ -88,7 +88,7 @@ view currentYear model =
         , case model.champion of
             Success champion ->
                 column [ UI.defaultSpacing ]
-                    [ row [ UI.defaultSpacing ]
+                    [ row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
                         , column [ UI.defaultSpacing ]
                             [ viewChampionTextInput FirstName champion

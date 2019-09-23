@@ -70,8 +70,7 @@ championSelection =
         |> with (Champion.medals medalSelection)
         |> with Champion.isMember
         |> with Champion.intro
-        --TODO
-        |> with (SelectionSet.succeed Nothing)
+        |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) Champion.profilePictureFilename)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience

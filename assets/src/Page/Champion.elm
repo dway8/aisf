@@ -6,7 +6,7 @@ import Common
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
-import Model exposing (Champion, ChampionPageModel, Msg(..), Sport)
+import Model exposing (Attachment, Champion, ChampionPageModel, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -31,32 +31,35 @@ view { id, champion } =
             |> Button.viewButton
         , case champion of
             Success champ ->
-                column [ spacing 15 ]
-                    [ column [ spacing 10 ]
-                        [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
-                        , column [ spacing 4 ]
-                            [ Common.viewField "N°" (Model.getId champ)
-                            , Common.viewField "Nom" champ.lastName
-                            , Common.viewField "Prénom" champ.firstName
-                            , Common.viewField "Discipline" (Model.sportToString champ.sport)
+                column [ UI.largeSpacing ]
+                    [ row [ UI.largeSpacing ]
+                        [ viewProfilePicture champ.profilePicture
+                        , column [ UI.defaultSpacing ]
+                            [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
+                            , column [ spacing 4 ]
+                                [ Common.viewField "N°" (Model.getId champ)
+                                , Common.viewField "Nom" champ.lastName
+                                , Common.viewField "Prénom" champ.firstName
+                                , Common.viewField "Discipline" (Model.sportToString champ.sport)
+                                ]
                             ]
-                        , Common.viewTextArea "Intro" champ.intro
                         ]
-                    , column [ spacing 10 ]
+                    , Common.viewTextArea "Intro" champ.intro
+                    , column [ UI.defaultSpacing ]
                         [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
                         , column [ spacing 7 ]
                             (champ.proExperiences
                                 |> List.map Common.viewProExperience
                             )
                         ]
-                    , column [ spacing 10 ]
+                    , column [ UI.defaultSpacing ]
                         [ el [ Font.bold, Font.size 18 ] <| text "PALMARÈS"
                         , column [ spacing 7 ]
                             (champ.medals
                                 |> List.map Common.viewMedal
                             )
                         ]
-                    , column [ spacing 10 ]
+                    , column [ UI.defaultSpacing ]
                         [ el [ Font.bold, Font.size 18 ] <| text "ANNÉES EN ÉQUIPE DE FRANCE"
                         , column [ spacing 7 ]
                             (if champ.yearsInFrenchTeam == [] then
@@ -83,3 +86,14 @@ view { id, champion } =
             _ ->
                 text "Une erreur s'est produite."
         ]
+
+
+viewProfilePicture : Maybe Attachment -> Element Msg
+viewProfilePicture profilePicture =
+    el [ width <| px 200 ] <|
+        case profilePicture of
+            Nothing ->
+                el [ width fill ] none
+
+            Just { filename } ->
+                image [ width <| px 200 ] { src = "/uploads/" ++ filename, description = "Photo de profil" }

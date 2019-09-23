@@ -15,6 +15,7 @@ defmodule AisfWeb.Schema do
     field(:medals, non_null(list_of(non_null(:medal))))
     field(:is_member, non_null(:boolean))
     field(:intro, non_null(:string))
+    field(:profile_picture_filename, :string)
   end
 
   object :pro_experience do
