@@ -3,10 +3,10 @@ defmodule AisfWeb.MembersTest do
   alias AisfWeb.Factory
 
   setup do
-    {:ok, champion1} = Factory.create_champion_with_membership_and_sport(true, "Ski alpin")
-    {:ok, champion2} = Factory.create_champion_with_membership_and_sport(true, "Biathlon")
-    {:ok, champion3} = Factory.create_champion_with_membership_and_sport(true, "Ski alpin")
-    {:ok, champion4} = Factory.create_champion_with_sport("Ski alpin")
+    {:ok, champion1} = Factory.create_champion_with(%{is_member: true, sport: "Ski alpin"})
+    {:ok, champion2} = Factory.create_champion_with(%{is_member: true, sport: "Biathlon"})
+    {:ok, champion3} = Factory.create_champion_with(%{is_member: true, sport: "Ski alpin"})
+    {:ok, champion4} = Factory.create_champion_with(%{sport: "Ski alpin"})
 
     {:ok, champion1: champion1, champion2: champion2, champion3: champion3, champion4: champion4}
   end

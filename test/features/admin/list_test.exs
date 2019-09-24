@@ -3,10 +3,10 @@ defmodule AisfWeb.Admin.ListTest do
   alias AisfWeb.Factory
 
   setup(context) do
-    {:ok, champion1} = Factory.create_champion_with_membership_and_sport(true, "Ski alpin")
-    {:ok, champion2} = Factory.create_champion_with_membership_and_sport(true, "Biathlon")
-    {:ok, champion3} = Factory.create_champion_with_sport("Ski alpin")
-    {:ok, champion4} = Factory.create_champion_with_sport("Ski de fond")
+    {:ok, champion1} = Factory.create_champion_with(%{is_member: true, sport: "Ski alpin"})
+    {:ok, champion2} = Factory.create_champion_with(%{is_member: true, sport: "Biathlon"})
+    {:ok, champion3} = Factory.create_champion_with(%{sport: "Ski alpin"})
+    {:ok, champion4} = Factory.create_champion_with(%{sport: "Ski de fond"})
 
     context.session
     |> visit("/")

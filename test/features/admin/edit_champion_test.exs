@@ -5,7 +5,7 @@ defmodule AisfWeb.Admin.EditChampionTest do
   @save_champion_button Query.css("#save-champion-btn")
 
   setup(context) do
-    {:ok, champion} = Factory.create_champion_with_sport("Ski alpin")
+    {:ok, champion} = Factory.create_champion_with(%{sport: "Ski alpin"})
 
     context.session
     |> visit("/")

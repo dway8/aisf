@@ -4,13 +4,12 @@ defmodule AisfWeb.TeamsTest do
 
   setup do
     {:ok, champion1} =
-      Factory.create_champion_with_sport_and_years_in_french_team("Saut", [1973, 1999, 2018])
+      Factory.create_champion_with(%{sport: "Saut", years_in_french_team: [1973, 1999, 2018]})
 
     {:ok, champion2} =
-      Factory.create_champion_with_sport_and_years_in_french_team("Snowboard", [2000, 2002])
+      Factory.create_champion_with(%{sport: "Snowboard", years_in_french_team: [2000, 2002]})
 
-    {:ok, _champion3} =
-      Factory.create_champion_with_sport_and_years_in_french_team("Freestyle", [])
+    {:ok, _champion3} = Factory.create_champion_with(%{sport: "Freestyle"})
 
     {:ok, champion1: champion1, champion2: champion2}
   end
