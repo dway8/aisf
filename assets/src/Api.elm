@@ -126,9 +126,17 @@ updateChampion : Champion -> Cmd Msg
 updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } as champion) =
     Mutation.updateChampion
         (\optional ->
-            champion.profilePicture
-                |> Maybe.map (\pp -> { profilePicture = GOA.Present (fileToParams pp) })
-                |> Maybe.withDefault optional
+            { optional
+                | profilePicture = champion.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
+                , frenchTeamParticipation = champion.frenchTeamParticipation |> GOA.fromMaybe
+                , olympicGamesParticipation = champion.olympicGamesParticipation |> GOA.fromMaybe
+                , worldCupParticipation = champion.worldCupParticipation |> GOA.fromMaybe
+                , trackRecord = champion.trackRecord |> GOA.fromMaybe
+                , bestMemory = champion.bestMemory |> GOA.fromMaybe
+                , decoration = champion.decoration |> GOA.fromMaybe
+                , background = champion.background |> GOA.fromMaybe
+                , volunteering = champion.volunteering |> GOA.fromMaybe
+            }
         )
         { id = Model.getId champion
         , email = email

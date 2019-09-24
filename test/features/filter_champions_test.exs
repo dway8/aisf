@@ -17,19 +17,14 @@ defmodule AisfWeb.FilterChampionsTest do
     context.session
     |> visit("/champions")
     |> assert_has(Query.css(".champion-item", count: 4))
-    |> fill_in(@filter_input, "Paul")
+    |> fill_in(@filter_input, with: "Paul")
     |> assert_has(Query.css(".champion-item", count: 2))
-    |> assert_has(Query.text(context.champion2.first_name))
-    |> assert_has(Query.text(context.champion3.first_name))
+    |> assert_has(Query.text(String.upcase(context.champion2.last_name)))
+    |> assert_has(Query.text(String.upcase(context.champion3.last_name)))
   end
 
-  test "filtering champions by name and sport", %{
-    session: session,
-    champion1: champion1,
-    champion2: champion2,
-    champion3: champion3
-  } do
-    session
+  test "filtering champions by name and sport", context do
+    context.session
     |> visit("/champions")
   end
 end

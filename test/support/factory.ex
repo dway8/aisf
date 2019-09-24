@@ -69,7 +69,7 @@ defmodule AisfWeb.Factory do
       years_in_french_team: [],
       pro_experiences: [],
       medals: [],
-      is_member: false,
+      is_member: true,
       intro: Faker.Lorem.paragraph(Enum.random(2..5))
     }
 

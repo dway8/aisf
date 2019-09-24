@@ -99,7 +99,7 @@ defmodule Aisf.Champions do
   """
   def update_champion(%Champion{} = champion, attrs) do
     new_attrs =
-      if attrs.profile_picture && attrs.profile_picture.base64 do
+      if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
         %{filename: filename, base64: base64} = attrs.profile_picture
         file = data_url_to_upload(base64)
         extension = Path.extname(filename)
