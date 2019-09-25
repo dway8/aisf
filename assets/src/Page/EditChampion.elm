@@ -41,13 +41,13 @@ initChampionForm =
     { id = Id "new"
     , lastName = ""
     , firstName = ""
-    , email = ""
+    , email = Nothing
     , sport = Nothing
     , proExperiences = Dict.empty
     , yearsInFrenchTeam = Dict.empty
     , medals = Dict.empty
     , isMember = False
-    , intro = ""
+    , intro = Nothing
     , profilePicture = Nothing
     , frenchTeamParticipation = Nothing
     , olympicGamesParticipation = Nothing
@@ -300,10 +300,10 @@ getChampionFormFieldData field champion =
             ( "Nom", champion.lastName )
 
         Email ->
-            ( "Email", champion.email )
+            ( "Email", champion.email |> Maybe.withDefault "" )
 
         Intro ->
-            ( "Intro", champion.intro )
+            ( "Intro", champion.intro |> Maybe.withDefault "" )
 
         _ ->
             ( "", "" )

@@ -44,7 +44,7 @@ view { id, champion } =
                                 ]
                             ]
                         ]
-                    , Common.viewTextArea "Intro" champ.intro
+                    , Common.viewTextArea "Intro" (champ.intro |> Maybe.withDefault "")
                     , column [ UI.defaultSpacing ]
                         [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
                         , column [ spacing 7 ]

@@ -34,9 +34,9 @@ decoration =
     Object.selectionForField "(Maybe String)" "decoration" [] (Decode.string |> Decode.nullable)
 
 
-email : SelectionSet String Aisf.Object.Champion
+email : SelectionSet (Maybe String) Aisf.Object.Champion
 email =
-    Object.selectionForField "String" "email" [] Decode.string
+    Object.selectionForField "(Maybe String)" "email" [] (Decode.string |> Decode.nullable)
 
 
 firstName : SelectionSet String Aisf.Object.Champion
@@ -54,9 +54,9 @@ id =
     Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-intro : SelectionSet String Aisf.Object.Champion
+intro : SelectionSet (Maybe String) Aisf.Object.Champion
 intro =
-    Object.selectionForField "String" "intro" [] Decode.string
+    Object.selectionForField "(Maybe String)" "intro" [] (Decode.string |> Decode.nullable)
 
 
 isMember : SelectionSet Bool Aisf.Object.Champion

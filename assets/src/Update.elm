@@ -204,10 +204,10 @@ updateChampionForm field val model =
                                         { champion | lastName = val }
 
                                     Email ->
-                                        { champion | email = val }
+                                        { champion | email = Just val }
 
                                     Intro ->
-                                        { champion | intro = val }
+                                        { champion | intro = Just val }
 
                                     _ ->
                                         champion

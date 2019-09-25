@@ -87,13 +87,13 @@ type alias Champion =
     { id : Id
     , lastName : String
     , firstName : String
-    , email : String
+    , email : Maybe String
     , sport : Sport
     , proExperiences : List ProExperience
     , yearsInFrenchTeam : List Year
     , medals : List Medal
     , isMember : Bool
-    , intro : String
+    , intro : Maybe String
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
@@ -110,13 +110,13 @@ type alias ChampionForm =
     { id : Id
     , lastName : String
     , firstName : String
-    , email : String
+    , email : Maybe String
     , sport : Maybe Sport
     , proExperiences : Dict Int (Editable ProExperience)
     , yearsInFrenchTeam : Dict Int (Editable Year)
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
-    , intro : String
+    , intro : Maybe String
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String

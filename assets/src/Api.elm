@@ -106,15 +106,13 @@ medalSelection =
 createChampion : Champion -> Cmd Msg
 createChampion c =
     Mutation.createChampion (\optional -> optional)
-        { email = c.email
-        , firstName = c.firstName
+        { firstName = c.firstName
         , lastName = c.lastName
         , sport = Model.sportToString c.sport
         , proExperiences = c.proExperiences |> List.map proExperienceToParams
         , yearsInFrenchTeam = c.yearsInFrenchTeam |> List.map Model.getYear
         , medals = c.medals |> List.map medalToParams
         , isMember = c.isMember
-        , intro = c.intro
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
@@ -127,7 +125,9 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
     Mutation.updateChampion
         (\optional ->
             { optional
-                | profilePicture = champion.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
+                | email = champion.email |> GOA.fromMaybe
+                , intro = champion.intro |> GOA.fromMaybe
+                , profilePicture = champion.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
                 , frenchTeamParticipation = champion.frenchTeamParticipation |> GOA.fromMaybe
                 , olympicGamesParticipation = champion.olympicGamesParticipation |> GOA.fromMaybe
                 , worldCupParticipation = champion.worldCupParticipation |> GOA.fromMaybe
@@ -139,7 +139,6 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
             }
         )
         { id = Model.getId champion
-        , email = email
         , firstName = firstName
         , lastName = lastName
         , sport = Model.sportToString sport
@@ -147,7 +146,6 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
         , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
         , medals = medals |> List.map medalToParams
         , isMember = isMember
-        , intro = intro
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
