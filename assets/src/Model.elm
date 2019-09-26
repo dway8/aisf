@@ -98,6 +98,7 @@ type alias Champion =
     , medals : List Medal
     , isMember : Bool
     , intro : Maybe String
+    , highlights : List String
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
@@ -126,6 +127,7 @@ type alias ChampionForm =
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
     , intro : Maybe String
+    , highlights : List String
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String

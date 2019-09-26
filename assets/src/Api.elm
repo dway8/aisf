@@ -74,6 +74,7 @@ championSelection =
         |> with (Champion.medals medalSelection)
         |> with Champion.isMember
         |> with Champion.intro
+        |> with (SelectionSet.map (Maybe.withDefault []) Champion.highlights)
         |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) Champion.profilePictureFilename)
         |> with Champion.frenchTeamParticipation
         |> with Champion.olympicGamesParticipation

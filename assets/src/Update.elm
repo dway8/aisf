@@ -596,6 +596,7 @@ validateChampionForm c =
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 , isMember = c.isMember
                 , intro = c.intro
+                , highlights = c.highlights
                 , profilePicture = c.profilePicture
                 , frenchTeamParticipation = c.frenchTeamParticipation
                 , olympicGamesParticipation = c.olympicGamesParticipation

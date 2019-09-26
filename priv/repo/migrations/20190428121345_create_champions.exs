@@ -9,6 +9,7 @@ defmodule Aisf.Repo.Migrations.CreateChampions do
       add(:password, :string)
       add(:sport, :string)
       add(:intro, :text)
+      add(:highlights, {:array, :string})
       add(:birth_date, :string)
       add(:address, :string)
       add(:phone_number, :string)

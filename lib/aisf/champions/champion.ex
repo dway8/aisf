@@ -19,6 +19,7 @@ defmodule Aisf.Champions.Champion do
     has_many(:medals, Medal)
     field(:is_member, :boolean)
     field(:intro, :string)
+    field(:highlights, {:array, :string})
     field(:profile_picture_filename, :string)
     field(:french_team_participation, :string)
     field(:olympic_games_participation, :string)
