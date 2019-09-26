@@ -88,6 +88,10 @@ type alias Champion =
     , lastName : String
     , firstName : String
     , email : Maybe String
+    , birthDate : Maybe String
+    , address : Maybe String
+    , phoneNumber : Maybe String
+    , website : Maybe String
     , sport : Sport
     , proExperiences : List ProExperience
     , yearsInFrenchTeam : List Year
@@ -103,6 +107,7 @@ type alias Champion =
     , decoration : Maybe String
     , background : Maybe String
     , volunteering : Maybe String
+    , oldId : Maybe Id
     }
 
 
@@ -111,6 +116,10 @@ type alias ChampionForm =
     , lastName : String
     , firstName : String
     , email : Maybe String
+    , birthDate : Maybe String
+    , address : Maybe String
+    , phoneNumber : Maybe String
+    , website : Maybe String
     , sport : Maybe Sport
     , proExperiences : Dict Int (Editable ProExperience)
     , yearsInFrenchTeam : Dict Int (Editable Year)

@@ -9,6 +9,10 @@ defmodule AisfWeb.Schema do
     field(:last_name, non_null(:string))
     field(:first_name, non_null(:string))
     field(:email, :string)
+    field(:birth_date, :string)
+    field(:address, :string)
+    field(:phone_number, :string)
+    field(:website, :string)
     field(:sport, non_null(:string))
     field(:pro_experiences, non_null(list_of(non_null(:pro_experience))))
     field(:years_in_french_team, list_of(non_null(:integer)))
@@ -24,6 +28,7 @@ defmodule AisfWeb.Schema do
     field(:decoration, :string)
     field(:background, :string)
     field(:volunteering, :string)
+    field(:old_id, :integer)
   end
 
   object :pro_experience do

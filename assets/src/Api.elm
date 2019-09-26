@@ -64,6 +64,10 @@ championSelection =
         |> with Champion.lastName
         |> with Champion.firstName
         |> with Champion.email
+        |> with Champion.birthDate
+        |> with Champion.address
+        |> with Champion.phoneNumber
+        |> with Champion.website
         |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Champion.sport)
         |> with (Champion.proExperiences proExperienceSelection)
         |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
@@ -79,6 +83,7 @@ championSelection =
         |> with Champion.decoration
         |> with Champion.background
         |> with Champion.volunteering
+        |> with (SelectionSet.map (Maybe.map (String.fromInt >> Id)) Champion.oldId)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience

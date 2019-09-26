@@ -8,6 +8,10 @@ defmodule Aisf.Champions.Champion do
     field(:first_name, :string)
     field(:last_name, :string)
     field(:email, :string)
+    field(:birth_date, :string)
+    field(:address, :string)
+    field(:phone_number, :string)
+    field(:website, :string)
     field(:password, :string)
     field(:sport, :string)
     has_many(:pro_experiences, ProExperience)
@@ -24,6 +28,7 @@ defmodule Aisf.Champions.Champion do
     field(:decoration, :string)
     field(:background, :string)
     field(:volunteering, :string)
+    field(:old_id, :integer)
 
     timestamps()
   end
@@ -34,12 +39,24 @@ defmodule Aisf.Champions.Champion do
       :first_name,
       :last_name,
       :email,
+      :birth_date,
+      :address,
+      :phone_number,
+      :website,
       :password,
       :sport,
       :years_in_french_team,
       :is_member,
       :intro,
-      :profile_picture_filename
+      :profile_picture_filename,
+      :french_team_participation,
+      :olympic_games_participation,
+      :world_cup_participation,
+      :track_record,
+      :best_memory,
+      :decoration,
+      :background,
+      :volunteering
     ])
     |> validate_required([
       :first_name,

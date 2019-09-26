@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (background, bestMemory, decoration, email, firstName, frenchTeamParticipation, id, intro, isMember, lastName, medals, olympicGamesParticipation, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, worldCupParticipation, yearsInFrenchTeam)
+module Aisf.Object.Champion exposing (address, background, bestMemory, birthDate, decoration, email, firstName, frenchTeamParticipation, id, intro, isMember, lastName, medals, oldId, olympicGamesParticipation, phoneNumber, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, website, worldCupParticipation, yearsInFrenchTeam)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -19,6 +19,11 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
+address : SelectionSet (Maybe String) Aisf.Object.Champion
+address =
+    Object.selectionForField "(Maybe String)" "address" [] (Decode.string |> Decode.nullable)
+
+
 background : SelectionSet (Maybe String) Aisf.Object.Champion
 background =
     Object.selectionForField "(Maybe String)" "background" [] (Decode.string |> Decode.nullable)
@@ -27,6 +32,11 @@ background =
 bestMemory : SelectionSet (Maybe String) Aisf.Object.Champion
 bestMemory =
     Object.selectionForField "(Maybe String)" "bestMemory" [] (Decode.string |> Decode.nullable)
+
+
+birthDate : SelectionSet (Maybe String) Aisf.Object.Champion
+birthDate =
+    Object.selectionForField "(Maybe String)" "birthDate" [] (Decode.string |> Decode.nullable)
 
 
 decoration : SelectionSet (Maybe String) Aisf.Object.Champion
@@ -74,9 +84,19 @@ medals object_ =
     Object.selectionForCompositeField "medals" [] object_ (identity >> Decode.list)
 
 
+oldId : SelectionSet (Maybe Int) Aisf.Object.Champion
+oldId =
+    Object.selectionForField "(Maybe Int)" "oldId" [] (Decode.int |> Decode.nullable)
+
+
 olympicGamesParticipation : SelectionSet (Maybe String) Aisf.Object.Champion
 olympicGamesParticipation =
     Object.selectionForField "(Maybe String)" "olympicGamesParticipation" [] (Decode.string |> Decode.nullable)
+
+
+phoneNumber : SelectionSet (Maybe String) Aisf.Object.Champion
+phoneNumber =
+    Object.selectionForField "(Maybe String)" "phoneNumber" [] (Decode.string |> Decode.nullable)
 
 
 proExperiences : SelectionSet decodesTo Aisf.Object.ProExperience -> SelectionSet (List decodesTo) Aisf.Object.Champion
@@ -102,6 +122,11 @@ trackRecord =
 volunteering : SelectionSet (Maybe String) Aisf.Object.Champion
 volunteering =
     Object.selectionForField "(Maybe String)" "volunteering" [] (Decode.string |> Decode.nullable)
+
+
+website : SelectionSet (Maybe String) Aisf.Object.Champion
+website =
+    Object.selectionForField "(Maybe String)" "website" [] (Decode.string |> Decode.nullable)
 
 
 worldCupParticipation : SelectionSet (Maybe String) Aisf.Object.Champion

@@ -586,6 +586,10 @@ validateChampionForm c =
                 , email = c.email
                 , firstName = c.firstName
                 , lastName = c.lastName
+                , birthDate = c.birthDate
+                , address = c.address
+                , phoneNumber = c.phoneNumber
+                , website = c.website
                 , sport = sport
                 , proExperiences = c.proExperiences |> Dict.values |> List.map Editable.value
                 , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
@@ -601,6 +605,7 @@ validateChampionForm c =
                 , decoration = c.decoration
                 , background = c.background
                 , volunteering = c.volunteering
+                , oldId = Nothing
                 }
 
 
