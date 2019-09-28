@@ -15,7 +15,8 @@ defmodule Aisf.Champions do
   """
   def list_champions do
     Repo.all(Champion)
-    |> Repo.preload([:pro_experiences, :medals])
+    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(:medals)
   end
 
   @doc """
@@ -40,15 +41,6 @@ defmodule Aisf.Champions do
   Gets a single champion.
 
   Raises `Ecto.NoResultsError` if the Champion does not exist.
-
-  ## Examples
-
-      iex> get_champion!(123)
-      %Champion{}
-
-      iex> get_champion!(456)
-      ** (Ecto.NoResultsError)
-
   """
   def get_champion!(id) do
     Repo.get!(Champion, id)
@@ -60,7 +52,8 @@ defmodule Aisf.Champions do
   """
   def get_champion(id) do
     Repo.get(Champion, id)
-    |> Repo.preload([:pro_experiences, :medals])
+    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(:medals)
   end
 
   @doc """

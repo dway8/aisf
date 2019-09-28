@@ -1,4 +1,4 @@
-module Model exposing (AdminPageModel, Attachment, Champion, ChampionForm, ChampionPageModel, Champions, Competition(..), EditChampionPageModel, Flags, FormField(..), Medal, MedalType(..), MedalsPageModel, MembersPageModel, Model, Msg(..), Page(..), ProExperience, Specialty(..), Sport(..), TeamsPageModel, Year(..), competitionFromString, competitionToDisplay, competitionToString, competitionsList, getId, getName, getSpecialtiesForSport, getYear, initMedal, initProExperience, medalTypeFromInt, medalTypeToDisplay, medalTypeToInt, specialtyFromString, specialtyToDisplay, specialtyToString, sportFromString, sportToString, sportsList)
+module Model exposing (..)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
@@ -43,6 +43,8 @@ type alias AdminPageModel =
     , sport : Maybe Sport
     , tableState : Table.State
     , searchQuery : Maybe String
+    , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
+    , sector : Maybe Sector
     }
 
 
@@ -765,12 +767,12 @@ type Sport
 
 type alias ProExperience =
     { id : Id
-    , occupationalCategory : String
     , title : String
     , companyName : String
     , description : String
     , website : String
     , contact : String
+    , sector : Sector
     }
 
 
@@ -835,6 +837,8 @@ type Msg
     | FileSelectionDone File
     | GotFileUrl String
     | UpdatedSearchQuery String
+    | GotSectors (RemoteData (Graphql.Http.Error Sectors) Sectors)
+    | SelectedASector String
 
 
 type FormField
@@ -842,7 +846,6 @@ type FormField
     | LastName
     | Email
     | Intro
-    | OccupationalCategory
     | Title
     | CompanyName
     | Description
@@ -906,12 +909,12 @@ sportFromString str =
 initProExperience : ProExperience
 initProExperience =
     { id = Id "new"
-    , occupationalCategory = ""
     , title = ""
     , companyName = ""
     , description = ""
     , website = ""
     , contact = ""
+    , sector = Sector (Id "new") ""
     }
 
 
@@ -946,3 +949,20 @@ type FileType
     = Image
     | PDF
     | Other
+
+
+type alias Sectors =
+    List Sector
+
+
+type alias Sector =
+    { id : Id
+    , name : String
+    }
+
+
+findSectorByName : String -> List Sector -> Maybe Sector
+findSectorByName name sectors =
+    sectors
+        |> List.filter (.name >> (==) name)
+        |> List.head

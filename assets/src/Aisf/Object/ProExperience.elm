@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.ProExperience exposing (companyName, contact, description, id, occupationalCategory, title, website)
+module Aisf.Object.ProExperience exposing (companyName, contact, description, id, sector, title, website)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -39,9 +39,9 @@ id =
     Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-occupationalCategory : SelectionSet String Aisf.Object.ProExperience
-occupationalCategory =
-    Object.selectionForField "String" "occupationalCategory" [] Decode.string
+sector : SelectionSet decodesTo Aisf.Object.Sector -> SelectionSet decodesTo Aisf.Object.ProExperience
+sector object_ =
+    Object.selectionForCompositeField "sector" [] object_ identity
 
 
 title : SelectionSet String Aisf.Object.ProExperience

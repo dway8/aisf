@@ -2,9 +2,11 @@ defmodule Aisf.DatabaseSeeder do
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperience
   alias Aisf.Medals.Medal
+  alias Aisf.Sectors.Sector
   alias Aisf.Repo
 
   @numberOfChampions Enum.random(6..20)
+  @numberOfSectors 10
 
   @sports Champion.sports()
   @years 1960..2019
@@ -29,13 +31,13 @@ defmodule Aisf.DatabaseSeeder do
 
       Enum.each(0..Enum.random(0..4), fn _i ->
         %ProExperience{
-          occupational_category: Faker.Industry.sector(),
           title: Faker.Name.title(),
           company_name: Faker.Company.name(),
           description: Faker.Lorem.paragraph(3),
           website: Faker.Internet.url(),
           contact: Faker.Name.name(),
-          champion_id: champion.id
+          champion_id: champion.id,
+          sector_id: Enum.random(1..@numberOfSectors)
         }
         |> Repo.insert!()
       end)
@@ -149,6 +151,17 @@ defmodule Aisf.DatabaseSeeder do
         ]
     end
   end
+
+  def insert_sectors do
+    Enum.each(1..@numberOfSectors, fn _i ->
+      sector =
+        %Sector{
+          name: Faker.Industry.sector()
+        }
+        |> Repo.insert!()
+    end)
+  end
 end
 
+Aisf.DatabaseSeeder.insert_sectors()
 Aisf.DatabaseSeeder.insert_champions()

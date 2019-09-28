@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object exposing (Champion(..), Medal(..), ProExperience(..))
+module Aisf.Object exposing (Champion(..), Medal(..), ProExperience(..), Sector(..))
 
 
 type Champion
@@ -15,3 +15,7 @@ type Medal
 
 type ProExperience
     = ProExperience
+
+
+type Sector
+    = Sector

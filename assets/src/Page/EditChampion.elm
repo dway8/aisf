@@ -222,7 +222,7 @@ viewProExperienceForm : Int -> ProExperience -> Element Msg
 viewProExperienceForm id newE =
     let
         fields =
-            [ OccupationalCategory, Title, CompanyName, Description, Website, Contact ]
+            [ Title, CompanyName, Description, Website, Contact ]
     in
     column []
         [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton id, label = text "Supprimer" } ]
@@ -322,9 +322,6 @@ getChampionFormFieldData field champion =
 getProExperienceFormFieldData : FormField -> ProExperience -> ( String, String )
 getProExperienceFormFieldData field exp =
     case field of
-        OccupationalCategory ->
-            ( "Catégorie professionnelle", exp.occupationalCategory )
-
         Title ->
             ( "Titre", exp.title )
 

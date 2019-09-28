@@ -143,6 +143,12 @@ update msg model =
         UpdatedSearchQuery query ->
             updateSearchQuery query model
 
+        GotSectors resp ->
+            handleSectorsResponse resp model
+
+        SelectedASector name ->
+            updateCurrentSector name model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -336,9 +342,6 @@ updateProExperience id field val model =
                                             (Editable.map
                                                 (\proExperience ->
                                                     case field of
-                                                        OccupationalCategory ->
-                                                            { proExperience | occupationalCategory = val }
-
                                                         Title ->
                                                             { proExperience | title = val }
 
@@ -835,6 +838,33 @@ updateSearchQuery query model =
 
         MedalsPage medModel ->
             ( { model | currentPage = MedalsPage { medModel | searchQuery = Just query } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleSectorsResponse : RemoteData (Graphql.Http.Error Sectors) Sectors -> Model -> ( Model, Cmd Msg )
+handleSectorsResponse resp model =
+    case model.currentPage of
+        AdminPage aModel ->
+            ( { model | currentPage = AdminPage { aModel | sectors = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateCurrentSector : String -> Model -> ( Model, Cmd Msg )
+updateCurrentSector name model =
+    case model.currentPage of
+        AdminPage aModel ->
+            aModel.sectors
+                |> RD.map
+                    (\sectors ->
+                        ( { model | currentPage = AdminPage { aModel | sector = Model.findSectorByName name sectors } }
+                        , Cmd.none
+                        )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

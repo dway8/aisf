@@ -1,4 +1,4 @@
-module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getMembers, updateChampion)
+module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getMembers, getSectors, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -6,6 +6,7 @@ import Aisf.Object
 import Aisf.Object.Champion as Champion
 import Aisf.Object.Medal as Medal
 import Aisf.Object.ProExperience as ProExperience
+import Aisf.Object.Sector as Sector
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Dict
@@ -15,7 +16,7 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Specialty(..), Sport(..), Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Sector, Specialty(..), Sport(..), Year(..))
 import RemoteData
 
 
@@ -57,6 +58,21 @@ getChampionsWithMedals =
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
 
 
+getSectors : Cmd Msg
+getSectors =
+    Query.sectors sectorSelection
+        |> Graphql.Http.queryRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotSectors)
+
+
+sectorSelection : SelectionSet Sector Aisf.Object.Sector
+sectorSelection =
+    SelectionSet.succeed Sector
+        |> with Sector.id
+        |> with Sector.name
+
+
 championSelection : SelectionSet Champion Aisf.Object.Champion
 championSelection =
     SelectionSet.succeed Champion
@@ -89,14 +105,14 @@ championSelection =
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience
 proExperienceSelection =
-    SelectionSet.map7 ProExperience
-        ProExperience.id
-        ProExperience.occupationalCategory
-        ProExperience.title
-        ProExperience.companyName
-        ProExperience.description
-        ProExperience.website
-        ProExperience.contact
+    SelectionSet.succeed ProExperience
+        |> with ProExperience.id
+        |> with ProExperience.title
+        |> with ProExperience.companyName
+        |> with ProExperience.description
+        |> with ProExperience.website
+        |> with ProExperience.contact
+        |> with (ProExperience.sector sectorSelection)
 
 
 medalSelection : SelectionSet Medal Aisf.Object.Medal
@@ -160,14 +176,14 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
 
 
 proExperienceToParams : ProExperience -> Aisf.InputObject.ProExperienceParams
-proExperienceToParams ({ id, occupationalCategory, title, companyName, description, website, contact } as proExp) =
+proExperienceToParams ({ id, title, companyName, description, website, contact, sector } as proExp) =
     { id = Model.getId proExp
-    , occupationalCategory = occupationalCategory
     , title = title
     , companyName = companyName
     , description = description
     , website = website
     , contact = contact
+    , sector = sector |> sectorToParams
     }
 
 
@@ -185,4 +201,11 @@ fileToParams : Attachment -> Aisf.InputObject.FileParams
 fileToParams { base64, filename } =
     { base64 = base64 |> GOA.fromMaybe
     , filename = filename
+    }
+
+
+sectorToParams : Sector -> Aisf.InputObject.SectorParams
+sectorToParams sector =
+    { id = Model.getId sector
+    , name = sector.name
     }

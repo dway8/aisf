@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, SectorParams, SectorParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, buildSectorParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams, encodeSectorParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -86,7 +86,7 @@ encodeMedalParams input =
 
 buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams
 buildProExperienceParams required =
-    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, occupationalCategory = required.occupationalCategory, title = required.title, website = required.website }
+    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, sector = required.sector, title = required.title, website = required.website }
 
 
 type alias ProExperienceParamsRequiredFields =
@@ -94,7 +94,7 @@ type alias ProExperienceParamsRequiredFields =
     , contact : String
     , description : String
     , id : String
-    , occupationalCategory : String
+    , sector : SectorParams
     , title : String
     , website : String
     }
@@ -107,7 +107,7 @@ type alias ProExperienceParams =
     , contact : String
     , description : String
     , id : String
-    , occupationalCategory : String
+    , sector : SectorParams
     , title : String
     , website : String
     }
@@ -118,4 +118,31 @@ type alias ProExperienceParams =
 encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
-        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "occupationalCategory", Encode.string input.occupationalCategory |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
+        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sector", encodeSectorParams input.sector |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
+
+
+buildSectorParams : SectorParamsRequiredFields -> SectorParams
+buildSectorParams required =
+    { id = required.id, name = required.name }
+
+
+type alias SectorParamsRequiredFields =
+    { id : String
+    , name : String
+    }
+
+
+{-| Type for the SectorParams input object.
+-}
+type alias SectorParams =
+    { id : String
+    , name : String
+    }
+
+
+{-| Encode a SectorParams into a value that can be used as an argument.
+-}
+encodeSectorParams : SectorParams -> Value
+encodeSectorParams input =
+    Encode.maybeObject
+        [ ( "id", Encode.string input.id |> Just ), ( "name", Encode.string input.name |> Just ) ]

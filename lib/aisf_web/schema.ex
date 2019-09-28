@@ -2,7 +2,7 @@ defmodule AisfWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Ecto, repo: App.Repo
 
-  alias AisfWeb.ChampionsResolver
+  alias AisfWeb.{ChampionsResolver, SectorsResolver}
 
   object :champion do
     field(:id, non_null(:id))
@@ -37,7 +37,7 @@ defmodule AisfWeb.Schema do
     field(:company_name, non_null(:string))
     field(:contact, non_null(:string))
     field(:description, non_null(:string))
-    field(:occupational_category, non_null(:string))
+    field(:sector, non_null(:sector))
     field(:title, non_null(:string))
     field(:website, non_null(:string))
   end
@@ -48,6 +48,11 @@ defmodule AisfWeb.Schema do
     field(:year, non_null(:integer))
     field(:specialty, non_null(:string))
     field(:medal_type, non_null(:integer))
+  end
+
+  object :sector do
+    field(:id, non_null(:id))
+    field(:name, non_null(:string))
   end
 
   query do
@@ -66,6 +71,10 @@ defmodule AisfWeb.Schema do
 
     field :champions_with_medals, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.get_with_medals/2)
+    end
+
+    field :sectors, non_null(list_of(non_null(:sector))) do
+      resolve(&SectorsResolver.all/3)
     end
   end
 
@@ -122,9 +131,9 @@ defmodule AisfWeb.Schema do
     field(:company_name, non_null(:string))
     field(:contact, non_null(:string))
     field(:description, non_null(:string))
-    field(:occupational_category, non_null(:string))
     field(:title, non_null(:string))
     field(:website, non_null(:string))
+    field(:sector, non_null(:sector_params))
   end
 
   input_object :medal_params do
@@ -138,5 +147,10 @@ defmodule AisfWeb.Schema do
   input_object :file_params do
     field(:filename, non_null(:string))
     field(:base64, :string)
+  end
+
+  input_object :sector_params do
+    field(:id, non_null(:string))
+    field(:name, non_null(:string))
   end
 end
