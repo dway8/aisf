@@ -14,6 +14,7 @@ import Json.Decode as D
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
+import UI
 
 
 sportSelector : Bool -> Maybe Sport -> Element Msg
@@ -52,17 +53,12 @@ viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
     column [ spacing 4 ]
         -- [ viewField "Catégorie professionnelle" exp.occupationalCategory
-        [ viewField "Titre" exp.title
-        , viewField "Nom de l'entreprise" exp.companyName
-        , viewField "Description" exp.description
-        , viewField "Site internet" exp.website
-        , viewField "Contact" exp.contact
+        [ UI.viewField "Titre" exp.title
+        , UI.viewField "Nom de l'entreprise" exp.companyName
+        , UI.viewField "Description" exp.description
+        , UI.viewField "Site internet" exp.website
+        , UI.viewField "Contact" exp.contact
         ]
-
-
-viewField : String -> String -> Element Msg
-viewField label value =
-    row [ spacing 10 ] [ text label, el [ Font.bold ] <| text value ]
 
 
 viewTextArea : String -> String -> Element Msg
@@ -73,10 +69,10 @@ viewTextArea label value =
 viewMedal : Medal -> Element Msg
 viewMedal { competition, year, specialty, medalType } =
     column [ spacing 4 ]
-        [ viewField "Compétition" (competition |> Model.competitionToDisplay)
-        , viewField "Année" (year |> Model.getYear |> String.fromInt)
-        , viewField "Spécialité" (specialty |> Model.specialtyToDisplay)
-        , viewField "Médaille" (medalType |> Model.medalTypeToDisplay)
+        [ UI.viewField "Compétition" (competition |> Model.competitionToDisplay)
+        , UI.viewField "Année" (year |> Model.getYear |> String.fromInt)
+        , UI.viewField "Spécialité" (specialty |> Model.specialtyToDisplay)
+        , UI.viewField "Médaille" (medalType |> Model.medalTypeToDisplay)
         ]
 
 
@@ -179,33 +175,14 @@ yearSelector showOptionAll currentYear msg =
                 )
 
 
-viewTextInput : Maybe String -> Maybe String -> String -> (String -> Msg) -> Element Msg
-viewTextInput label placeholder value msg =
-    Input.text
-        [ Border.solid
-        , Border.rounded 8
-        , paddingXY 13 7
-        , width shrink
-        ]
-        { onChange = msg
-        , text = value
-        , placeholder =
-            placeholder
-                |> Maybe.map (\p -> Input.placeholder [ Font.size 14, Font.italic ] <| el [ centerY ] <| text p)
-        , label =
-            label
-                |> Maybe.map
-                    (\l ->
-                        Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
-                            paragraph [] [ text l ]
-                    )
-                |> Maybe.withDefault (Input.labelHidden "")
-        }
-
-
 viewSearchQuery : Maybe String -> Element Msg
 viewSearchQuery query =
-    viewTextInput Nothing (Just "Rechercher un champion...") (query |> Maybe.withDefault "") UpdatedSearchQuery
+    UI.textInput []
+        { onChange = UpdatedSearchQuery
+        , label = Nothing
+        , text = query |> Maybe.withDefault ""
+        , placeholder = Just <| Input.placeholder [ Font.size 14, Font.italic ] <| el [ centerY ] <| text "Rechercher un champion..."
+        }
 
 
 filterBySearchQuery : Maybe String -> List Champion -> List Champion

@@ -5,6 +5,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events exposing (onClick)
 import Element.Font as Font
+import Element.Input as Input
 import Element.Region as Region
 import Html
 import Html.Attributes as HA
@@ -132,3 +133,40 @@ noAttr =
 textColor : Color
 textColor =
     rgb255 102 102 102
+
+
+viewField : String -> String -> Element msg
+viewField label value =
+    row [ spacing 10 ] [ el [ Font.bold ] <| text label, text value ]
+
+
+type alias InputConfig msg =
+    { onChange : String -> msg
+    , label : Maybe String
+    , text : String
+    , placeholder : Maybe (Input.Placeholder msg)
+    }
+
+
+textInput : List (Attribute msg) -> InputConfig msg -> Element msg
+textInput attrs config =
+    Input.text
+        (attrs
+            ++ [ Border.solid
+               , Border.rounded 8
+               , paddingXY 13 7
+               , width shrink
+               ]
+        )
+        { onChange = config.onChange
+        , text = config.text
+        , placeholder = config.placeholder
+        , label =
+            config.label
+                |> Maybe.map
+                    (\l ->
+                        Input.labelAbove [ paddingEach { bottom = 4, right = 0, left = 0, top = 0 }, Font.bold ] <|
+                            paragraph [] [ text l ]
+                    )
+                |> Maybe.withDefault (Input.labelHidden "")
+        }

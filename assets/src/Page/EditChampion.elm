@@ -234,7 +234,12 @@ viewProExperienceForm id newE =
                             ( label, value ) =
                                 getProExperienceFormFieldData field newE
                         in
-                        Common.viewTextInput (Just label) Nothing value (UpdatedProExperienceField id field)
+                        UI.textInput []
+                            { onChange = UpdatedProExperienceField id field
+                            , text = value
+                            , placeholder = Nothing
+                            , label = Just label
+                            }
                     )
             )
         ]
@@ -278,7 +283,12 @@ viewChampionTextInput field champion =
         ( label, value ) =
             getChampionFormFieldData field champion
     in
-    Common.viewTextInput (Just label) Nothing value (UpdatedChampionField field)
+    UI.textInput []
+        { onChange = UpdatedChampionField field
+        , text = value
+        , placeholder = Nothing
+        , label = Just label
+        }
 
 
 viewTextArea : String -> String -> (String -> Msg) -> Element Msg

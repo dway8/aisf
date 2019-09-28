@@ -37,10 +37,10 @@ view { id, champion } =
                         , column [ UI.defaultSpacing ]
                             [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
                             , column [ spacing 4 ]
-                                [ Common.viewField "N°" (Model.getId champ)
-                                , Common.viewField "Nom" champ.lastName
-                                , Common.viewField "Prénom" champ.firstName
-                                , Common.viewField "Discipline" (Model.sportToString champ.sport)
+                                [ UI.viewField "N°" (Model.getId champ)
+                                , UI.viewField "Nom" champ.lastName
+                                , UI.viewField "Prénom" champ.firstName
+                                , UI.viewField "Discipline" (Model.sportToString champ.sport)
                                 ]
                             ]
                         ]
