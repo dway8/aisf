@@ -28,7 +28,7 @@ view model =
 
 viewBody : Model -> Html Msg
 viewBody model =
-    layout
+    UI.defaultLayout
         [ Font.family
             [ Font.external
                 { name = "Open Sans"

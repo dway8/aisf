@@ -4,6 +4,7 @@ import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
 import Dict
+import Dropdown
 import Editable exposing (Editable(..))
 import Element exposing (..)
 import Element.Background as Background
@@ -15,7 +16,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sport, Year)
+import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sectors, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -26,13 +27,21 @@ init : Maybe Id -> ( EditChampionPageModel, Cmd Msg )
 init maybeId =
     case maybeId of
         Just id ->
-            ( { id = Just id, champion = Loading }
-            , Api.getChampion id
+            ( { id = Just id
+              , champion = Loading
+              , sectors = Loading
+              , sectorDropdown = Dropdown.init
+              }
+            , Cmd.batch [ Api.getChampion id, Api.getSectors ]
             )
 
         Nothing ->
-            ( { id = Nothing, champion = Success initChampionForm }
-            , Cmd.none
+            ( { id = Nothing
+              , champion = Success initChampionForm
+              , sectors = Loading
+              , sectorDropdown = Dropdown.init
+              }
+            , Api.getSectors
             )
 
 
@@ -111,8 +120,8 @@ view currentYear model =
                         "ÉDITER CHAMPION"
                     )
             )
-        , case model.champion of
-            Success champion ->
+        , case ( model.champion, model.sectors ) of
+            ( Success champion, Success sectors ) ->
                 column [ UI.defaultSpacing ]
                     [ row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
@@ -128,7 +137,7 @@ view currentYear model =
                             getChampionFormFieldData Intro champion
                       in
                       viewTextArea label value (UpdatedChampionField Intro)
-                    , editProExperiences champion
+                    , editProExperiences sectors model.sectorDropdown champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
                     , text "Enregistrer"
@@ -143,8 +152,8 @@ view currentYear model =
         ]
 
 
-editProExperiences : ChampionForm -> Element Msg
-editProExperiences { proExperiences } =
+editProExperiences : Sectors -> Dropdown.Model -> ChampionForm -> Element Msg
+editProExperiences sectors sectorDropdown { proExperiences } =
     column [ spacing 10 ]
         [ column []
             (proExperiences
@@ -158,7 +167,7 @@ editProExperiences { proExperiences } =
                                     ]
 
                             Editable oldE newE ->
-                                viewProExperienceForm id newE
+                                viewProExperienceForm sectors sectorDropdown id newE
                     )
                 |> Dict.values
             )
@@ -218,31 +227,59 @@ editYearsInFrenchTeam currentYear champion =
         ]
 
 
-viewProExperienceForm : Int -> ProExperience -> Element Msg
-viewProExperienceForm id newE =
+viewProExperienceForm : Sectors -> Dropdown.Model -> Int -> ProExperience -> Element Msg
+viewProExperienceForm sectors sectorDropdown id newE =
     let
         fields =
             [ Title, CompanyName, Description, Website, Contact ]
     in
     column []
         [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton id, label = text "Supprimer" } ]
-        , column []
-            (fields
-                |> List.map
-                    (\field ->
-                        let
-                            ( label, value ) =
-                                getProExperienceFormFieldData field newE
-                        in
-                        UI.textInput []
-                            { onChange = UpdatedProExperienceField id field
-                            , text = value
-                            , placeholder = Nothing
-                            , label = Just label
-                            }
-                    )
+        , column [ UI.defaultSpacing ]
+            (viewSectorDropdown sectors sectorDropdown newE
+                :: (fields
+                        |> List.map
+                            (\field ->
+                                let
+                                    ( label, value ) =
+                                        getProExperienceFormFieldData field newE
+                                in
+                                UI.textInput []
+                                    { onChange = UpdatedProExperienceField id field
+                                    , text = value
+                                    , placeholder = Nothing
+                                    , label = Just label
+                                    }
+                            )
+                   )
             )
         ]
+
+
+viewSectorDropdown : Sectors -> Dropdown.Model -> ProExperience -> Element Msg
+viewSectorDropdown sectors sectorDropdown proExperience =
+    let
+        list =
+            Model.acceptableSectors sectorDropdown.query sectors
+
+        config =
+            { label = Just "Secteur d'activité"
+            , msgs =
+                { inputMsg = UpdatedDropdownQuery
+                , mappingMsg = DropdownStateChanged
+                , focusMsg = DropdownGotFocus
+                , blurMsg = DropdownLostFocus
+                , escapeMsg = ClosedDropdown
+                , noOp = NoOp
+                , removeMsg = RemovedItemFromDropdown
+                }
+            , displayFn = text
+            , header = Nothing
+            , placeholder = Just <| Input.placeholder [] <| text "Rechercher..."
+            , inputAttrs = []
+            }
+    in
+    Dropdown.viewDropdownInput config sectorDropdown list
 
 
 viewMedalForm : Year -> Int -> Maybe Sport -> Medal -> Element Msg

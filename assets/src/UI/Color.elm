@@ -1,4 +1,4 @@
-module UI.Color exposing (black, blue, darkBlue, darkGrey, darkerGrey, darkestGrey, green, grey, lightBlue, lightGrey, lighterGrey, lightestGrey, makeDarker, makeOpaque, orange, red, white, yellow)
+module UI.Color exposing (..)
 
 import Element exposing (Color, rgb255, rgba, toRgb)
 
@@ -108,3 +108,18 @@ makeDarker color =
             rgb.blue * 0.8
     in
     rgba darkerRed darkerGreen darkerBlue rgb.alpha
+
+
+colorToRgbList : Color -> List String
+colorToRgbList color =
+    color
+        |> toRgb
+        |> (\v -> [ v.red, v.green, v.blue, v.alpha ])
+        |> List.map ((*) 255 >> round >> String.fromInt)
+
+
+colorToString : Color -> String
+colorToString color =
+    colorToRgbList color
+        |> String.join ","
+        |> (\str -> "rgba(" ++ str ++ ")")

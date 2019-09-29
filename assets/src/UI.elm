@@ -15,6 +15,26 @@ import UI.Button as Button
 import UI.Color
 
 
+defaultLayout : List (Attribute msg) -> Element msg -> Html.Html msg
+defaultLayout attrs =
+    layoutWith { options = [ defaultFocusStyle ] } attrs
+
+
+defaultFocusStyle : Option
+defaultFocusStyle =
+    focusStyle <|
+        { borderColor = Nothing
+        , backgroundColor = Nothing
+        , shadow =
+            Just
+                { color = UI.Color.blue
+                , offset = ( 0, 0 )
+                , blur = 3
+                , size = 1
+                }
+        }
+
+
 smallSpacing : Attribute msg
 smallSpacing =
     spacing 5

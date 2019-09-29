@@ -4,9 +4,11 @@ import Aisf.Scalar exposing (Id(..))
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
+import Dropdown
 import Editable exposing (Editable)
 import File exposing (File)
 import Graphql.Http
+import Menu
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import Url exposing (Url)
@@ -78,6 +80,8 @@ type alias ChampionPageModel =
 type alias EditChampionPageModel =
     { id : Maybe Id
     , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
+    , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
+    , sectorDropdown : Dropdown.Model
     }
 
 
@@ -839,6 +843,12 @@ type Msg
     | UpdatedSearchQuery String
     | GotSectors (RemoteData (Graphql.Http.Error Sectors) Sectors)
     | SelectedASector String
+    | DropdownStateChanged Menu.Msg
+    | UpdatedDropdownQuery String
+    | DropdownGotFocus
+    | DropdownLostFocus
+    | ClosedDropdown
+    | RemovedItemFromDropdown String
 
 
 type FormField
@@ -966,3 +976,15 @@ findSectorByName name sectors =
     sectors
         |> List.filter (.name >> (==) name)
         |> List.head
+
+
+acceptableSectors : Maybe String -> Sectors -> List String
+acceptableSectors query sectors =
+    sectors
+        |> List.map .name
+        |> List.filter
+            (\name ->
+                name
+                    |> String.toLower
+                    |> String.contains (query |> Maybe.withDefault "" |> String.toLower)
+            )

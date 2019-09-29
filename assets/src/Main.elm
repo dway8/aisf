@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Http
+import Menu
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 import Route
@@ -25,7 +26,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch [ Sub.map DropdownStateChanged Menu.subscription ]
 
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )

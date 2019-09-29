@@ -5,10 +5,12 @@ import Api
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
+import Dropdown
 import Editable exposing (Editable(..))
 import File exposing (File)
 import File.Select as Select
 import Graphql.Http
+import Menu
 import Model exposing (..)
 import Page.Admin
 import Page.Champion
@@ -148,6 +150,24 @@ update msg model =
 
         SelectedASector name ->
             updateCurrentSector name model
+
+        DropdownStateChanged menuMsg ->
+            changeDropdownState menuMsg model
+
+        UpdatedDropdownQuery str ->
+            updateDropdownQuery str model
+
+        DropdownGotFocus ->
+            focusDropdown model
+
+        DropdownLostFocus ->
+            closeDropdown model
+
+        ClosedDropdown ->
+            closeDropdown model
+
+        RemovedItemFromDropdown str ->
+            removeItemFromDropdown str model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -704,9 +724,17 @@ handleChampionResponse resp model =
             else
                 ( model, Cmd.none )
 
-        ( EditChampionPage { id }, Success champion ) ->
+        ( EditChampionPage { id, sectors }, Success champion ) ->
             if id == Just champion.id then
-                ( { model | currentPage = EditChampionPage { id = id, champion = Success (Page.EditChampion.championToForm champion) } }
+                ( { model
+                    | currentPage =
+                        EditChampionPage
+                            { id = id
+                            , champion = Success (Page.EditChampion.championToForm champion)
+                            , sectors = sectors
+                            , sectorDropdown = Dropdown.init
+                            }
+                  }
                 , Cmd.none
                 )
 
@@ -727,6 +755,7 @@ editProExperience id model =
                         let
                             newProExp =
                                 champion.proExperiences
+                                    |> Dict.map (\_ exp -> Editable.cancel exp)
                                     |> Dict.update id (Maybe.map Editable.edit)
 
                             newChampion =
@@ -849,6 +878,9 @@ handleSectorsResponse resp model =
         AdminPage aModel ->
             ( { model | currentPage = AdminPage { aModel | sectors = resp } }, Cmd.none )
 
+        EditChampionPage eModel ->
+            ( { model | currentPage = EditChampionPage { eModel | sectors = resp } }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )
 
@@ -865,6 +897,121 @@ updateCurrentSector name model =
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        EditChampionPage eModel ->
+            case ( eModel.champion, eModel.sectors ) of
+                ( Success champion, Success sectors ) ->
+                    let
+                        newChampion =
+                            { champion
+                                | proExperiences =
+                                    champion.proExperiences
+                                        |> Dict.map
+                                            (\id exp ->
+                                                exp
+                                                    |> Editable.map (\editingExp -> { editingExp | sector = Model.findSectorByName name sectors |> Maybe.withDefault editingExp.sector })
+                                            )
+                            }
+
+                        newModel =
+                            eModel
+                    in
+                    ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+changeDropdownState : Menu.Msg -> Model -> ( Model, Cmd Msg )
+changeDropdownState menuMsg model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            case eModel.sectors of
+                Success sectors ->
+                    let
+                        dropdown =
+                            eModel.sectorDropdown
+
+                        ( newState, maybeMsg ) =
+                            Menu.update (Dropdown.updateConfig SelectedASector)
+                                menuMsg
+                                20
+                                dropdown.state
+                                (Model.acceptableSectors dropdown.query sectors)
+                    in
+                    ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateDropdownQuery : String -> Model -> ( Model, Cmd Msg )
+updateDropdownQuery newQuery model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            let
+                newModel =
+                    { eModel
+                        | sectorDropdown =
+                            eModel.sectorDropdown
+                                |> Dropdown.setQuery (Just newQuery)
+                                |> Dropdown.toggleMenu (newQuery /= "")
+                    }
+            in
+            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+focusDropdown : Model -> ( Model, Cmd Msg )
+focusDropdown model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+closeDropdown : Model -> ( Model, Cmd Msg )
+closeDropdown model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            let
+                newModel =
+                    { eModel
+                        | sectorDropdown =
+                            eModel.sectorDropdown
+                                |> Dropdown.toggleMenu False
+                                |> Dropdown.setQuery Nothing
+                    }
+            in
+            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+removeItemFromDropdown : String -> Model -> ( Model, Cmd Msg )
+removeItemFromDropdown str model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            let
+                newModel =
+                    { eModel
+                        | sectorDropdown =
+                            eModel.sectorDropdown
+                                |> Dropdown.removeSelected
+                    }
+            in
+            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
