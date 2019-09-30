@@ -174,8 +174,8 @@ textInput attrs config =
         (attrs
             ++ [ Border.solid
                , Border.rounded 8
-               , paddingXY 13 7
-               , width shrink
+               , paddingXY 13 10
+               , width <| minimum 200 shrink
                ]
         )
         { onChange = config.onChange

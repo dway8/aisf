@@ -177,12 +177,13 @@ yearSelector showOptionAll currentYear msg =
 
 viewSearchQuery : Maybe String -> Element Msg
 viewSearchQuery query =
-    UI.textInput []
-        { onChange = UpdatedSearchQuery
-        , label = Nothing
-        , text = query |> Maybe.withDefault ""
-        , placeholder = Just <| Input.placeholder [ Font.size 14, Font.italic ] <| el [ centerY ] <| text "Rechercher un champion..."
-        }
+    el [] <|
+        UI.textInput []
+            { onChange = UpdatedSearchQuery
+            , label = Nothing
+            , text = query |> Maybe.withDefault ""
+            , placeholder = Just <| Input.placeholder [ Font.size 14, Font.italic ] <| el [ centerY ] <| text "Rechercher un champion..."
+            }
 
 
 filterBySearchQuery : Maybe String -> List Champion -> List Champion

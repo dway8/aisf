@@ -121,7 +121,7 @@ view rdSectors currentYear model =
             )
         , case ( model.champion, rdSectors ) of
             ( Success champion, Success sectors ) ->
-                column [ UI.defaultSpacing ]
+                column [ UI.largeSpacing ]
                     [ row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
                         , column [ UI.defaultSpacing ]
@@ -153,8 +153,8 @@ view rdSectors currentYear model =
 
 editProExperiences : Sectors -> Dropdown.Model -> ChampionForm -> Element Msg
 editProExperiences sectors sectorDropdown { proExperiences } =
-    column [ spacing 10 ]
-        [ column []
+    column [ UI.largeSpacing ]
+        [ column [ UI.defaultSpacing ]
             (proExperiences
                 |> Dict.map
                     (\id exp ->
@@ -179,8 +179,8 @@ editProExperiences sectors sectorDropdown { proExperiences } =
 
 editMedals : Year -> ChampionForm -> Element Msg
 editMedals currentYear { medals, sport } =
-    column [ spacing 10 ]
-        [ column []
+    column [ UI.largeSpacing ]
+        [ column [ UI.defaultSpacing ]
             (medals
                 |> Dict.map
                     (\id medal ->
@@ -205,8 +205,8 @@ editMedals currentYear { medals, sport } =
 
 editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
 editYearsInFrenchTeam currentYear champion =
-    column [ spacing 10 ]
-        [ column []
+    column [ UI.largeSpacing ]
+        [ column [ UI.defaultSpacing ]
             (champion.yearsInFrenchTeam
                 |> Dict.map
                     (\id year ->
