@@ -724,14 +724,13 @@ handleChampionResponse resp model =
             else
                 ( model, Cmd.none )
 
-        ( EditChampionPage { id, sectors }, Success champion ) ->
+        ( EditChampionPage { id }, Success champion ) ->
             if id == Just champion.id then
                 ( { model
                     | currentPage =
                         EditChampionPage
                             { id = id
                             , champion = Success (Page.EditChampion.championToForm champion)
-                            , sectors = sectors
                             , sectorDropdown = Dropdown.init
                             }
                   }
@@ -874,33 +873,20 @@ updateSearchQuery query model =
 
 handleSectorsResponse : RemoteData (Graphql.Http.Error Sectors) Sectors -> Model -> ( Model, Cmd Msg )
 handleSectorsResponse resp model =
-    case model.currentPage of
-        AdminPage aModel ->
-            ( { model | currentPage = AdminPage { aModel | sectors = resp } }, Cmd.none )
-
-        EditChampionPage eModel ->
-            ( { model | currentPage = EditChampionPage { eModel | sectors = resp } }, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
+    ( { model | sectors = resp }, Cmd.none )
 
 
 updateCurrentSector : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSector name model =
-    case model.currentPage of
-        AdminPage aModel ->
-            aModel.sectors
-                |> RD.map
-                    (\sectors ->
-                        ( { model | currentPage = AdminPage { aModel | sector = Model.findSectorByName name sectors } }
-                        , Cmd.none
-                        )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
+    case ( model.currentPage, model.sectors ) of
+        ( AdminPage aModel, Success sectors ) ->
+            ( { model | currentPage = AdminPage { aModel | sector = Model.findSectorByName sectors name } }
+            , Cmd.none
+            )
 
-        EditChampionPage eModel ->
-            case ( eModel.champion, eModel.sectors ) of
-                ( Success champion, Success sectors ) ->
+        ( EditChampionPage eModel, Success sectors ) ->
+            case eModel.champion of
+                Success champion ->
                     let
                         newChampion =
                             { champion
@@ -909,7 +895,7 @@ updateCurrentSector name model =
                                         |> Dict.map
                                             (\id exp ->
                                                 exp
-                                                    |> Editable.map (\editingExp -> { editingExp | sector = Model.findSectorByName name sectors |> Maybe.withDefault editingExp.sector })
+                                                    |> Editable.map (\editingExp -> { editingExp | sector = Model.findSectorByName sectors name |> Maybe.withDefault editingExp.sector })
                                             )
                             }
 
@@ -927,25 +913,20 @@ updateCurrentSector name model =
 
 changeDropdownState : Menu.Msg -> Model -> ( Model, Cmd Msg )
 changeDropdownState menuMsg model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            case eModel.sectors of
-                Success sectors ->
-                    let
-                        dropdown =
-                            eModel.sectorDropdown
+    case ( model.currentPage, model.sectors ) of
+        ( EditChampionPage eModel, Success sectors ) ->
+            let
+                dropdown =
+                    eModel.sectorDropdown
 
-                        ( newState, maybeMsg ) =
-                            Menu.update (Dropdown.updateConfig SelectedASector)
-                                menuMsg
-                                20
-                                dropdown.state
-                                (Model.acceptableSectors dropdown.query sectors)
-                    in
-                    ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+                ( newState, maybeMsg ) =
+                    Menu.update (Dropdown.updateConfig SelectedASector)
+                        menuMsg
+                        20
+                        dropdown.state
+                        (Model.acceptableSectors dropdown.query sectors)
+            in
+            ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

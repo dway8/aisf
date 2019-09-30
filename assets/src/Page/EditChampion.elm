@@ -12,6 +12,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import File
+import Graphql.Http
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
@@ -29,19 +30,17 @@ init maybeId =
         Just id ->
             ( { id = Just id
               , champion = Loading
-              , sectors = Loading
               , sectorDropdown = Dropdown.init
               }
-            , Cmd.batch [ Api.getChampion id, Api.getSectors ]
+            , Api.getChampion id
             )
 
         Nothing ->
             ( { id = Nothing
               , champion = Success initChampionForm
-              , sectors = Loading
               , sectorDropdown = Dropdown.init
               }
-            , Api.getSectors
+            , Cmd.none
             )
 
 
@@ -107,8 +106,8 @@ championToForm champion =
     }
 
 
-view : Year -> EditChampionPageModel -> Element Msg
-view currentYear model =
+view : RemoteData (Graphql.Http.Error Sectors) Sectors -> Year -> EditChampionPageModel -> Element Msg
+view rdSectors currentYear model =
     column [ UI.largeSpacing ]
         [ UI.heading 1
             (el [ Font.bold, Font.size 18 ] <|
@@ -120,7 +119,7 @@ view currentYear model =
                         "ÉDITER CHAMPION"
                     )
             )
-        , case ( model.champion, model.sectors ) of
+        , case ( model.champion, rdSectors ) of
             ( Success champion, Success sectors ) ->
                 column [ UI.defaultSpacing ]
                     [ row [ UI.largeSpacing ]

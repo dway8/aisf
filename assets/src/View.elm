@@ -59,10 +59,10 @@ viewBody model =
                     Page.Champion.view championModel
 
                 EditChampionPage editChampionModel ->
-                    Page.EditChampion.view model.currentYear editChampionModel
+                    Page.EditChampion.view model.sectors model.currentYear editChampionModel
 
                 AdminPage adminModel ->
-                    Page.Admin.view adminModel
+                    Page.Admin.view model.sectors adminModel
             ]
 
 

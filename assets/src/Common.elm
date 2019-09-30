@@ -52,8 +52,8 @@ viewSportOption currentSport sport =
 viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
     column [ spacing 4 ]
-        -- [ viewField "Catégorie professionnelle" exp.occupationalCategory
-        [ UI.viewField "Titre" exp.title
+        [ UI.viewField "Secteur d'activité" exp.sector.name
+        , UI.viewField "Titre" exp.title
         , UI.viewField "Nom de l'entreprise" exp.companyName
         , UI.viewField "Description" exp.description
         , UI.viewField "Site internet" exp.website

@@ -24,7 +24,8 @@ defmodule Aisf.Champions do
   """
   def list_members do
     Repo.all(from(c in Champion, where: c.is_member == true))
-    |> Repo.preload([:pro_experiences, :medals])
+    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(:medals)
   end
 
   @doc """

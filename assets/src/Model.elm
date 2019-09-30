@@ -20,6 +20,7 @@ type alias Model =
     , key : Nav.Key
     , isAdmin : Bool
     , currentYear : Year
+    , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
     }
 
 
@@ -45,7 +46,6 @@ type alias AdminPageModel =
     , sport : Maybe Sport
     , tableState : Table.State
     , searchQuery : Maybe String
-    , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
     , sector : Maybe Sector
     }
 
@@ -80,7 +80,6 @@ type alias ChampionPageModel =
 type alias EditChampionPageModel =
     { id : Maybe Id
     , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
-    , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
     , sectorDropdown : Dropdown.Model
     }
 
@@ -971,8 +970,8 @@ type alias Sector =
     }
 
 
-findSectorByName : String -> List Sector -> Maybe Sector
-findSectorByName name sectors =
+findSectorByName : List Sector -> String -> Maybe Sector
+findSectorByName sectors name =
     sectors
         |> List.filter (.name >> (==) name)
         |> List.head

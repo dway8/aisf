@@ -20,20 +20,19 @@ init =
       , sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
       , searchQuery = Nothing
-      , sectors = Loading
       , sector = Nothing
       }
-    , Cmd.batch [ Api.getChampions, Api.getSectors ]
+    , Api.getChampions
     )
 
 
-view : AdminPageModel -> Element Msg
-view model =
+view : RemoteData (Graphql.Http.Error Sectors) Sectors -> AdminPageModel -> Element Msg
+view rdSectors model =
     column [ UI.largeSpacing ]
         [ row [ UI.defaultSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
-            , sectorSelector model.sectors model.sector
+            , sectorSelector rdSectors model.sector
             ]
         , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
         , case model.champions of
@@ -135,6 +134,6 @@ viewSectorOption : Sectors -> Maybe Sector -> String -> Html.Html msg
 viewSectorOption sectors currentSector sectorName =
     Html.option
         [ HA.value sectorName
-        , HA.selected <| currentSector == Model.findSectorByName sectorName sectors
+        , HA.selected <| currentSector == Model.findSectorByName sectors sectorName
         ]
         [ Html.text sectorName ]

@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Api
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Http
@@ -43,6 +44,7 @@ init flags url key =
       , key = key
       , isAdmin = flags.isAdmin
       , currentYear = currentYear
+      , sectors = Loading
       }
-    , cmd
+    , Cmd.batch [ cmd, Api.getSectors ]
     )
