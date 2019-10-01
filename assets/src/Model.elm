@@ -775,7 +775,7 @@ type alias ProExperience =
     , description : String
     , website : String
     , contact : String
-    , sector : Sector
+    , sectors : Sectors
     }
 
 
@@ -923,7 +923,7 @@ initProExperience =
     , description = ""
     , website = ""
     , contact = ""
-    , sector = Sector (Id "new") ""
+    , sectors = []
     }
 
 

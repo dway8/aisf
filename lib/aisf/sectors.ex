@@ -1,4 +1,4 @@
-defmodule Aisf.Sectors do
+defmodule Aisf.Sectors.Sectors do
   @moduledoc """
   The Sectors context.
   """

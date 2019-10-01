@@ -15,7 +15,7 @@ defmodule Aisf.Champions do
   """
   def list_champions do
     Repo.all(Champion)
-    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload(:medals)
   end
 
@@ -24,7 +24,7 @@ defmodule Aisf.Champions do
   """
   def list_members do
     Repo.all(from(c in Champion, where: c.is_member == true))
-    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload(:medals)
   end
 
@@ -53,7 +53,7 @@ defmodule Aisf.Champions do
   """
   def get_champion(id) do
     Repo.get(Champion, id)
-    |> Repo.preload(pro_experiences: [:sector])
+    |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload(:medals)
   end
 

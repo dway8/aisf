@@ -73,9 +73,9 @@ filterBySector sector champions =
         Nothing ->
             champions
 
-        Just s ->
+        Just { name } ->
             champions
-                |> List.filter (.proExperiences >> List.any (\exp -> exp.sector.name == s.name))
+                |> List.filter (.proExperiences >> List.any (\exp -> exp.sectors |> List.any (.name >> (==) name)))
 
 
 tableConfig : Table.Config Champion Msg

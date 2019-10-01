@@ -18,7 +18,7 @@ import Utils
 
 type alias Model =
     { query : Maybe String
-    , selected : Maybe String
+    , selected : List String
     , showMenu : Bool
     , state : Menu.State
     }
@@ -27,7 +27,7 @@ type alias Model =
 init : Model
 init =
     { query = Nothing
-    , selected = Nothing
+    , selected = []
     , showMenu = False
     , state = Menu.empty
     }
@@ -53,14 +53,19 @@ toggleMenu showMenu model =
     { model | showMenu = showMenu }
 
 
-setSelected : String -> Model -> Model
-setSelected data model =
-    { model | selected = Just data }
+setSelected : List String -> Model -> Model
+setSelected list model =
+    { model | selected = list }
+
+
+addSelected : String -> Model -> Model
+addSelected data model =
+    { model | selected = model.selected ++ [ data ] }
 
 
 removeSelected : Model -> Model
 removeSelected model =
-    { model | selected = Nothing }
+    { model | selected = [] }
 
 
 updateConfig : (String -> msg) -> Menu.UpdateConfig msg String
@@ -133,14 +138,7 @@ viewDropdownInput config dropdownModel itemsList =
         removeAlreadySelected list =
             list
                 |> List.filter
-                    (\i ->
-                        case dropdownModel.selected of
-                            Just id ->
-                                i /= id
-
-                            Nothing ->
-                                True
-                    )
+                    (\item -> not <| List.member item dropdownModel.selected)
     in
     column
         [ width fill ]
@@ -150,18 +148,16 @@ viewDropdownInput config dropdownModel itemsList =
                 |> Maybe.withDefault none
             , wrappedRow
                 [ Border.width 1
-                , Border.rounded 4
-                , paddingXY 12 8
+                , Border.rounded 8
                 , width fill
                 , Border.color UI.Color.lightGrey
-                , height <| minimum 46 fill
                 , UI.smallSpacing
                 , htmlAttribute <| HA.class "focus-within"
                 , UI.mediumFont
                 ]
-                [ dropdownModel.selected
-                    |> Maybe.map
-                        (\selectedItem ->
+                ((dropdownModel.selected
+                    |> List.map
+                        (\item ->
                             row
                                 [ Border.width 1
                                 , Border.rounded 1
@@ -170,26 +166,27 @@ viewDropdownInput config dropdownModel itemsList =
                                 , Background.color UI.Color.lightestGrey
                                 , UI.smallSpacing
                                 ]
-                                [ el [ UI.mediumFont, pointer, Events.onClick <| removeMsg selectedItem ] <| UI.viewIcon "close"
-                                , Element.map (always noOp) <| el [ UI.smallFont ] <| text <| selectedItem
+                                [ el [ UI.mediumFont, pointer, Events.onClick <| removeMsg item ] <| UI.viewIcon "close"
+                                , Element.map (always noOp) <| el [ UI.smallFont ] <| text <| item
                                 ]
                         )
-                    |> Maybe.withDefault none
-                , el [ htmlAttribute <| HA.class "no-focus" ] <|
-                    Input.text
-                        [ Events.onFocus focusMsg
-                        , htmlAttribute <| HE.preventDefaultOn "keydown" upDownEscDecoder
-                        , htmlAttribute <| HE.on "blur" (blurDecoder noOp blurMsg)
-                        , Border.width 0
-                        , width <| px 100
-                        , padding 0
-                        ]
-                        { onChange = inputMsg
-                        , label = Input.labelHidden ""
-                        , text = dropdownModel.query |> Maybe.withDefault ""
-                        , placeholder = Just <| Input.placeholder [] <| text "Ajouter..."
-                        }
-                ]
+                 )
+                    ++ [ el [ htmlAttribute <| HA.class "no-focus" ] <|
+                            UI.textInput
+                                [ Events.onFocus focusMsg
+                                , htmlAttribute <| HE.preventDefaultOn "keydown" upDownEscDecoder
+                                , htmlAttribute <| HE.on "blur" (blurDecoder noOp blurMsg)
+                                , Border.width 0
+                                , width <| px 100
+                                , padding 0
+                                ]
+                                { onChange = inputMsg
+                                , label = Nothing
+                                , text = dropdownModel.query |> Maybe.withDefault ""
+                                , placeholder = Just <| Input.placeholder [] <| text "Ajouter..."
+                                }
+                       ]
+                )
             ]
         , Utils.viewIf dropdownModel.showMenu <|
             el
@@ -199,7 +196,7 @@ viewDropdownInput config dropdownModel itemsList =
                         , Border.width 1
                         , Border.rounded 2
                         , Border.color UI.Color.lightGrey
-                        , width <| px 400
+                        , width shrink
                         , Background.color UI.Color.white
                         , htmlAttribute <| HA.style "z-index" "1"
                         , Font.color UI.Color.grey
@@ -270,6 +267,6 @@ menuViewConfig displayFn =
     in
     Menu.viewConfig
         { toId = identity
-        , ul = [ HA.class "autocomplete-list" ]
+        , ul = [ HA.class "autocomplete-list", HA.style "padding" "0" ]
         , li = customizedLi
         }

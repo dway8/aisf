@@ -86,7 +86,7 @@ encodeMedalParams input =
 
 buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams
 buildProExperienceParams required =
-    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, sector = required.sector, title = required.title, website = required.website }
+    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, sectors = required.sectors, title = required.title, website = required.website }
 
 
 type alias ProExperienceParamsRequiredFields =
@@ -94,7 +94,7 @@ type alias ProExperienceParamsRequiredFields =
     , contact : String
     , description : String
     , id : String
-    , sector : SectorParams
+    , sectors : List SectorParams
     , title : String
     , website : String
     }
@@ -107,7 +107,7 @@ type alias ProExperienceParams =
     , contact : String
     , description : String
     , id : String
-    , sector : SectorParams
+    , sectors : List SectorParams
     , title : String
     , website : String
     }
@@ -118,7 +118,7 @@ type alias ProExperienceParams =
 encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
-        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sector", encodeSectorParams input.sector |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
+        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sectors", (encodeSectorParams |> Encode.list) input.sectors |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
 
 
 buildSectorParams : SectorParamsRequiredFields -> SectorParams

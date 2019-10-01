@@ -2,16 +2,17 @@ defmodule Aisf.DatabaseSeeder do
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperience
   alias Aisf.Medals.Medal
-  alias Aisf.Sectors.Sector
+  alias Aisf.Sectors.{Sectors, Sector}
   alias Aisf.Repo
 
   @numberOfChampions Enum.random(6..20)
-  @numberOfSectors 10
 
   @sports Champion.sports()
   @years 1960..2019
 
   def insert_champions do
+    all_sectors = Sectors.list_sectors()
+
     Enum.each(1..@numberOfChampions, fn _i ->
       years_in_french_team = Enum.take_random(@years, Enum.random(0..10))
       sport = Enum.random(@sports)
@@ -29,16 +30,23 @@ defmodule Aisf.DatabaseSeeder do
         }
         |> Repo.insert!()
 
-      Enum.each(0..Enum.random(0..4), fn _i ->
-        %ProExperience{
+      Enum.each(0..Enum.random(0..3), fn _i ->
+        sectors =
+          Enum.take_random(all_sectors, Enum.random(1..3))
+          |> Enum.map(fn s -> s.name end)
+
+        proExperienceAttrs = %{
           title: Faker.Name.title(),
           company_name: Faker.Company.name(),
           description: Faker.Lorem.paragraph(3),
           website: Faker.Internet.url(),
           contact: Faker.Name.name(),
           champion_id: champion.id,
-          sector_id: Enum.random(1..@numberOfSectors)
+          sectors: sectors
         }
+
+        %ProExperience{}
+        |> ProExperience.changeset(proExperienceAttrs)
         |> Repo.insert!()
       end)
 
@@ -153,12 +161,12 @@ defmodule Aisf.DatabaseSeeder do
   end
 
   def insert_sectors do
-    Enum.each(1..@numberOfSectors, fn _i ->
-      sector =
-        %Sector{
-          name: Faker.Industry.sector()
-        }
-        |> Repo.insert!()
+    Enum.each(1..20, fn _i ->
+      attrs = %{name: Faker.Industry.sub_sector()}
+
+      %Sector{}
+      |> Sector.changeset(attrs)
+      |> Repo.insert()
     end)
   end
 end

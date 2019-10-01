@@ -272,7 +272,7 @@ viewSectorDropdown sectors sectorDropdown proExperience =
                 , noOp = NoOp
                 , removeMsg = RemovedItemFromDropdown
                 }
-            , displayFn = text
+            , displayFn = \data -> el [ UI.defaultPadding, UI.mediumFont ] <| text data
             , header = Nothing
             , placeholder = Just <| Input.placeholder [] <| text "Rechercher..."
             , inputAttrs = []

@@ -7,6 +7,7 @@
     <title>Aisf · Phoenix Framework</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,100italic,400,400italic,700&display=fallback" rel="stylesheet">
 
     <style>
         .no-focus .focus-within:focus-within {

@@ -752,6 +752,9 @@ editProExperience id model =
                 |> RD.map
                     (\champion ->
                         let
+                            experienceToEdit =
+                                Dict.get id champion.proExperiences
+
                             newProExp =
                                 champion.proExperiences
                                     |> Dict.map (\_ exp -> Editable.cancel exp)
@@ -759,8 +762,23 @@ editProExperience id model =
 
                             newChampion =
                                 { champion | proExperiences = newProExp }
+
+                            newDropdown =
+                                experienceToEdit
+                                    |> Maybe.map Editable.value
+                                    |> Maybe.map (\exp -> Dropdown.setSelected (exp.sectors |> List.map .name) eModel.sectorDropdown)
+                                    |> Maybe.withDefault eModel.sectorDropdown
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model
+                            | currentPage =
+                                EditChampionPage
+                                    { eModel
+                                        | champion = Success newChampion
+                                        , sectorDropdown = newDropdown
+                                    }
+                          }
+                        , Cmd.none
+                        )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -895,7 +913,7 @@ updateCurrentSector name model =
                                         |> Dict.map
                                             (\id exp ->
                                                 exp
-                                                    |> Editable.map (\editingExp -> { editingExp | sector = Model.findSectorByName sectors name |> Maybe.withDefault editingExp.sector })
+                                                    |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ (Model.findSectorByName sectors name |> Maybe.map List.singleton |> Maybe.withDefault []) })
                                             )
                             }
 
@@ -926,7 +944,9 @@ changeDropdownState menuMsg model =
                         dropdown.state
                         (Model.acceptableSectors dropdown.query sectors)
             in
-            ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
+            maybeMsg
+                |> Maybe.map (\updateMsg -> update updateMsg model)
+                |> Maybe.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

@@ -30,11 +30,7 @@ viewBody : Model -> Html Msg
 viewBody model =
     UI.defaultLayout
         [ Font.family
-            [ Font.external
-                { name = "Open Sans"
-                , url = "https://fonts.googleapis.com/css?family=Open+Sans:100,100italic,400,400italic,700"
-                }
-            ]
+            [ Font.typeface "Open Sans", Font.typeface "Roboto", Font.typeface "Arial" ]
         , alignLeft
         , Font.size 16
         , padding 20

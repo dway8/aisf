@@ -112,7 +112,7 @@ proExperienceSelection =
         |> with ProExperience.description
         |> with ProExperience.website
         |> with ProExperience.contact
-        |> with (ProExperience.sector sectorSelection)
+        |> with (ProExperience.sectors sectorSelection)
 
 
 medalSelection : SelectionSet Medal Aisf.Object.Medal
@@ -176,14 +176,14 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
 
 
 proExperienceToParams : ProExperience -> Aisf.InputObject.ProExperienceParams
-proExperienceToParams ({ id, title, companyName, description, website, contact, sector } as proExp) =
+proExperienceToParams ({ id, title, companyName, description, website, contact, sectors } as proExp) =
     { id = Model.getId proExp
     , title = title
     , companyName = companyName
     , description = description
     , website = website
     , contact = contact
-    , sector = sector |> sectorToParams
+    , sectors = sectors |> List.map sectorToParams
     }
 
 
