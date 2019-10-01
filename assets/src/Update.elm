@@ -918,9 +918,12 @@ updateCurrentSector name model =
                             }
 
                         newModel =
-                            eModel
+                            { eModel
+                                | champion = Success newChampion
+                                , sectorDropdown = eModel.sectorDropdown |> Dropdown.toggleMenu False |> Dropdown.addSelected name |> Dropdown.setQuery Nothing
+                            }
                     in
-                    ( { model | currentPage = EditChampionPage eModel }, Cmd.none )
+                    ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -943,10 +946,16 @@ changeDropdownState menuMsg model =
                         20
                         dropdown.state
                         (Model.acceptableSectors dropdown.query sectors)
+
+                newEModel =
+                    { eModel | sectorDropdown = Dropdown.setState newState eModel.sectorDropdown }
+
+                newModel =
+                    { model | currentPage = EditChampionPage newEModel }
             in
             maybeMsg
-                |> Maybe.map (\updateMsg -> update updateMsg model)
-                |> Maybe.withDefault ( model, Cmd.none )
+                |> Maybe.map (\updateMsg -> update updateMsg newModel)
+                |> Maybe.withDefault ( newModel, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
