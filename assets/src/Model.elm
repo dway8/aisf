@@ -775,7 +775,7 @@ type alias ProExperience =
     , description : String
     , website : String
     , contact : String
-    , sectors : Sectors
+    , sectors : List String
     }
 
 

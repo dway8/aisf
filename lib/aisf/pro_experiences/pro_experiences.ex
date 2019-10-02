@@ -62,6 +62,7 @@ defmodule Aisf.ProExperiences.ProExperiences do
   """
   def update_pro_experience(%ProExperience{} = pro_experience, attrs) do
     pro_experience
+    |> Repo.preload(:sectors)
     |> ProExperience.changeset(attrs)
     |> Repo.update()
   end

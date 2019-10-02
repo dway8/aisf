@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, SectorParams, SectorParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, buildSectorParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams, encodeSectorParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -94,7 +94,7 @@ type alias ProExperienceParamsRequiredFields =
     , contact : String
     , description : String
     , id : String
-    , sectors : List SectorParams
+    , sectors : List String
     , title : String
     , website : String
     }
@@ -107,7 +107,7 @@ type alias ProExperienceParams =
     , contact : String
     , description : String
     , id : String
-    , sectors : List SectorParams
+    , sectors : List String
     , title : String
     , website : String
     }
@@ -118,31 +118,4 @@ type alias ProExperienceParams =
 encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
-        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sectors", (encodeSectorParams |> Encode.list) input.sectors |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
-
-
-buildSectorParams : SectorParamsRequiredFields -> SectorParams
-buildSectorParams required =
-    { id = required.id, name = required.name }
-
-
-type alias SectorParamsRequiredFields =
-    { id : String
-    , name : String
-    }
-
-
-{-| Type for the SectorParams input object.
--}
-type alias SectorParams =
-    { id : String
-    , name : String
-    }
-
-
-{-| Encode a SectorParams into a value that can be used as an argument.
--}
-encodeSectorParams : SectorParams -> Value
-encodeSectorParams input =
-    Encode.maybeObject
-        [ ( "id", Encode.string input.id |> Just ), ( "name", Encode.string input.name |> Just ) ]
+        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sectors", (Encode.string |> Encode.list) input.sectors |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]

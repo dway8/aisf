@@ -52,7 +52,7 @@ viewSportOption currentSport sport =
 viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
     column [ spacing 4 ]
-        [ UI.viewField "Secteurs d'activité" (exp.sectors |> List.map .name |> String.join ", ")
+        [ UI.viewField "Secteurs d'activité" (exp.sectors |> String.join ", ")
         , UI.viewField "Titre" exp.title
         , UI.viewField "Nom de l'entreprise" exp.companyName
         , UI.viewField "Description" exp.description

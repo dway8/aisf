@@ -112,7 +112,7 @@ proExperienceSelection =
         |> with ProExperience.description
         |> with ProExperience.website
         |> with ProExperience.contact
-        |> with (ProExperience.sectors sectorSelection)
+        |> with (ProExperience.sectors Sector.name)
 
 
 medalSelection : SelectionSet Medal Aisf.Object.Medal
@@ -183,7 +183,7 @@ proExperienceToParams ({ id, title, companyName, description, website, contact, 
     , description = description
     , website = website
     , contact = contact
-    , sectors = sectors |> List.map sectorToParams
+    , sectors = sectors
     }
 
 
@@ -201,11 +201,4 @@ fileToParams : Attachment -> Aisf.InputObject.FileParams
 fileToParams { base64, filename } =
     { base64 = base64 |> GOA.fromMaybe
     , filename = filename
-    }
-
-
-sectorToParams : Sector -> Aisf.InputObject.SectorParams
-sectorToParams sector =
-    { id = Model.getId sector
-    , name = sector.name
     }

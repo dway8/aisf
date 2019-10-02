@@ -766,7 +766,7 @@ editProExperience id model =
                             newDropdown =
                                 experienceToEdit
                                     |> Maybe.map Editable.value
-                                    |> Maybe.map (\exp -> Dropdown.setSelected (exp.sectors |> List.map .name) eModel.sectorDropdown)
+                                    |> Maybe.map (\exp -> Dropdown.setSelected exp.sectors eModel.sectorDropdown)
                                     |> Maybe.withDefault eModel.sectorDropdown
                         in
                         ( { model
@@ -913,7 +913,7 @@ updateCurrentSector name model =
                                         |> Dict.map
                                             (\id exp ->
                                                 exp
-                                                    |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ (Model.findSectorByName sectors name |> Maybe.map List.singleton |> Maybe.withDefault []) })
+                                                    |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ [ name ] })
                                             )
                             }
 

@@ -133,7 +133,7 @@ defmodule AisfWeb.Schema do
     field(:description, non_null(:string))
     field(:title, non_null(:string))
     field(:website, non_null(:string))
-    field(:sectors, non_null(list_of(non_null(:sector_params))))
+    field(:sectors, non_null(list_of(non_null(:string))))
   end
 
   input_object :medal_params do
@@ -149,8 +149,4 @@ defmodule AisfWeb.Schema do
     field(:base64, :string)
   end
 
-  input_object :sector_params do
-    field(:id, non_null(:string))
-    field(:name, non_null(:string))
-  end
 end
