@@ -68,8 +68,8 @@ removeSelected model =
     { model | selected = [] }
 
 
-updateConfig : (String -> msg) -> Menu.UpdateConfig msg String
-updateConfig msg =
+updateConfig : (String -> msg) -> msg -> Menu.UpdateConfig msg String
+updateConfig selectMsg createMsg =
     Menu.updateConfig
         { toId = identity
         , onKeyDown =
@@ -78,7 +78,12 @@ updateConfig msg =
                     Nothing
 
                 else if code == 13 then
-                    maybeId |> Maybe.map msg
+                    case maybeId of
+                        Just id ->
+                            Just <| selectMsg id
+
+                        _ ->
+                            Just <| createMsg
 
                 else
                     Nothing
@@ -86,7 +91,7 @@ updateConfig msg =
         , onTooHigh = Nothing
         , onMouseEnter = \_ -> Nothing
         , onMouseLeave = \_ -> Nothing
-        , onMouseClick = msg >> Just
+        , onMouseClick = selectMsg >> Just
         , separateSelections = False
         }
 

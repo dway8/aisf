@@ -848,6 +848,7 @@ type Msg
     | DropdownLostFocus
     | ClosedDropdown
     | RemovedItemFromDropdown String
+    | CreatedASectorFromQuery
 
 
 type FormField
@@ -987,3 +988,8 @@ acceptableSectors query sectors =
                     |> String.toLower
                     |> String.contains (query |> Maybe.withDefault "" |> String.toLower)
             )
+
+
+createSector : String -> Sector
+createSector name =
+    Sector (Id "NEW") name

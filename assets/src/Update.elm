@@ -169,6 +169,9 @@ update msg model =
         RemovedItemFromDropdown str ->
             removeItemFromDropdown str model
 
+        CreatedASectorFromQuery ->
+            createASectorFromQuery model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -902,34 +905,36 @@ updateCurrentSector name model =
             , Cmd.none
             )
 
-        ( EditChampionPage eModel, Success sectors ) ->
-            case eModel.champion of
-                Success champion ->
-                    let
-                        newChampion =
-                            { champion
-                                | proExperiences =
-                                    champion.proExperiences
-                                        |> Dict.map
-                                            (\id exp ->
-                                                exp
-                                                    |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ [ name ] })
-                                            )
-                            }
-
-                        newModel =
-                            { eModel
-                                | champion = Success newChampion
-                                , sectorDropdown = eModel.sectorDropdown |> Dropdown.toggleMenu False |> Dropdown.addSelected name |> Dropdown.setQuery Nothing
-                            }
-                    in
-                    ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+        ( EditChampionPage eModel, _ ) ->
+            ( { model | currentPage = EditChampionPage (updateChampionWithProExperienceSector name eModel) }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
+
+
+updateChampionWithProExperienceSector : String -> EditChampionPageModel -> EditChampionPageModel
+updateChampionWithProExperienceSector sectorName eModel =
+    case eModel.champion of
+        Success champion ->
+            let
+                newChampion =
+                    { champion
+                        | proExperiences =
+                            champion.proExperiences
+                                |> Dict.map
+                                    (\id exp ->
+                                        exp
+                                            |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ [ sectorName ] })
+                                    )
+                    }
+            in
+            { eModel
+                | champion = Success newChampion
+                , sectorDropdown = eModel.sectorDropdown |> Dropdown.toggleMenu False |> Dropdown.addSelected sectorName |> Dropdown.setQuery Nothing
+            }
+
+        _ ->
+            eModel
 
 
 changeDropdownState : Menu.Msg -> Model -> ( Model, Cmd Msg )
@@ -941,7 +946,7 @@ changeDropdownState menuMsg model =
                     eModel.sectorDropdown
 
                 ( newState, maybeMsg ) =
-                    Menu.update (Dropdown.updateConfig SelectedASector)
+                    Menu.update (Dropdown.updateConfig SelectedASector CreatedASectorFromQuery)
                         menuMsg
                         20
                         dropdown.state
@@ -1022,6 +1027,29 @@ removeItemFromDropdown str model =
                     }
             in
             ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+createASectorFromQuery : Model -> ( Model, Cmd Msg )
+createASectorFromQuery model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.sectorDropdown.query
+                |> Maybe.map
+                    (\query ->
+                        let
+                            newEModel =
+                                updateChampionWithProExperienceSector query eModel
+
+                            newSectors =
+                                model.sectors
+                                    |> RD.map (\sectors -> sectors ++ [ Model.createSector query ])
+                        in
+                        ( { model | currentPage = EditChampionPage newEModel, sectors = newSectors }, Cmd.none )
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
