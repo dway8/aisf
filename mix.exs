@@ -20,7 +20,7 @@ defmodule Aisf.MixProject do
   def application do
     [
       mod: {Aisf.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :edeliver]
     ]
   end
 
@@ -48,7 +48,9 @@ defmodule Aisf.MixProject do
       {:bcrypt_elixir, "~> 2.0.3"},
       {:wallaby, "~> 0.23.0", [runtime: false, only: :test]},
       {:faker, "~> 0.12", only: [:dev, :test]},
-      {:ex_url, "~> 1.1"}
+      {:ex_url, "~> 1.1"},
+      {:edeliver, ">= 1.7.0"},
+      {:distillery, "~> 2.1", warn_missing: false}
     ]
   end
 

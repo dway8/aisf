@@ -1,0 +1,56 @@
+# .deliver/config
+
+APP="aisf"
+
+BUILD_HOST="51.91.108.44"
+BUILD_USER="debian"
+BUILD_AT="/home/debian/elix/app_build"
+
+PRODUCTION_HOSTS="51.91.108.44"
+PRODUCTION_USER="debian"
+DELIVER_TO="/home/debian/elix/app_release"
+
+pre_erlang_get_and_update_deps() {
+  local _prod_secret_path="/home/debian/elix/app_config/prod.secret.exs"
+  if [ "$TARGET_MIX_ENV" = "prod" ]; then
+    __sync_remote "
+      ln -sfn '$_prod_secret_path' '$BUILD_AT/config/prod.secret.exs'
+    "
+  fi
+}
+
+pre_erlang_clean_compile() {
+  status "Installing NPM dependencies"
+  __sync_remote "
+    [ -f ~/.profile ] && source ~/.profile
+    set -e
+
+    cd '$BUILD_AT/assets'
+    npm install $SILENCE
+
+    #elm 0.19.1
+    wget https://44a95588fe4cc47efd96-ec3c2a753a12d2be9f23ba16873acc23.ssl.cf2.rackcdn.com/elm-0.19.1-beta-1-linux
+    cp elm-0.19.1-beta-1-linux 'node_modules/.bin/elm'
+
+  "
+
+  status "Building static files"
+    __sync_remote "
+      [ -f ~/.profile ] && source ~/.profile
+      set -e
+
+      cd '$BUILD_AT'
+      mkdir -p priv/static
+      cd '$BUILD_AT/assets'
+      npm run deploy $SILENCE
+   "
+
+  status "Running phx.digest"
+  __sync_remote "
+    [ -f ~/.profile ] && source ~/.profile
+    set -e
+
+    cd '$BUILD_AT'
+    APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest $SILENCE
+  "
+}
