@@ -2,7 +2,7 @@ defmodule Aisf.ProExperiences.ProExperience do
   use Ecto.Schema
   import Ecto.Changeset
   alias Aisf.Champions.Champion
-  alias Aisf.Sectors.{Sectors, Sector}
+  alias Aisf.Sectors.Sector
   alias Aisf.Repo
 
   schema "pro_experiences" do
@@ -12,6 +12,7 @@ defmodule Aisf.ProExperiences.ProExperience do
     field(:title, :string)
     field(:website, :string)
     belongs_to(:champion, Champion)
+    field(:old_champion_id, :integer)
 
     many_to_many(:sectors, Sector, join_through: "pro_experiences_sectors")
 

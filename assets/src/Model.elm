@@ -770,11 +770,11 @@ type Sport
 
 type alias ProExperience =
     { id : Id
-    , title : String
-    , companyName : String
-    , description : String
-    , website : String
-    , contact : String
+    , title : Maybe String
+    , companyName : Maybe String
+    , description : Maybe String
+    , website : Maybe String
+    , contact : Maybe String
     , sectors : List String
     }
 
@@ -919,11 +919,11 @@ sportFromString str =
 initProExperience : ProExperience
 initProExperience =
     { id = Id "new"
-    , title = ""
-    , companyName = ""
-    , description = ""
-    , website = ""
-    , contact = ""
+    , title = Nothing
+    , companyName = Nothing
+    , description = Nothing
+    , website = Nothing
+    , contact = Nothing
     , sectors = []
     }
 

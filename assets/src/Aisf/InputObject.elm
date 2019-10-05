@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsOptionalFields, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -84,32 +84,41 @@ encodeMedalParams input =
         [ ( "competition", Encode.string input.competition |> Just ), ( "id", Encode.string input.id |> Just ), ( "medalType", Encode.int input.medalType |> Just ), ( "specialty", Encode.string input.specialty |> Just ), ( "year", Encode.int input.year |> Just ) ]
 
 
-buildProExperienceParams : ProExperienceParamsRequiredFields -> ProExperienceParams
-buildProExperienceParams required =
-    { companyName = required.companyName, contact = required.contact, description = required.description, id = required.id, sectors = required.sectors, title = required.title, website = required.website }
+buildProExperienceParams : ProExperienceParamsRequiredFields -> (ProExperienceParamsOptionalFields -> ProExperienceParamsOptionalFields) -> ProExperienceParams
+buildProExperienceParams required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { companyName = Absent, contact = Absent, description = Absent, title = Absent, website = Absent }
+    in
+    { companyName = optionals.companyName, contact = optionals.contact, description = optionals.description, id = required.id, sectors = required.sectors, title = optionals.title, website = optionals.website }
 
 
 type alias ProExperienceParamsRequiredFields =
-    { companyName : String
-    , contact : String
-    , description : String
-    , id : String
+    { id : String
     , sectors : List String
-    , title : String
-    , website : String
+    }
+
+
+type alias ProExperienceParamsOptionalFields =
+    { companyName : OptionalArgument String
+    , contact : OptionalArgument String
+    , description : OptionalArgument String
+    , title : OptionalArgument String
+    , website : OptionalArgument String
     }
 
 
 {-| Type for the ProExperienceParams input object.
 -}
 type alias ProExperienceParams =
-    { companyName : String
-    , contact : String
-    , description : String
+    { companyName : OptionalArgument String
+    , contact : OptionalArgument String
+    , description : OptionalArgument String
     , id : String
     , sectors : List String
-    , title : String
-    , website : String
+    , title : OptionalArgument String
+    , website : OptionalArgument String
     }
 
 
@@ -118,4 +127,4 @@ type alias ProExperienceParams =
 encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
-        [ ( "companyName", Encode.string input.companyName |> Just ), ( "contact", Encode.string input.contact |> Just ), ( "description", Encode.string input.description |> Just ), ( "id", Encode.string input.id |> Just ), ( "sectors", (Encode.string |> Encode.list) input.sectors |> Just ), ( "title", Encode.string input.title |> Just ), ( "website", Encode.string input.website |> Just ) ]
+        [ ( "companyName", Encode.string |> Encode.optional input.companyName ), ( "contact", Encode.string |> Encode.optional input.contact ), ( "description", Encode.string |> Encode.optional input.description ), ( "id", Encode.string input.id |> Just ), ( "sectors", (Encode.string |> Encode.list) input.sectors |> Just ), ( "title", Encode.string |> Encode.optional input.title ), ( "website", Encode.string |> Encode.optional input.website ) ]

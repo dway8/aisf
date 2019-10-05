@@ -53,11 +53,11 @@ viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
     column [ spacing 4 ]
         [ UI.viewField "Secteurs d'activité" (exp.sectors |> String.join ", ")
-        , UI.viewField "Titre" exp.title
-        , UI.viewField "Nom de l'entreprise" exp.companyName
-        , UI.viewField "Description" exp.description
-        , UI.viewField "Site internet" exp.website
-        , UI.viewField "Contact" exp.contact
+        , UI.viewField "Titre" (exp.title |> Maybe.withDefault "Non renseigné")
+        , UI.viewField "Nom de l'entreprise" (exp.companyName |> Maybe.withDefault "Non renseigné")
+        , UI.viewField "Description" (exp.description |> Maybe.withDefault "Non renseigné")
+        , UI.viewField "Site internet" (exp.website |> Maybe.withDefault "Non renseigné")
+        , UI.viewField "Contact" (exp.contact |> Maybe.withDefault "Non renseigné")
         ]
 
 

@@ -6,6 +6,7 @@ defmodule Aisf.Sectors.Sector do
 
   schema "sectors" do
     field(:name, :string)
+    field(:old_id, :integer)
 
     timestamps()
   end

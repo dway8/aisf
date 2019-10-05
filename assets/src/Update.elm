@@ -366,19 +366,19 @@ updateProExperience id field val model =
                                                 (\proExperience ->
                                                     case field of
                                                         Title ->
-                                                            { proExperience | title = val }
+                                                            { proExperience | title = Just val }
 
                                                         CompanyName ->
-                                                            { proExperience | companyName = val }
+                                                            { proExperience | companyName = Just val }
 
                                                         Description ->
-                                                            { proExperience | description = val }
+                                                            { proExperience | description = Just val }
 
                                                         Website ->
-                                                            { proExperience | website = val }
+                                                            { proExperience | website = Just val }
 
                                                         Contact ->
-                                                            { proExperience | contact = val }
+                                                            { proExperience | contact = Just val }
 
                                                         _ ->
                                                             proExperience

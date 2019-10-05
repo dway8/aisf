@@ -178,11 +178,11 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
 proExperienceToParams : ProExperience -> Aisf.InputObject.ProExperienceParams
 proExperienceToParams ({ id, title, companyName, description, website, contact, sectors } as proExp) =
     { id = Model.getId proExp
-    , title = title
-    , companyName = companyName
-    , description = description
-    , website = website
-    , contact = contact
+    , title = title |> GOA.fromMaybe
+    , companyName = companyName |> GOA.fromMaybe
+    , description = description |> GOA.fromMaybe
+    , website = website |> GOA.fromMaybe
+    , contact = contact |> GOA.fromMaybe
     , sectors = sectors
     }
 

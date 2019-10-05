@@ -34,12 +34,12 @@ defmodule AisfWeb.Schema do
 
   object :pro_experience do
     field(:id, non_null(:id))
-    field(:company_name, non_null(:string))
-    field(:contact, non_null(:string))
-    field(:description, non_null(:string))
+    field(:company_name, :string)
+    field(:contact, :string)
+    field(:description, :string)
     field(:sectors, non_null(list_of(non_null(:sector))))
-    field(:title, non_null(:string))
-    field(:website, non_null(:string))
+    field(:title, :string)
+    field(:website, :string)
   end
 
   object :medal do
@@ -128,11 +128,11 @@ defmodule AisfWeb.Schema do
 
   input_object :pro_experience_params do
     field(:id, non_null(:string))
-    field(:company_name, non_null(:string))
-    field(:contact, non_null(:string))
-    field(:description, non_null(:string))
-    field(:title, non_null(:string))
-    field(:website, non_null(:string))
+    field(:company_name, :string)
+    field(:contact, :string)
+    field(:description, :string)
+    field(:title, :string)
+    field(:website, :string)
     field(:sectors, non_null(list_of(non_null(:string))))
   end
 
@@ -148,5 +148,4 @@ defmodule AisfWeb.Schema do
     field(:filename, non_null(:string))
     field(:base64, :string)
   end
-
 end

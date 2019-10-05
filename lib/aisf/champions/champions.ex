@@ -35,7 +35,8 @@ defmodule Aisf.Champions do
     Repo.all(
       from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
     )
-    |> Repo.preload([:pro_experiences, :medals])
+    |> Repo.preload(pro_experiences: [:sectors])
+    |> Repo.preload(:medals)
   end
 
   @doc """
@@ -45,7 +46,8 @@ defmodule Aisf.Champions do
   """
   def get_champion!(id) do
     Repo.get!(Champion, id)
-    |> Repo.preload([:pro_experiences, :medals])
+    |> Repo.preload(pro_experiences: [:sectors])
+    |> Repo.preload(:medals)
   end
 
   @doc """
@@ -75,7 +77,10 @@ defmodule Aisf.Champions do
           attrs.medals
           |> Enum.map(fn m -> Medals.create_medal(champion, m) end)
 
-          {:ok, champion |> Repo.preload([:pro_experiences, :medals])}
+          {:ok,
+           champion
+           |> Repo.preload(pro_experiences: [:sectors])
+           |> Repo.preload(:medals)}
         end).()
   end
 
@@ -135,7 +140,10 @@ defmodule Aisf.Champions do
             end
           end)
 
-          {:ok, champion |> Repo.preload([:pro_experiences, :medals])}
+          {:ok,
+           champion
+           |> Repo.preload(pro_experiences: [:sectors])
+           |> Repo.preload(:medals)}
         end).()
   end
 

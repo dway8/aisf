@@ -369,19 +369,19 @@ getProExperienceFormFieldData : FormField -> ProExperience -> ( String, String )
 getProExperienceFormFieldData field exp =
     case field of
         Title ->
-            ( "Titre", exp.title )
+            ( "Titre", exp.title |> Maybe.withDefault "" )
 
         CompanyName ->
-            ( "Nom de l'entreprise", exp.companyName )
+            ( "Nom de l'entreprise", exp.companyName |> Maybe.withDefault "" )
 
         Description ->
-            ( "Description", exp.description )
+            ( "Description", exp.description |> Maybe.withDefault "" )
 
         Website ->
-            ( "Site internet", exp.website )
+            ( "Site internet", exp.website |> Maybe.withDefault "" )
 
         Contact ->
-            ( "Contact", exp.contact )
+            ( "Contact", exp.contact |> Maybe.withDefault "" )
 
         _ ->
             ( "", "" )

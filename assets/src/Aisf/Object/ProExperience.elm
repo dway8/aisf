@@ -19,19 +19,19 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-companyName : SelectionSet String Aisf.Object.ProExperience
+companyName : SelectionSet (Maybe String) Aisf.Object.ProExperience
 companyName =
-    Object.selectionForField "String" "companyName" [] Decode.string
+    Object.selectionForField "(Maybe String)" "companyName" [] (Decode.string |> Decode.nullable)
 
 
-contact : SelectionSet String Aisf.Object.ProExperience
+contact : SelectionSet (Maybe String) Aisf.Object.ProExperience
 contact =
-    Object.selectionForField "String" "contact" [] Decode.string
+    Object.selectionForField "(Maybe String)" "contact" [] (Decode.string |> Decode.nullable)
 
 
-description : SelectionSet String Aisf.Object.ProExperience
+description : SelectionSet (Maybe String) Aisf.Object.ProExperience
 description =
-    Object.selectionForField "String" "description" [] Decode.string
+    Object.selectionForField "(Maybe String)" "description" [] (Decode.string |> Decode.nullable)
 
 
 id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.ProExperience
@@ -44,11 +44,11 @@ sectors object_ =
     Object.selectionForCompositeField "sectors" [] object_ (identity >> Decode.list)
 
 
-title : SelectionSet String Aisf.Object.ProExperience
+title : SelectionSet (Maybe String) Aisf.Object.ProExperience
 title =
-    Object.selectionForField "String" "title" [] Decode.string
+    Object.selectionForField "(Maybe String)" "title" [] (Decode.string |> Decode.nullable)
 
 
-website : SelectionSet String Aisf.Object.ProExperience
+website : SelectionSet (Maybe String) Aisf.Object.ProExperience
 website =
-    Object.selectionForField "String" "website" [] Decode.string
+    Object.selectionForField "(Maybe String)" "website" [] (Decode.string |> Decode.nullable)
