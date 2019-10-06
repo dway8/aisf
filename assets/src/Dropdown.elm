@@ -212,7 +212,11 @@ viewDropdownInput config dropdownModel itemsList =
                             html <|
                                 Html.div [ HA.class "autocomplete-menu" ] <|
                                     if itemsList == [] then
-                                        [ Html.text "Aucun résultat" ]
+                                        [ Html.text <|
+                                            "Aucun résultat, appuyez sur Entrée pour ajouter \""
+                                                ++ (dropdownModel.query |> Maybe.withDefault "" |> Utils.capitalize)
+                                                ++ "\""
+                                        ]
 
                                     else
                                         [ Html.map mappingMsg <|

@@ -23,6 +23,7 @@ import Route exposing (Route(..))
 import Table
 import Task
 import Url exposing (Url)
+import Utils
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -1040,12 +1041,15 @@ createASectorFromQuery model =
                 |> Maybe.map
                     (\query ->
                         let
+                            capitalizedQuery =
+                                Utils.capitalize query
+
                             newEModel =
-                                updateChampionWithProExperienceSector query eModel
+                                updateChampionWithProExperienceSector capitalizedQuery eModel
 
                             newSectors =
                                 model.sectors
-                                    |> RD.map (\sectors -> sectors ++ [ Model.createSector query ])
+                                    |> RD.map (\sectors -> sectors ++ [ Model.createSector capitalizedQuery ])
                         in
                         ( { model | currentPage = EditChampionPage newEModel, sectors = newSectors }, Cmd.none )
                     )

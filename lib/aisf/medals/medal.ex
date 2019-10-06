@@ -10,7 +10,6 @@ defmodule Aisf.Medals.Medal do
     field(:specialty, :string)
     field(:year, :integer)
     belongs_to(:champion, Champion)
-    field(:old_champion_id, :integer)
 
     timestamps()
   end

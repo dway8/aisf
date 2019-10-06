@@ -12,7 +12,6 @@ defmodule Aisf.Champions.Champion do
     field(:address, :string)
     field(:phone_number, :string)
     field(:website, :string)
-    field(:password, :string)
     field(:sport, :string)
     has_many(:pro_experiences, ProExperience)
     field(:years_in_french_team, {:array, :integer})
@@ -44,7 +43,6 @@ defmodule Aisf.Champions.Champion do
       :address,
       :phone_number,
       :website,
-      :password,
       :sport,
       :years_in_french_team,
       :is_member,
@@ -63,7 +61,6 @@ defmodule Aisf.Champions.Champion do
       :first_name,
       :last_name,
       :email,
-      :password,
       :sport,
       :years_in_french_team,
       :is_member,

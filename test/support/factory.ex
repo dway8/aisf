@@ -10,7 +10,6 @@ defmodule AisfWeb.Factory do
         last_name: Faker.Name.last_name(),
         first_name: Faker.Name.first_name(),
         email: Faker.Internet.free_email(),
-        password: Faker.UUID.v4(),
         sport: Enum.random(@sports),
         years_in_french_team: [],
         pro_experiences: [],

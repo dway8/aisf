@@ -22,7 +22,6 @@ defmodule Aisf.DatabaseSeeder do
           last_name: Faker.Name.last_name(),
           first_name: Faker.Name.first_name(),
           email: Faker.Internet.free_email(),
-          password: Faker.UUID.v4(),
           sport: sport,
           years_in_french_team: years_in_french_team,
           is_member: Enum.random([true, false]),

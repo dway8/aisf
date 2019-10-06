@@ -12,7 +12,6 @@ defmodule Aisf.ProExperiences.ProExperience do
     field(:title, :string)
     field(:website, :string)
     belongs_to(:champion, Champion)
-    field(:old_champion_id, :integer)
 
     many_to_many(:sectors, Sector, join_through: "pro_experiences_sectors")
 
@@ -50,6 +49,6 @@ defmodule Aisf.ProExperiences.ProExperience do
 
   defp get_or_insert_sector(name) do
     Repo.get_by(Sector, name: name) ||
-      Repo.insert!(Sector, %Sector{name: name})
+      Repo.insert!(%Sector{name: String.capitalize(name)})
   end
 end

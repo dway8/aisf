@@ -63,10 +63,6 @@ defmodule Aisf.Champions do
   Creates a champion.
   """
   def create_champion(attrs \\ %{}) do
-    attrs =
-      attrs
-      |> add_pass_hash()
-
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
@@ -82,13 +78,6 @@ defmodule Aisf.Champions do
            |> Repo.preload(pro_experiences: [:sectors])
            |> Repo.preload(:medals)}
         end).()
-  end
-
-  defp add_pass_hash(attrs) do
-    password = Ecto.UUID.generate() |> binary_part(16, 16)
-
-    attrs
-    |> Map.put(:password, Bcrypt.hash_pwd_salt(password))
   end
 
   @doc """
