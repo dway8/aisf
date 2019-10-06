@@ -394,34 +394,23 @@ viewProfilePicture profilePicture =
             Nothing ->
                 el [ width fill ] <|
                     column [ spacing 10, padding 10, centerX ]
-                        [ Input.button
-                            [ Background.color UI.Color.green
-                            , padding 10
-                            , Border.rounded 5
-                            , Font.color UI.Color.white
-                            , width fill
-                            , Font.center
-                            ]
-                            { onPress = Just BeganFileSelection
-                            , label = text "Uploader une photo"
-                            }
+                        [ text "Uploader une photo"
+                            |> Button.makeButton (Just BeganFileSelection)
+                            |> Button.withBackgroundColor UI.Color.green
+                            |> Button.viewButton
                         ]
 
             Just { filename, base64 } ->
-                case base64 of
-                    Nothing ->
-                        row [ spacing 10 ]
-                            [ el [] <| text "Récupération du fichier en cours..."
-                            , Input.button
-                                [ Border.rounded 3
-                                , padding 10
-                                , Background.color UI.Color.red
-                                , Font.color UI.Color.white
-                                ]
-                                { onPress = Just CancelledFileSelection
-                                , label = text "Annuler"
-                                }
-                            ]
-
-                    Just url ->
-                        image [ width <| px 200 ] { src = url, description = "Photo de profil" }
+                column [ UI.defaultSpacing, width fill ]
+                    [ let
+                        src =
+                            base64 |> Maybe.withDefault ("/uploads/" ++ filename)
+                      in
+                      image [ width <| px 200 ] { src = src, description = "Photo de profil" }
+                    , el [ centerX ]
+                        (text "Changer la photo"
+                            |> Button.makeButton (Just BeganFileSelection)
+                            |> Button.withBackgroundColor UI.Color.green
+                            |> Button.viewButton
+                        )
+                    ]

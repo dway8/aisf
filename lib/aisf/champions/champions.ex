@@ -4,6 +4,7 @@ defmodule Aisf.Champions do
   """
 
   import Ecto.Query, warn: false
+  import Logger
   alias Aisf.Repo
 
   alias Aisf.Champions.Champion
@@ -93,8 +94,10 @@ defmodule Aisf.Champions do
         extension = Path.extname(filename)
         new_filename = "#{champion.id}-profile#{extension}"
 
-        File.mkdir_p("media/")
-        File.cp(file.path, "media/" <> new_filename)
+        upload_dir = Application.get_env(:aisf, AisfWeb.Endpoint)[:upload_dir]
+        Logger.info("Upload directory: #{upload_dir}")
+        File.mkdir_p(upload_dir)
+        File.cp(file.path, "#{upload_dir}/#{new_filename}")
 
         attrs
         |> Map.put(:profile_picture_filename, new_filename)

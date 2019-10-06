@@ -74,3 +74,6 @@ config :aisf, Aisf.Repo,
   database: "aisf_dev",
   hostname: "localhost",
   pool_size: 10
+
+# File uploads
+config :aisf, AisfWeb.Endpoint, upload_dir: "media"

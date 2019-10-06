@@ -60,11 +60,9 @@ defmodule Aisf.Champions.Champion do
     |> validate_required([
       :first_name,
       :last_name,
-      :email,
       :sport,
       :years_in_french_team,
-      :is_member,
-      :intro
+      :is_member
     ])
   end
 

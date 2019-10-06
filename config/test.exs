@@ -29,3 +29,6 @@ config :wallaby,
   screenshot_dir: "/tmp/screenshots"
 
 # max_wait_time: 20_000
+
+# File uploads
+config :aisf, AisfWeb.Endpoint, upload_dir: "media"
