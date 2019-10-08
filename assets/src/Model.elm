@@ -1001,3 +1001,56 @@ acceptableSectors query sectors =
 createSector : String -> Sector
 createSector name =
     Sector (Id "NEW") name
+
+
+getSportIcon : Sport -> String
+getSportIcon sport =
+    "picto_"
+        ++ (case sport of
+                SkiAlpin ->
+                    "alpin"
+
+                SkiDeFond ->
+                    "fond"
+
+                Biathlon ->
+                    "biathlon"
+
+                CombineNordique ->
+                    "nordique"
+
+                Freestyle ->
+                    "freestyle"
+
+                Saut ->
+                    "saut"
+
+                Snowboard ->
+                    "snowboard"
+           )
+        ++ ".png"
+
+
+getMedalIcon : Competition -> MedalType -> String
+getMedalIcon competition medalType =
+    (case competition of
+        OlympicGames ->
+            "jo"
+
+        WorldChampionships ->
+            "champion_du_monde"
+
+        WorldCup ->
+            "globe"
+    )
+        ++ (case medalType of
+                Gold ->
+                    "_or"
+
+                Silver ->
+                    "_ar"
+
+                Bronze ->
+                    "_br"
+           )
+        ++ ".png"

@@ -721,15 +721,28 @@ handleChampionsResponse resp model =
 
 handleTableMsg : Table.State -> Model -> ( Model, Cmd msg )
 handleTableMsg tableState model =
-    case model.currentPage of
-        MembersPage memModel ->
-            ( { model | currentPage = MembersPage { memModel | tableState = tableState } }, Cmd.none )
+    let
+        updateFn m =
+            { m | tableState = tableState }
 
-        MedalsPage mModel ->
-            ( { model | currentPage = MedalsPage { mModel | tableState = tableState } }, Cmd.none )
+        newPage =
+            case model.currentPage of
+                MembersPage memModel ->
+                    MembersPage (updateFn memModel)
 
-        _ ->
-            ( model, Cmd.none )
+                MedalsPage mModel ->
+                    MedalsPage (updateFn mModel)
+
+                TeamsPage tModel ->
+                    TeamsPage (updateFn tModel)
+
+                AdminPage aModel ->
+                    AdminPage (updateFn aModel)
+
+                _ ->
+                    model.currentPage
+    in
+    ( { model | currentPage = newPage }, Cmd.none )
 
 
 selectChampion : Id -> Model -> ( Model, Cmd Msg )

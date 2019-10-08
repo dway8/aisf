@@ -6,7 +6,7 @@ import Common
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
+import Model exposing (Champion, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 
@@ -16,7 +16,7 @@ init year =
     ( { champions = Loading
       , sport = Nothing
       , specialty = Nothing
-      , tableState = Table.initialSort ""
+      , tableState = Table.initialSort "ANNÉE"
       , currentYear = year
       , selectedYear = Nothing
       , searchQuery = Nothing
@@ -55,6 +55,7 @@ view model =
 type alias MedalFromChampion =
     { id : Id
     , name : String
+    , competition : Competition
     , medalType : MedalType
     , sport : Sport
     , specialty : Specialty
@@ -72,6 +73,7 @@ getMedalsFromChampions champions =
                         (\medal ->
                             { id = champion.id
                             , name = Model.getName champion
+                            , competition = medal.competition
                             , medalType = medal.medalType
                             , sport = champion.sport
                             , specialty = medal.specialty
@@ -124,7 +126,18 @@ tableColumns : List (Table.Column MedalFromChampion Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
-        , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.medalTypeToDisplay medal.medalType)
+        , viewData =
+            \medal ->
+                Common.centeredCell []
+                    (Html.img
+                        [ HA.style "max-width" "25px"
+                        , HA.style "max-height" "25px"
+                        , HA.style "object-fit" "contain"
+                        , HA.src <| "images/" ++ Model.getMedalIcon medal.competition medal.medalType
+                        , HA.title <| Model.medalTypeToDisplay medal.medalType
+                        ]
+                        []
+                    )
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn
@@ -139,7 +152,7 @@ tableColumns =
         }
     , Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \medal -> Common.defaultCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
+        , viewData = \medal -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
     ]

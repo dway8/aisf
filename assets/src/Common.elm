@@ -136,6 +136,11 @@ defaultCell attrs htmlEl =
     Table.HtmlDetails (HA.style "vertical-align" "middle" :: [ HA.height 40 ] ++ attrs) [ htmlEl ]
 
 
+centeredCell : List (Html.Attribute msg) -> Html.Html msg -> Table.HtmlDetails msg
+centeredCell attrs htmlEl =
+    Table.HtmlDetails ([ HA.style "vertical-align" "middle", HA.style "text-align" "center" ] ++ [ HA.height 40 ] ++ attrs) [ htmlEl ]
+
+
 nameColumn : Table.Column Champion Msg
 nameColumn =
     Table.veryCustomColumn
@@ -151,20 +156,44 @@ profilePictureColumn =
         { name = ""
         , viewData =
             \champion ->
-                defaultCell [] <|
-                    case champion.profilePicture of
-                        Just { filename } ->
-                            Html.img
-                                [ HA.style "max-width" "35px"
-                                , HA.style "max-height" "35px"
-                                , HA.style "object-fit" "contain"
-                                , HA.src <| "/uploads/" ++ filename
-                                ]
-                                []
+                centeredCell [] <|
+                    let
+                        src =
+                            case champion.profilePicture of
+                                Just { filename } ->
+                                    "/uploads/" ++ filename
 
-                        Nothing ->
-                            Html.text ""
+                                _ ->
+                                    "images/no-profile-pic.jpg"
+                    in
+                    Html.img
+                        [ HA.style "max-width" "35px"
+                        , HA.style "max-height" "35px"
+                        , HA.style "object-fit" "contain"
+                        , HA.src src
+                        ]
+                        []
         , sorter = Table.unsortable
+        }
+
+
+sportColumn : Table.Column { a | sport : Sport } Msg
+sportColumn =
+    Table.veryCustomColumn
+        { name = "DISCIPLINE"
+        , viewData =
+            \champion ->
+                centeredCell []
+                    (Html.img
+                        [ HA.style "max-width" "35px"
+                        , HA.style "max-height" "35px"
+                        , HA.style "object-fit" "contain"
+                        , HA.src <| "images/" ++ Model.getSportIcon champion.sport
+                        , HA.title <| Model.sportToString champion.sport
+                        ]
+                        []
+                    )
+        , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
         }
 
 
