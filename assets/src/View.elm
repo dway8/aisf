@@ -32,15 +32,19 @@ viewBody model =
         [ Font.family
             [ Font.typeface "Open Sans", Font.typeface "Roboto", Font.typeface "Arial" ]
         , alignLeft
-        , Font.size 16
-        , padding 20
+        , UI.mediumFont
+        , UI.largePadding
         , width fill
-        , height fill
         , Font.color UI.textColor
         ]
     <|
-        column [ width fill, height fill, spacing 30 ]
-            [ viewMenu model.currentPage
+        column [ width fill, spacing 30 ]
+            [ case model.currentPage of
+                EditChampionPage _ ->
+                    none
+
+                _ ->
+                    viewMenu model.currentPage
             , case model.currentPage of
                 MembersPage membersModel ->
                     Page.Members.view membersModel
@@ -52,7 +56,7 @@ viewBody model =
                     Page.Teams.view teamsModel
 
                 ChampionPage championModel ->
-                    Page.Champion.view championModel
+                    Page.Champion.view model.isAdmin championModel
 
                 EditChampionPage editChampionModel ->
                     Page.EditChampion.view model.sectors model.currentYear editChampionModel

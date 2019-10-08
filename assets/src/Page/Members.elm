@@ -73,11 +73,8 @@ tableConfig =
 
 tableColumns : List (Table.Column Champion Msg)
 tableColumns =
-    [ Table.veryCustomColumn
-        { name = "NOM / PRÉNOM"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.getName champion)
-        , sorter = Table.decreasingOrIncreasingBy .lastName
-        }
+    [ Common.profilePictureColumn
+    , Common.nameColumn
     , Table.veryCustomColumn
         { name = "DISCIPLINE"
         , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.sportToString champion.sport)

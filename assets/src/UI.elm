@@ -20,6 +20,19 @@ defaultLayout attrs =
     layoutWith { options = [ defaultFocusStyle ] } attrs
 
 
+defaultLayoutForTable : Element msg -> Html.Html msg
+defaultLayoutForTable =
+    layoutWith { options = [ noStaticStyleSheet, defaultFocusStyle ] }
+        [ mediumFont
+        , Font.family
+            [ Font.typeface "Open Sans"
+            , Font.typeface "Roboto"
+            , Font.typeface "Arial"
+            ]
+        , Font.color textColor
+        ]
+
+
 defaultFocusStyle : Option
 defaultFocusStyle =
     focusStyle <|

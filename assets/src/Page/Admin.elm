@@ -12,6 +12,8 @@ import Model exposing (AdminPageModel, Champion, Msg(..), Sector, Sectors, Sport
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
+import UI.Button as Button
+import UI.Color
 
 
 init : ( AdminPageModel, Cmd Msg )
@@ -34,7 +36,14 @@ view rdSectors model =
             , Common.sportSelector True model.sport
             , sectorSelector rdSectors model.sector
             ]
-        , link [] { url = "/champions/new", label = el [] <| text "Ajouter champion" }
+        , link []
+            { url = "/champions/new"
+            , label =
+                text "Ajouter un champion"
+                    |> Button.makeButton Nothing
+                    |> Button.withBackgroundColor UI.Color.green
+                    |> Button.viewButton
+            }
         , case model.champions of
             Success champions ->
                 champions
@@ -94,11 +103,8 @@ tableConfig =
 
 tableColumns : List (Table.Column Champion Msg)
 tableColumns =
-    [ Table.veryCustomColumn
-        { name = "NOM / PRÉNOM"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.getName champion)
-        , sorter = Table.decreasingOrIncreasingBy .lastName
-        }
+    [ Common.profilePictureColumn
+    , Common.nameColumn
     , Table.veryCustomColumn
         { name = "DISCIPLINE"
         , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.sportToString champion.sport)

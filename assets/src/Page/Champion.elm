@@ -11,6 +11,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
 import UI.Color
+import Utils
 
 
 init : Id -> ( ChampionPageModel, Cmd Msg )
@@ -18,22 +19,29 @@ init id =
     ( { id = id, champion = Loading }, Api.getChampion id )
 
 
-view : ChampionPageModel -> Element Msg
-view { id, champion } =
-    column [ spacing 10 ]
-        [ link []
-            { url = "/champions"
-            , label = row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
-            }
-            |> Button.makeButton Nothing
-            |> Button.withBackgroundColor UI.Color.lighterGrey
-            |> Button.withAttrs []
-            |> Button.viewButton
+view : Bool -> ChampionPageModel -> Element Msg
+view isAdmin { id, champion } =
+    column [ spacing 10, width fill ]
+        [ row [ UI.largeSpacing ]
+            [ row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
+                |> Button.makeButton (Just GoBack)
+                |> Button.withBackgroundColor UI.Color.lighterGrey
+                |> Button.withAttrs []
+                |> Button.viewButton
+            , Utils.viewIf
+                isAdmin
+                (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "edit", text <| "Éditer la fiche" ]
+                    |> Button.makeButton (Just <| PressedEditChampionButton id)
+                    |> Button.withBackgroundColor UI.Color.orange
+                    |> Button.withAttrs []
+                    |> Button.viewButton
+                )
+            ]
         , case champion of
             Success champ ->
                 column [ UI.largeSpacing ]
                     [ row [ UI.largeSpacing ]
-                        [ viewProfilePicture champ.profilePicture
+                        [ Common.viewProfilePicture 200 champ.profilePicture
                         , column [ UI.defaultSpacing ]
                             [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
                             , column [ spacing 4 ]
@@ -87,17 +95,6 @@ view { id, champion } =
             _ ->
                 text "Une erreur s'est produite."
         ]
-
-
-viewProfilePicture : Maybe Attachment -> Element Msg
-viewProfilePicture profilePicture =
-    el [ width <| px 200 ] <|
-        case profilePicture of
-            Nothing ->
-                el [ width fill ] none
-
-            Just { filename } ->
-                image [ width <| px 200 ] { src = "/uploads/" ++ filename, description = "Photo de profil" }
 
 
 viewHighlights : List String -> Element Msg

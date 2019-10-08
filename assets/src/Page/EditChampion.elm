@@ -108,21 +108,22 @@ championToForm champion =
 
 view : RemoteData (Graphql.Http.Error Sectors) Sectors -> Year -> EditChampionPageModel -> Element Msg
 view rdSectors currentYear model =
-    column [ UI.largeSpacing ]
+    column [ UI.largeSpacing, width fill ]
         [ UI.heading 1
             (el [ Font.bold, Font.size 18 ] <|
                 text
                     (if model.id == Nothing then
-                        "AJOUTER CHAMPION"
+                        "AJOUTER UN CHAMPION"
 
                      else
-                        "ÉDITER CHAMPION"
+                        "ÉDITER LA FICHE CHAMPION"
                     )
             )
         , case ( model.champion, rdSectors ) of
             ( Success champion, Success sectors ) ->
                 column [ UI.largeSpacing ]
-                    [ row [ UI.largeSpacing ]
+                    [ viewButtons
+                    , row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
                         , column [ UI.defaultSpacing ]
                             [ viewChampionTextInput FirstName champion
@@ -140,11 +141,7 @@ view rdSectors currentYear model =
                     , editProExperiences sectors model.sectorDropdown champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
-                    , text "Enregistrer"
-                        |> Button.makeButton (Just PressedSaveChampionButton)
-                        |> Button.withBackgroundColor UI.Color.green
-                        |> Button.withAttrs [ htmlAttribute <| HA.id "save-champion-btn" ]
-                        |> Button.viewButton
+                    , viewButtons
                     ]
 
             _ ->
@@ -463,5 +460,19 @@ editHighlights { highlights } =
         , text "Ajouter un fait marquant"
             |> Button.makeButton (Just PressedAddHighlightButton)
             |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
+        ]
+
+
+viewButtons =
+    row [ UI.largeSpacing ]
+        [ text "Annuler"
+            |> Button.makeButton (Just GoBack)
+            |> Button.withBackgroundColor UI.Color.lighterGrey
+            |> Button.viewButton
+        , text "Enregistrer les modifications"
+            |> Button.makeButton (Just PressedSaveChampionButton)
+            |> Button.withBackgroundColor UI.Color.green
+            |> Button.withAttrs [ htmlAttribute <| HA.id "save-champion-btn" ]
             |> Button.viewButton
         ]

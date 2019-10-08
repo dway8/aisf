@@ -43,6 +43,9 @@ update msg model =
                 External _ ->
                     ( model, Cmd.none )
 
+        GoBack ->
+            goBack model
+
         ChampionSelected id ->
             selectChampion id model
 
@@ -191,6 +194,9 @@ update msg model =
         PressedConfirmHighlightButton id ->
             confirmHighlight id model
 
+        PressedEditChampionButton id ->
+            editChampion id model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -200,6 +206,11 @@ handleUrlChange newLocation model =
                 |> getPageAndCmdFromRoute model.currentYear model.isAdmin model.key
     in
     ( { model | currentPage = page }, cmd )
+
+
+goBack : Model -> ( Model, Cmd Msg )
+goBack model =
+    ( model, Nav.back model.key 1 )
 
 
 getPageAndCmdFromRoute : Year -> Bool -> Nav.Key -> Route -> ( Page, Cmd Msg )
@@ -723,12 +734,7 @@ handleTableMsg tableState model =
 
 selectChampion : Id -> Model -> ( Model, Cmd Msg )
 selectChampion (Id id) model =
-    case model.currentPage of
-        AdminPage _ ->
-            ( model, Nav.pushUrl model.key ("/champions/edit/" ++ id) )
-
-        _ ->
-            ( model, Nav.pushUrl model.key ("/champions/" ++ id) )
+    ( model, Nav.pushUrl model.key ("/champions/" ++ id) )
 
 
 handleChampionResponse : RemoteData (Graphql.Http.Error Champion) Champion -> Model -> ( Model, Cmd Msg )
@@ -1236,3 +1242,12 @@ confirmHighlight id model =
 
         _ ->
             ( model, Cmd.none )
+
+
+editChampion : Id -> Model -> ( Model, Cmd Msg )
+editChampion (Id id) model =
+    if model.isAdmin then
+        ( model, Nav.pushUrl model.key ("/champions/edit/" ++ id) )
+
+    else
+        ( model, Cmd.none )

@@ -133,7 +133,39 @@ toRowAttrs champion =
 
 defaultCell : List (Html.Attribute msg) -> Html.Html msg -> Table.HtmlDetails msg
 defaultCell attrs htmlEl =
-    Table.HtmlDetails (HA.style "vertical-align" "middle" :: attrs) [ htmlEl ]
+    Table.HtmlDetails (HA.style "vertical-align" "middle" :: [ HA.height 40 ] ++ attrs) [ htmlEl ]
+
+
+nameColumn : Table.Column Champion Msg
+nameColumn =
+    Table.veryCustomColumn
+        { name = "NOM / PRÉNOM"
+        , viewData = \champion -> defaultCell [] (Html.text <| Model.getName champion)
+        , sorter = Table.decreasingOrIncreasingBy .lastName
+        }
+
+
+profilePictureColumn : Table.Column Champion Msg
+profilePictureColumn =
+    Table.veryCustomColumn
+        { name = ""
+        , viewData =
+            \champion ->
+                defaultCell [] <|
+                    case champion.profilePicture of
+                        Just { filename } ->
+                            Html.img
+                                [ HA.style "max-width" "35px"
+                                , HA.style "max-height" "35px"
+                                , HA.style "object-fit" "contain"
+                                , HA.src <| "/uploads/" ++ filename
+                                ]
+                                []
+
+                        Nothing ->
+                            Html.text ""
+        , sorter = Table.unsortable
+        }
 
 
 
@@ -203,3 +235,14 @@ filterBySearchQuery query champions =
                         String.contains lowerStr (String.toLower champ.lastName)
                             || String.contains lowerStr (String.toLower champ.firstName)
                     )
+
+
+viewProfilePicture : Int -> Maybe Attachment -> Element Msg
+viewProfilePicture widthPx profilePicture =
+    el [ width <| px widthPx ] <|
+        case profilePicture of
+            Nothing ->
+                el [ width fill ] none
+
+            Just { filename } ->
+                image [ width <| px widthPx ] { src = "/uploads/" ++ filename, description = "Photo de profil" }

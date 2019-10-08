@@ -855,6 +855,8 @@ type Msg
     | CancelledHighlightEdition Int
     | UpdatedHighlight Int String
     | PressedConfirmHighlightButton Int
+    | GoBack
+    | PressedEditChampionButton Id
 
 
 type FormField
