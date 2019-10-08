@@ -60,7 +60,7 @@ initChampionForm =
     , medals = Dict.empty
     , isMember = False
     , intro = Nothing
-    , highlights = []
+    , highlights = Dict.empty
     , profilePicture = Nothing
     , frenchTeamParticipation = Nothing
     , olympicGamesParticipation = Nothing
@@ -93,7 +93,7 @@ championToForm champion =
     , medals = champion.medals |> toEditableDict
     , isMember = champion.isMember
     , intro = champion.intro
-    , highlights = champion.highlights
+    , highlights = champion.highlights |> toEditableDict
     , profilePicture = champion.profilePicture
     , frenchTeamParticipation = champion.frenchTeamParticipation
     , olympicGamesParticipation = champion.olympicGamesParticipation
@@ -136,6 +136,7 @@ view rdSectors currentYear model =
                             getChampionFormFieldData Intro champion
                       in
                       viewTextArea label value (UpdatedChampionField Intro)
+                    , editHighlights champion
                     , editProExperiences sectors model.sectorDropdown champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
@@ -414,3 +415,53 @@ viewProfilePicture profilePicture =
                             |> Button.viewButton
                         )
                     ]
+
+
+editHighlights : ChampionForm -> Element Msg
+editHighlights { highlights } =
+    column [ UI.largeSpacing ]
+        [ el [ Font.bold ] <| text "Faits marquants"
+        , column [ UI.defaultSpacing ]
+            (highlights
+                |> Dict.map
+                    (\id highlight ->
+                        row [ UI.defaultSpacing ]
+                            (case highlight of
+                                ReadOnly h ->
+                                    [ text h
+                                    , text "Éditer"
+                                        |> Button.makeButton
+                                            (Just <| PressedEditHighlightButton id)
+                                        |> Button.withBackgroundColor UI.Color.grey
+                                        |> Button.viewButton
+                                    , text "Supprimer"
+                                        |> Button.makeButton (Just <| PressedDeleteHighlightButton id)
+                                        |> Button.withBackgroundColor UI.Color.red
+                                        |> Button.viewButton
+                                    ]
+
+                                Editable _ newH ->
+                                    [ UI.textInput []
+                                        { onChange = UpdatedHighlight id
+                                        , text = newH
+                                        , placeholder = Nothing
+                                        , label = Nothing
+                                        }
+                                    , text "OK"
+                                        |> Button.makeButton (Just <| PressedConfirmHighlightButton id)
+                                        |> Button.withBackgroundColor UI.Color.green
+                                        |> Button.viewButton
+                                    , text "Annuler"
+                                        |> Button.makeButton (Just <| CancelledHighlightEdition id)
+                                        |> Button.withBackgroundColor UI.Color.grey
+                                        |> Button.viewButton
+                                    ]
+                            )
+                    )
+                |> Dict.values
+            )
+        , text "Ajouter un fait marquant"
+            |> Button.makeButton (Just PressedAddHighlightButton)
+            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
+        ]

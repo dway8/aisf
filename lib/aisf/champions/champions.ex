@@ -2,9 +2,9 @@ defmodule Aisf.Champions do
   @moduledoc """
   The Champions context.
   """
+  require Logger
 
   import Ecto.Query, warn: false
-  import Logger
   alias Aisf.Repo
 
   alias Aisf.Champions.Champion

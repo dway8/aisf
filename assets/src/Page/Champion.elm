@@ -45,6 +45,7 @@ view { id, champion } =
                             ]
                         ]
                     , Common.viewTextArea "Intro" (champ.intro |> Maybe.withDefault "")
+                    , viewHighlights champ.highlights
                     , column [ UI.defaultSpacing ]
                         [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
                         , column [ spacing 7 ]
@@ -97,3 +98,14 @@ viewProfilePicture profilePicture =
 
             Just { filename } ->
                 image [ width <| px 200 ] { src = "/uploads/" ++ filename, description = "Photo de profil" }
+
+
+viewHighlights : List String -> Element Msg
+viewHighlights highlights =
+    column [ UI.largeSpacing ]
+        [ el [ Font.bold ] <| text "Faits marquants"
+        , column [ UI.defaultSpacing ]
+            (highlights
+                |> List.map (\h -> text h)
+            )
+        ]

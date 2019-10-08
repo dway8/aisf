@@ -135,6 +135,7 @@ createChampion c =
         , yearsInFrenchTeam = c.yearsInFrenchTeam |> List.map Model.getYear
         , medals = c.medals |> List.map medalToParams
         , isMember = c.isMember
+        , highlights = c.highlights
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
@@ -168,6 +169,7 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
         , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
         , medals = medals |> List.map medalToParams
         , isMember = isMember
+        , highlights = champion.highlights
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint

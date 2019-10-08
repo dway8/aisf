@@ -55,14 +55,16 @@ defmodule Aisf.Champions.Champion do
       :best_memory,
       :decoration,
       :background,
-      :volunteering
+      :volunteering,
+      :highlights
     ])
     |> validate_required([
       :first_name,
       :last_name,
       :sport,
       :years_in_french_team,
-      :is_member
+      :is_member,
+      :highlights
     ])
   end
 

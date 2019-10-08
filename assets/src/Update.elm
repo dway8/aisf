@@ -173,6 +173,24 @@ update msg model =
         CreatedASectorFromQuery ->
             createASectorFromQuery model
 
+        PressedAddHighlightButton ->
+            addHighlight model
+
+        PressedEditHighlightButton id ->
+            editHighlight id model
+
+        PressedDeleteHighlightButton id ->
+            deleteHighlight id model
+
+        CancelledHighlightEdition id ->
+            cancelHighlightEdition id model
+
+        UpdatedHighlight id str ->
+            updateHighlight id str model
+
+        PressedConfirmHighlightButton id ->
+            confirmHighlight id model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -337,11 +355,8 @@ deleteProExperience id model =
                 |> RD.map
                     (\champion ->
                         let
-                            newProExperiences =
-                                champion.proExperiences |> Dict.remove id
-
                             newChampion =
-                                { champion | proExperiences = newProExperiences }
+                                { champion | proExperiences = champion.proExperiences |> Dict.remove id }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
                     )
@@ -623,7 +638,7 @@ validateChampionForm c =
                 , medals = c.medals |> Dict.values |> List.map Editable.value
                 , isMember = c.isMember
                 , intro = c.intro
-                , highlights = c.highlights
+                , highlights = c.highlights |> Dict.values |> List.map Editable.value
                 , profilePicture = c.profilePicture
                 , frenchTeamParticipation = c.frenchTeamParticipation
                 , olympicGamesParticipation = c.olympicGamesParticipation
@@ -1054,6 +1069,170 @@ createASectorFromQuery model =
                         ( { model | currentPage = EditChampionPage newEModel, sectors = newSectors }, Cmd.none )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+addHighlight : Model -> ( Model, Cmd Msg )
+addHighlight model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newKey =
+                                getDictNextKey champion.highlights
+
+                            newHighlights =
+                                case champion.sport of
+                                    Just sport ->
+                                        champion.highlights
+                                            |> Dict.insert newKey (ReadOnly "" |> Editable.edit)
+
+                                    Nothing ->
+                                        champion.highlights
+
+                            newChampion =
+                                { champion | highlights = newHighlights }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+editHighlight : Int -> Model -> ( Model, Cmd Msg )
+editHighlight id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            highlightToEdit =
+                                Dict.get id champion.highlights
+
+                            newHighlights =
+                                champion.highlights
+                                    |> Dict.map (\_ exp -> Editable.cancel exp)
+                                    |> Dict.update id (Maybe.map Editable.edit)
+
+                            newChampion =
+                                { champion | highlights = newHighlights }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        , Cmd.none
+                        )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+deleteHighlight : Int -> Model -> ( Model, Cmd Msg )
+deleteHighlight id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                { champion | highlights = champion.highlights |> Dict.remove id }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+cancelHighlightEdition : Int -> Model -> ( Model, Cmd Msg )
+cancelHighlightEdition id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newHighlights =
+                                champion.highlights
+                                    |> Dict.update id
+                                        (Maybe.andThen
+                                            (\highlight ->
+                                                case highlight of
+                                                    ReadOnly _ ->
+                                                        Just highlight
+
+                                                    Editable old new ->
+                                                        case new of
+                                                            "" ->
+                                                                Nothing
+
+                                                            _ ->
+                                                                Just <| ReadOnly old
+                                            )
+                                        )
+
+                            newChampion =
+                                { champion | highlights = newHighlights }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateHighlight : Int -> String -> Model -> ( Model, Cmd Msg )
+updateHighlight id val model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newHighlights =
+                                champion.highlights
+                                    |> Dict.update id
+                                        (Maybe.map (Editable.map (always val)))
+
+                            newChampion =
+                                { champion | highlights = newHighlights }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+confirmHighlight : Int -> Model -> ( Model, Cmd Msg )
+confirmHighlight id model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newHighlights =
+                                champion.highlights
+                                    |> Dict.update id (Maybe.map Editable.save)
+
+                            newChampion =
+                                { champion | highlights = newHighlights }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

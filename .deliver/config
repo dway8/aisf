@@ -60,7 +60,10 @@ post_extract_release_archive() {
   __remote "
     [ -f ~/.profile ] && source ~/.profile
     set -e
+
+  if [ -d "$DELIVER_TO/$APP/var" ]; then
     cd $DELIVER_TO/$APP/var $SILENCE
     rm start_erl.data
+  fi
   "
 }

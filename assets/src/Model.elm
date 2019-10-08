@@ -132,7 +132,7 @@ type alias ChampionForm =
     , medals : Dict Int (Editable Medal)
     , isMember : Bool
     , intro : Maybe String
-    , highlights : List String
+    , highlights : Dict Int (Editable String)
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
@@ -849,6 +849,12 @@ type Msg
     | ClosedDropdown
     | RemovedItemFromDropdown String
     | CreatedASectorFromQuery
+    | PressedAddHighlightButton
+    | PressedEditHighlightButton Int
+    | PressedDeleteHighlightButton Int
+    | CancelledHighlightEdition Int
+    | UpdatedHighlight Int String
+    | PressedConfirmHighlightButton Int
 
 
 type FormField

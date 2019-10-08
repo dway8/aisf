@@ -97,6 +97,7 @@ defmodule AisfWeb.Schema do
       arg(:decoration, :string)
       arg(:background, :string)
       arg(:volunteering, :string)
+      arg(:highlights, non_null(list_of(non_null(:string))))
 
       resolve(&ChampionsResolver.create/2)
     end
@@ -121,6 +122,7 @@ defmodule AisfWeb.Schema do
       arg(:decoration, :string)
       arg(:background, :string)
       arg(:volunteering, :string)
+      arg(:highlights, non_null(list_of(non_null(:string))))
 
       resolve(&ChampionsResolver.update/2)
     end
