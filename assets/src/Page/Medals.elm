@@ -133,7 +133,7 @@ tableColumns =
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
                         , HA.style "object-fit" "contain"
-                        , HA.src <| "images/" ++ Model.getMedalIcon medal.competition medal.medalType
+                        , HA.src <| "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
                         , HA.title <| Model.medalTypeToDisplay medal.medalType
                         ]
                         []

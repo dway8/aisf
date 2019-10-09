@@ -15,6 +15,7 @@ import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
+import UI.Color
 
 
 sportSelector : Bool -> Maybe Sport -> Element Msg
@@ -51,19 +52,14 @@ viewSportOption currentSport sport =
 
 viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
-    column [ spacing 4 ]
-        [ UI.viewField "Secteurs d'activité" (exp.sectors |> String.join ", ")
-        , UI.viewField "Titre" (exp.title |> Maybe.withDefault "Non renseigné")
-        , UI.viewField "Nom de l'entreprise" (exp.companyName |> Maybe.withDefault "Non renseigné")
-        , UI.viewField "Description" (exp.description |> Maybe.withDefault "Non renseigné")
-        , UI.viewField "Site internet" (exp.website |> Maybe.withDefault "Non renseigné")
-        , UI.viewField "Contact" (exp.contact |> Maybe.withDefault "Non renseigné")
+    column [ UI.smallSpacing, width fill ]
+        [ viewInfoRow "Secteurs" (exp.sectors |> String.join ", " |> text)
+        , viewInfoRow "Titre" (exp.title |> Maybe.withDefault "-" |> text)
+        , viewInfoRow "Entreprise" (exp.companyName |> Maybe.withDefault "-" |> text)
+        , viewInfoRow "Description" (exp.description |> Maybe.withDefault "-" |> text)
+        , viewInfoRow "Site internet" (exp.website |> Maybe.withDefault "-" |> text)
+        , viewInfoRow "Contact" (exp.contact |> Maybe.withDefault "-" |> text)
         ]
-
-
-viewTextArea : String -> String -> Element Msg
-viewTextArea label value =
-    column [ spacing 5 ] [ text label, el [ Font.bold ] <| text value ]
 
 
 viewMedal : Medal -> Element Msg
@@ -164,7 +160,7 @@ profilePictureColumn =
                                     "/uploads/" ++ filename
 
                                 _ ->
-                                    "images/no-profile-pic.jpg"
+                                    "/images/no-profile-pic.jpg"
                     in
                     Html.img
                         [ HA.style "max-width" "35px"
@@ -188,7 +184,7 @@ sportColumn =
                         [ HA.style "max-width" "35px"
                         , HA.style "max-height" "35px"
                         , HA.style "object-fit" "contain"
-                        , HA.src <| "images/" ++ Model.getSportIcon champion.sport
+                        , HA.src <| "/images/" ++ Model.getSportIcon champion.sport
                         , HA.title <| Model.sportToString champion.sport
                         ]
                         []
@@ -275,3 +271,34 @@ viewProfilePicture widthPx profilePicture =
 
             Just { filename } ->
                 image [ width <| px widthPx ] { src = "/uploads/" ++ filename, description = "Photo de profil" }
+
+
+viewInfoRow : String -> Element Msg -> Element Msg
+viewInfoRow title content =
+    row [ UI.largeSpacing, width fill ]
+        [ el
+            [ Font.bold
+            , Font.alignRight
+            , alignTop
+            , width <| fillPortion 2
+            ]
+          <|
+            text title
+        , paragraph [ Font.alignLeft, width <| fillPortion 5 ] [ content ]
+        ]
+
+
+viewBlockTitle : String -> Element Msg
+viewBlockTitle title =
+    el
+        [ width fill
+        , UI.largestFont
+        , Font.color UI.Color.blue
+        , Font.bold
+        , Border.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
+        , Border.color UI.Color.blue
+        , paddingEach { top = 0, bottom = 3, left = 0, right = 0 }
+        ]
+    <|
+        text <|
+            String.toUpper title

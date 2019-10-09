@@ -4,86 +4,64 @@ import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Model exposing (Attachment, Champion, ChampionPageModel, Msg(..), Sport)
+import Html
+import Html.Attributes as HA
+import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Sport)
 import RemoteData exposing (RemoteData(..), WebData)
+import Table
 import UI
 import UI.Button as Button
-import UI.Color
+import UI.Color as Color
 import Utils
 
 
 init : Id -> ( ChampionPageModel, Cmd Msg )
 init id =
-    ( { id = id, champion = Loading }, Api.getChampion id )
+    ( { id = id, champion = Loading, medalsTableState = Table.initialSort "ANNÉE" }, Api.getChampion id )
 
 
 view : Bool -> ChampionPageModel -> Element Msg
-view isAdmin { id, champion } =
-    column [ spacing 10, width fill ]
+view isAdmin { id, champion, medalsTableState } =
+    column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
                 |> Button.makeButton (Just GoBack)
-                |> Button.withBackgroundColor UI.Color.lighterGrey
+                |> Button.withBackgroundColor Color.lighterGrey
                 |> Button.withAttrs []
                 |> Button.viewButton
             , Utils.viewIf
                 isAdmin
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "edit", text <| "Éditer la fiche" ]
                     |> Button.makeButton (Just <| PressedEditChampionButton id)
-                    |> Button.withBackgroundColor UI.Color.orange
+                    |> Button.withBackgroundColor Color.orange
                     |> Button.withAttrs []
                     |> Button.viewButton
                 )
             ]
         , case champion of
             Success champ ->
-                column [ UI.largeSpacing ]
+                column [ UI.largeSpacing, width fill ]
                     [ row [ UI.largeSpacing ]
-                        [ Common.viewProfilePicture 200 champ.profilePicture
-                        , column [ UI.defaultSpacing ]
-                            [ el [ Font.bold, Font.size 18 ] <| text "INFOS"
-                            , column [ spacing 4 ]
-                                [ UI.viewField "N°" (Model.getId champ)
-                                , UI.viewField "Nom" champ.lastName
-                                , UI.viewField "Prénom" champ.firstName
-                                , UI.viewField "Discipline" (Model.sportToString champ.sport)
+                        [ Common.viewProfilePicture 150 champ.profilePicture
+                        , column [ UI.largeSpacing, alignTop ]
+                            [ el [ Font.bold, UI.largestFont ] <| text champ.lastName
+                            , el [ Font.bold, UI.largestFont ] <| text champ.firstName
+                            , row [ UI.defaultSpacing ]
+                                [ image [ width <| px 50 ] { src = "/images/" ++ Model.getSportIcon champ.sport, description = Model.sportToString champ.sport }
+                                , text (Model.sportToString champ.sport)
                                 ]
+                            , image [ width <| px 50 ] { src = "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
                             ]
                         ]
-                    , Common.viewTextArea "Intro" (champ.intro |> Maybe.withDefault "")
+                    , paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text (champ.intro |> Maybe.withDefault "") ]
                     , viewHighlights champ.highlights
-                    , column [ UI.defaultSpacing ]
-                        [ el [ Font.bold, Font.size 18 ] <| text "EXPÉRIENCES PROFESSIONNELLES"
-                        , column [ spacing 7 ]
-                            (champ.proExperiences
-                                |> List.map Common.viewProExperience
-                            )
-                        ]
-                    , column [ UI.defaultSpacing ]
-                        [ el [ Font.bold, Font.size 18 ] <| text "PALMARÈS"
-                        , column [ spacing 7 ]
-                            (champ.medals
-                                |> List.map Common.viewMedal
-                            )
-                        ]
-                    , column [ UI.defaultSpacing ]
-                        [ el [ Font.bold, Font.size 18 ] <| text "ANNÉES EN ÉQUIPE DE FRANCE"
-                        , column [ spacing 7 ]
-                            (if champ.yearsInFrenchTeam == [] then
-                                [ text "Aucune" ]
-
-                             else
-                                champ.yearsInFrenchTeam
-                                    |> List.map Model.getYear
-                                    |> List.sort
-                                    |> List.map
-                                        (\year ->
-                                            text <| String.fromInt year
-                                        )
-                            )
-                        ]
+                    , viewSportCareer champ
+                    , viewProfessionalCareer champ
+                    , viewPictures champ
+                    , viewMedals medalsTableState champ
                     ]
 
             NotAsked ->
@@ -99,10 +77,117 @@ view isAdmin { id, champion } =
 
 viewHighlights : List String -> Element Msg
 viewHighlights highlights =
-    column [ UI.largeSpacing ]
-        [ el [ Font.bold ] <| text "Faits marquants"
-        , column [ UI.defaultSpacing ]
-            (highlights
-                |> List.map (\h -> text h)
+    column [ UI.defaultSpacing, paddingXY 10 0 ]
+        (highlights
+            |> List.map (\h -> row [ UI.defaultSpacing ] [ text "-", text h ])
+        )
+
+
+viewSportCareer : Champion -> Element Msg
+viewSportCareer champion =
+    champion
+        |> viewBlock "Carrière sportive"
+            [ Common.viewInfoRow "Années en équipe de France" (champion.frenchTeamParticipation |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Participation aux JO" (champion.olympicGamesParticipation |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Championnats du monde" (champion.worldCupParticipation |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Palmarès" (champion.trackRecord |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Ton meilleur souvenir" (champion.bestMemory |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Décoration" (champion.decoration |> Maybe.withDefault "-" |> text)
+            ]
+
+
+viewProfessionalCareer : Champion -> Element Msg
+viewProfessionalCareer champion =
+    champion
+        |> viewBlock "Carrière professionnelle"
+            [ Common.viewInfoRow "Formation" (champion.background |> Maybe.withDefault "-" |> text)
+            , Common.viewInfoRow "Bénévolat" (champion.volunteering |> Maybe.withDefault "-" |> text)
+            , column [ UI.defaultSpacing, width fill ]
+                [ el [ Font.bold, UI.largeFont ] <| text "Expériences professionnelles"
+                , column [ spacing 7, width fill ]
+                    (champion.proExperiences
+                        |> List.map Common.viewProExperience
+                    )
+                ]
+            ]
+
+
+viewPictures : Champion -> Element Msg
+viewPictures champion =
+    champion
+        |> viewBlock "Photos" []
+
+
+viewMedals : Table.State -> Champion -> Element Msg
+viewMedals tableState champion =
+    champion
+        |> viewBlock "Palmarès"
+            (champion.medals
+                |> Table.view tableConfig tableState
+                |> html
+                |> el [ htmlAttribute <| HA.id "champion-medals-list", width <| maximum 680 fill ]
+                |> List.singleton
             )
+
+
+tableConfig : Table.Config Medal Msg
+tableConfig =
+    let
+        tableCustomizations =
+            Common.tableCustomizations
+    in
+    Table.customConfig
+        { toId = Model.getId
+        , toMsg = TableMsg
+        , columns = tableColumns
+        , customizations = { tableCustomizations | rowAttrs = always [ HA.style "cursor" "pointer" ] }
+        }
+
+
+tableColumns : List (Table.Column Medal Msg)
+tableColumns =
+    [ Table.veryCustomColumn
+        { name = "MÉDAILLE"
+        , viewData =
+            \medal ->
+                Common.centeredCell []
+                    (Html.img
+                        [ HA.style "max-width" "25px"
+                        , HA.style "max-height" "25px"
+                        , HA.style "object-fit" "contain"
+                        , HA.src <| "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
+                        , HA.title <| Model.medalTypeToDisplay medal.medalType
+                        ]
+                        []
+                    )
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = "TYPE"
+        , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.medalTypeToDisplay medal.medalType)
+        , sorter = Table.decreasingOrIncreasingBy (.medalType >> Model.medalTypeToDisplay)
+        }
+    , Table.veryCustomColumn
+        { name = "COMPÉTITION"
+        , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.competitionToDisplay medal.competition)
+        , sorter = Table.decreasingOrIncreasingBy (.competition >> Model.competitionToDisplay)
+        }
+    , Table.veryCustomColumn
+        { name = "DISCIPLINE"
+        , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.specialtyToDisplay medal.specialty)
+        , sorter = Table.decreasingOrIncreasingBy (.specialty >> Model.specialtyToDisplay)
+        }
+    , Table.veryCustomColumn
+        { name = "ANNÉE"
+        , viewData = \medal -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
+        , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
+        }
+    ]
+
+
+viewBlock : String -> List (Element Msg) -> Champion -> Element Msg
+viewBlock title content champion =
+    column [ UI.largeSpacing, width <| maximum 900 fill ]
+        [ Common.viewBlockTitle title
+        , column [ UI.defaultSpacing, width fill ] content
         ]

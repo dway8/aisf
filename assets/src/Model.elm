@@ -74,6 +74,7 @@ type alias TeamsPageModel =
 type alias ChampionPageModel =
     { id : Id
     , champion : RemoteData (Graphql.Http.Error Champion) Champion
+    , medalsTableState : Table.State
     }
 
 
@@ -1054,3 +1055,12 @@ getMedalIcon competition medalType =
                     "_br"
            )
         ++ ".png"
+
+
+getIsMemberIcon : Bool -> String
+getIsMemberIcon isMember =
+    if isMember then
+        "logo_aisf.png"
+
+    else
+        "logo_aisf_nb.png"

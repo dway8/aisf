@@ -753,9 +753,9 @@ selectChampion (Id id) model =
 handleChampionResponse : RemoteData (Graphql.Http.Error Champion) Champion -> Model -> ( Model, Cmd Msg )
 handleChampionResponse resp model =
     case ( model.currentPage, resp ) of
-        ( ChampionPage { id }, Success champion ) ->
-            if id == champion.id then
-                ( { model | currentPage = ChampionPage { id = id, champion = resp } }
+        ( ChampionPage cModel, Success champion ) ->
+            if cModel.id == champion.id then
+                ( { model | currentPage = ChampionPage { cModel | champion = resp } }
                 , Cmd.none
                 )
 

@@ -119,21 +119,13 @@ tableColumns =
     [ Table.veryCustomColumn
         { name = "MEMBRE"
         , viewData =
-            \champion ->
-                let
-                    src =
-                        if champion.isMember then
-                            "logo_aisf.png"
-
-                        else
-                            "logo_aisf_nb.png"
-                in
+            \{ isMember } ->
                 Common.centeredCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
                         , HA.style "object-fit" "contain"
-                        , HA.src <| "images/" ++ src
+                        , HA.src <| "/images/" ++ Model.getIsMemberIcon isMember
                         ]
                         []
                     )
