@@ -16,7 +16,7 @@ init : Year -> ( TeamsPageModel, Cmd Msg )
 init year =
     ( { champions = Loading
       , sport = Nothing
-      , tableState = Table.initialSort ""
+      , tableState = Table.initialSort "ANNÉE"
       , currentYear = year
       , selectedYear = Nothing
       , searchQuery = Nothing
@@ -54,6 +54,7 @@ type alias YearInTeamFromChampion =
     , name : String
     , sport : Sport
     , year : Year
+    , isMember : Bool
     }
 
 
@@ -69,6 +70,7 @@ getYearsInTeamsFromChampions champions =
                             , name = Model.getName champion
                             , sport = champion.sport
                             , year = year
+                            , isMember = champion.isMember
                             }
                         )
                     |> (++) acc
@@ -115,15 +117,42 @@ tableConfig =
 tableColumns : List (Table.Column YearInTeamFromChampion Msg)
 tableColumns =
     [ Table.veryCustomColumn
+        { name = "MEMBRE"
+        , viewData =
+            \champion ->
+                let
+                    src =
+                        if champion.isMember then
+                            "logo_aisf.png"
+
+                        else
+                            "logo_aisf_nb.png"
+                in
+                Common.centeredCell []
+                    (Html.img
+                        [ HA.style "max-width" "25px"
+                        , HA.style "max-height" "25px"
+                        , HA.style "object-fit" "contain"
+                        , HA.src <| "images/" ++ src
+                        ]
+                        []
+                    )
+        , sorter =
+            Table.decreasingOrIncreasingBy
+                (\c ->
+                    if c.isMember then
+                        0
+
+                    else
+                        1
+                )
+        }
+    , Table.veryCustomColumn
         { name = "NOM / PRÉNOM"
         , viewData = \champion -> Common.defaultCell [] (Html.text <| champion.name)
         , sorter = Table.decreasingOrIncreasingBy .name
         }
-    , Table.veryCustomColumn
-        { name = "DISCIPLINE"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.sportToString champion.sport)
-        , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
-        }
+    , Common.sportColumn
     , Table.veryCustomColumn
         { name = "ANNÉE"
         , viewData = \champion -> Common.defaultCell [] (Html.text <| String.fromInt <| Model.getYear champion.year)

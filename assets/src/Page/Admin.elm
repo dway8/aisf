@@ -105,11 +105,7 @@ tableColumns : List (Table.Column Champion Msg)
 tableColumns =
     [ Common.profilePictureColumn
     , Common.nameColumn
-    , Table.veryCustomColumn
-        { name = "DISCIPLINE"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| Model.sportToString champion.sport)
-        , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
-        }
+    , Common.sportColumn
     ]
 
 
