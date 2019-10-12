@@ -75,6 +75,7 @@ type alias ChampionPageModel =
     { id : Id
     , champion : RemoteData (Graphql.Http.Error Champion) Champion
     , medalsTableState : Table.State
+    , pictureDialog : Maybe Picture
     }
 
 
@@ -867,6 +868,8 @@ type Msg
     | GoBack
     | PressedEditChampionButton Id
     | PressedAddPictureButton
+    | ClickedOnPicture Int
+    | ClickedOnPictureDialogBackground
 
 
 type FormField

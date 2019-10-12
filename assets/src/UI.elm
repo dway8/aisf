@@ -203,3 +203,64 @@ textInput attrs config =
                     )
                 |> Maybe.withDefault (Input.labelHidden "")
         }
+
+
+type alias DialogConfig msg =
+    { header : Maybe (Element msg)
+    , outerSideElements : Maybe ( Element msg, Element msg )
+    , body : Element msg
+    , closable : Maybe msg
+    }
+
+
+viewDialog : DialogConfig msg -> Element msg
+viewDialog config =
+    let
+        attrs =
+            case config.outerSideElements of
+                Just ( l, r ) ->
+                    [ onLeft l, onRight r ]
+
+                Nothing ->
+                    []
+    in
+    el
+        [ width fill
+        , height fill
+        , behindContent <|
+            el
+                ([ width fill
+                 , height fill
+                 , Background.color (UI.Color.makeOpaque 0.5 UI.Color.black)
+                 ]
+                    ++ (case config.closable of
+                            Just msg ->
+                                [ onClick msg ]
+
+                            Nothing ->
+                                []
+                       )
+                )
+                none
+        , inFront <|
+            el
+                [ htmlAttribute <| HA.style "height" "100%"
+                , htmlAttribute <| HA.style "width" "100%"
+                , htmlAttribute <| HA.style "pointer-events" "none"
+                , htmlAttribute <| HA.style "position" "fixed"
+                ]
+            <|
+                el
+                    ([ centerX
+                     , centerY
+                     , htmlAttribute <| HA.style "pointer-events" "all"
+                     , htmlAttribute <| HA.style "max-height" "95%"
+                     , Border.rounded 5
+                     ]
+                        ++ attrs
+                    )
+                <|
+                    config.body
+        ]
+    <|
+        none

@@ -10,6 +10,7 @@ import Editable exposing (Editable(..))
 import File exposing (File)
 import File.Select as Select
 import Graphql.Http
+import List.Extra as LE
 import Menu
 import Model exposing (..)
 import Page.Admin
@@ -199,6 +200,12 @@ update msg model =
 
         PressedAddPictureButton ->
             addPicture model
+
+        ClickedOnPicture idx ->
+            displayLargePicture idx model
+
+        ClickedOnPictureDialogBackground ->
+            closePictureDialog model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -1329,6 +1336,40 @@ addPicture model =
                                 { champion | pictures = newPictures }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+displayLargePicture : Int -> Model -> ( Model, Cmd Msg )
+displayLargePicture idx model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            pictureToDisplay =
+                                LE.getAt idx champion.pictures
+                        in
+                        ( { model | currentPage = ChampionPage { cModel | pictureDialog = pictureToDisplay } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+closePictureDialog : Model -> ( Model, Cmd Msg )
+closePictureDialog model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        ( { model | currentPage = ChampionPage { cModel | pictureDialog = Nothing } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 

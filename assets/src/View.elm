@@ -13,6 +13,7 @@ import Page.EditChampion
 import Page.Medals
 import Page.Members
 import Page.Teams
+import RemoteData as RD
 import Route exposing (Route(..))
 import UI
 import UI.Color
@@ -29,14 +30,16 @@ view model =
 viewBody : Model -> Html Msg
 viewBody model =
     UI.defaultLayout
-        [ Font.family
+        ([ Font.family
             [ Font.typeface "Open Sans", Font.typeface "Roboto", Font.typeface "Arial" ]
-        , alignLeft
-        , UI.mediumFont
-        , UI.largePadding
-        , width fill
-        , Font.color UI.textColor
-        ]
+         , alignLeft
+         , UI.mediumFont
+         , UI.largePadding
+         , width fill
+         , Font.color UI.textColor
+         ]
+            ++ viewDialogs model
+        )
     <|
         column [ width fill, spacing 30 ]
             [ case model.currentPage of
@@ -103,3 +106,23 @@ isCurrentPage route currentPage =
 
         _ ->
             False
+
+
+viewDialogs : Model -> List (Attribute Msg)
+viewDialogs model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\{ pictures, id } ->
+                        case cModel.pictureDialog of
+                            Just picture ->
+                                [ inFront <| Page.Champion.viewPictureDialog id picture pictures ]
+
+                            _ ->
+                                []
+                    )
+                |> RD.withDefault []
+
+        _ ->
+            []

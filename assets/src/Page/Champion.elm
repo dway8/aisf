@@ -1,4 +1,4 @@
-module Page.Champion exposing (init, view)
+module Page.Champion exposing (init, view, viewPictureDialog)
 
 import Aisf.Scalar exposing (Id(..))
 import Api
@@ -6,10 +6,11 @@ import Common
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events exposing (onClick)
 import Element.Font as Font
 import Html
 import Html.Attributes as HA
-import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Sport)
+import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Picture, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
@@ -20,7 +21,13 @@ import Utils
 
 init : Id -> ( ChampionPageModel, Cmd Msg )
 init id =
-    ( { id = id, champion = Loading, medalsTableState = Table.initialSort "ANNÉE" }, Api.getChampion id )
+    ( { id = id
+      , champion = Loading
+      , medalsTableState = Table.initialSort "ANNÉE"
+      , pictureDialog = Nothing
+      }
+    , Api.getChampion id
+    )
 
 
 view : Bool -> ChampionPageModel -> Element Msg
@@ -117,12 +124,11 @@ viewPictures champion =
             Model.getId champion
     in
     Common.viewBlock "Photos"
-        [ row [ width fill ]
+        [ row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
             (champion.pictures
-                |> List.map
-                    (\{ attachment } ->
-                        el [ width <| px 200 ] <|
-                            image [ width <| px 200 ] { src = "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "Photo de profil" }
+                |> List.indexedMap
+                    (\idx { attachment } ->
+                        image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
                     )
             )
         ]
@@ -192,3 +198,35 @@ tableColumns =
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
     ]
+
+
+viewPictureDialog : Id -> Picture -> List Picture -> Element Msg
+viewPictureDialog (Id championId) { attachment } pictures =
+    let
+        displayArrow =
+            List.length pictures > 1
+
+        btn move icon position =
+            el
+                [ Font.size 30
+                , pointer
+                , centerY
+                , Font.color Color.white
+                , position
+                ]
+            <|
+                html <|
+                    Html.i [ HA.class ("zmdi zmdi-" ++ icon) ] []
+    in
+    UI.viewDialog
+        { header = Nothing
+        , outerSideElements =
+            if displayArrow then
+                Just ( btn -1 "arrow-left" <| moveLeft 20, btn 1 "arrow-right" <| moveRight 20 )
+
+            else
+                Nothing
+        , body =
+            image [ centerX, centerY ] { src = "/uploads/" ++ championId ++ "/" ++ attachment.filename, description = "" }
+        , closable = Just ClickedOnPictureDialogBackground
+        }
