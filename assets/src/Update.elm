@@ -134,17 +134,17 @@ update msg model =
         PressedEditMedalButton id ->
             editMedal id model
 
-        BeganFileSelection ->
-            beginFileSelection model
+        BeganFileSelection id ->
+            beginFileSelection id model
 
         CancelledFileSelection ->
             cancelFileSelection model
 
-        FileSelectionDone file ->
-            handleFileSelectionDone file model
+        FileSelectionDone id file ->
+            handleFileSelectionDone id file model
 
-        GotFileUrl base64file ->
-            handleFileUrlReceived base64file model
+        GotFileUrl id base64file ->
+            handleFileUrlReceived id base64file model
 
         UpdatedSearchQuery query ->
             updateSearchQuery query model
@@ -196,6 +196,9 @@ update msg model =
 
         PressedEditChampionButton id ->
             editChampion id model
+
+        PressedAddPictureButton ->
+            addPicture model
 
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
@@ -660,6 +663,7 @@ validateChampionForm c =
                 , background = c.background
                 , volunteering = c.volunteering
                 , oldId = Nothing
+                , pictures = c.pictures
                 }
 
 
@@ -847,9 +851,9 @@ editMedal id model =
             ( model, Cmd.none )
 
 
-beginFileSelection : Model -> ( Model, Cmd Msg )
-beginFileSelection model =
-    ( model, Select.file [ "image/*" ] FileSelectionDone )
+beginFileSelection : Id -> Model -> ( Model, Cmd Msg )
+beginFileSelection id model =
+    ( model, Select.file [ "image/*" ] (FileSelectionDone id) )
 
 
 cancelFileSelection : Model -> ( Model, Cmd Msg )
@@ -857,8 +861,8 @@ cancelFileSelection model =
     ( model, Cmd.none )
 
 
-handleFileSelectionDone : File -> Model -> ( Model, Cmd Msg )
-handleFileSelectionDone file model =
+handleFileSelectionDone : Id -> File -> Model -> ( Model, Cmd Msg )
+handleFileSelectionDone id file model =
     case model.currentPage of
         EditChampionPage eModel ->
             eModel.champion
@@ -866,10 +870,15 @@ handleFileSelectionDone file model =
                     (\champion ->
                         let
                             newChampion =
-                                { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
+                                case id of
+                                    Id "0" ->
+                                        { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
+
+                                    _ ->
+                                        updateChampionPicturesWithFile id file champion
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
-                        , Task.perform GotFileUrl <| File.toUrl file
+                        , Task.perform (GotFileUrl id) <| File.toUrl file
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
@@ -878,8 +887,25 @@ handleFileSelectionDone file model =
             ( model, Cmd.none )
 
 
-handleFileUrlReceived : String -> Model -> ( Model, Cmd Msg )
-handleFileUrlReceived base64file model =
+updateChampionPicturesWithFile : Id -> File -> ChampionForm -> ChampionForm
+updateChampionPicturesWithFile id file champion =
+    let
+        newPictures =
+            champion.pictures
+                |> List.map
+                    (\pic ->
+                        if pic.id == id then
+                            { pic | attachment = Attachment (File.name file) Nothing }
+
+                        else
+                            pic
+                    )
+    in
+    { champion | pictures = newPictures }
+
+
+handleFileUrlReceived : Id -> String -> Model -> ( Model, Cmd Msg )
+handleFileUrlReceived id base64file model =
     case model.currentPage of
         EditChampionPage eModel ->
             eModel.champion
@@ -887,16 +913,21 @@ handleFileUrlReceived base64file model =
                     (\champion ->
                         let
                             newChampion =
-                                case champion.profilePicture of
-                                    Nothing ->
-                                        champion
+                                case id of
+                                    Id "0" ->
+                                        case champion.profilePicture of
+                                            Nothing ->
+                                                champion
 
-                                    Just oldFile ->
-                                        let
-                                            newFile =
-                                                { oldFile | base64 = Just base64file }
-                                        in
-                                        { champion | profilePicture = Just newFile }
+                                            Just oldFile ->
+                                                let
+                                                    newFile =
+                                                        { oldFile | base64 = Just base64file }
+                                                in
+                                                { champion | profilePicture = Just newFile }
+
+                                    _ ->
+                                        updateChampionPicturesWithFileUrl id base64file champion
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
                         , Cmd.none
@@ -906,6 +937,23 @@ handleFileUrlReceived base64file model =
 
         _ ->
             ( model, Cmd.none )
+
+
+updateChampionPicturesWithFileUrl : Id -> String -> ChampionForm -> ChampionForm
+updateChampionPicturesWithFileUrl idToUpdate base64file champion =
+    let
+        newPictures =
+            champion.pictures
+                |> List.map
+                    (\({ id, attachment } as pic) ->
+                        if pic.id == idToUpdate then
+                            { pic | attachment = { attachment | base64 = Just base64file } }
+
+                        else
+                            pic
+                    )
+    in
+    { champion | pictures = newPictures }
 
 
 updateSearchQuery : String -> Model -> ( Model, Cmd Msg )
@@ -1264,3 +1312,25 @@ editChampion (Id id) model =
 
     else
         ( model, Cmd.none )
+
+
+addPicture : Model -> ( Model, Cmd Msg )
+addPicture model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newPictures =
+                                champion.pictures ++ [ Model.initPicture ]
+
+                            newChampion =
+                                { champion | pictures = newPictures }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )

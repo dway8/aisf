@@ -288,6 +288,14 @@ viewInfoRow title content =
         ]
 
 
+viewBlock : String -> List (Element Msg) -> Element Msg
+viewBlock title content =
+    column [ UI.largeSpacing, width <| maximum 900 fill ]
+        [ viewBlockTitle title
+        , column [ UI.defaultSpacing, width fill ] content
+        ]
+
+
 viewBlockTitle : String -> Element Msg
 viewBlockTitle title =
     el

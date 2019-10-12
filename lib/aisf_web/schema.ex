@@ -30,6 +30,12 @@ defmodule AisfWeb.Schema do
     field(:background, :string)
     field(:volunteering, :string)
     field(:old_id, :integer)
+    field(:pictures, non_null(list_of(non_null(:picture))))
+  end
+
+  object :picture do
+    field(:id, non_null(:id))
+    field(:filename, non_null(:string))
   end
 
   object :pro_experience do
@@ -98,6 +104,7 @@ defmodule AisfWeb.Schema do
       arg(:background, :string)
       arg(:volunteering, :string)
       arg(:highlights, non_null(list_of(non_null(:string))))
+      arg(:pictures, non_null(list_of(non_null(:picture_params))))
 
       resolve(&ChampionsResolver.create/2)
     end
@@ -123,6 +130,7 @@ defmodule AisfWeb.Schema do
       arg(:background, :string)
       arg(:volunteering, :string)
       arg(:highlights, non_null(list_of(non_null(:string))))
+      arg(:pictures, non_null(list_of(non_null(:picture_params))))
 
       resolve(&ChampionsResolver.update/2)
     end
@@ -144,6 +152,11 @@ defmodule AisfWeb.Schema do
     field(:year, non_null(:integer))
     field(:specialty, non_null(:string))
     field(:medal_type, non_null(:integer))
+  end
+
+  input_object :picture_params do
+    field(:id, non_null(:string))
+    field(:attachment, non_null(:file_params))
   end
 
   input_object :file_params do

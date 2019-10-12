@@ -3,6 +3,7 @@ defmodule Aisf.Champions.Champion do
   import Ecto.Changeset
   alias Aisf.ProExperiences.ProExperience
   alias Aisf.Medals.Medal
+  alias Aisf.Pictures.Picture
 
   schema "champions" do
     field(:first_name, :string)
@@ -29,6 +30,7 @@ defmodule Aisf.Champions.Champion do
     field(:background, :string)
     field(:volunteering, :string)
     field(:old_id, :integer)
+    has_many(:pictures, Picture)
 
     timestamps()
   end

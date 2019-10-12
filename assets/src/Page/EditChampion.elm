@@ -17,7 +17,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), ProExperience, Sectors, Sport, Year)
+import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), Picture, ProExperience, Sectors, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -70,6 +70,7 @@ initChampionForm =
     , decoration = Nothing
     , background = Nothing
     , volunteering = Nothing
+    , pictures = []
     }
 
 
@@ -103,6 +104,7 @@ championToForm champion =
     , decoration = champion.decoration
     , background = champion.background
     , volunteering = champion.volunteering
+    , pictures = champion.pictures
     }
 
 
@@ -121,7 +123,7 @@ view rdSectors currentYear model =
             )
         , case ( model.champion, rdSectors ) of
             ( Success champion, Success sectors ) ->
-                column [ UI.largeSpacing ]
+                column [ UI.largeSpacing, width fill ]
                     [ viewButtons
                     , row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
@@ -138,7 +140,9 @@ view rdSectors currentYear model =
                       in
                       viewTextArea label value (UpdatedChampionField Intro)
                     , editHighlights champion
-                    , editProExperiences sectors model.sectorDropdown champion
+                    , editSportCareer champion
+                    , editProfessionalCareer sectors model.sectorDropdown champion
+                    , editPictures champion
                     , editMedals currentYear champion
                     , editYearsInFrenchTeam currentYear champion
                     , viewButtons
@@ -146,6 +150,30 @@ view rdSectors currentYear model =
 
             _ ->
                 text "..."
+        ]
+
+
+editSportCareer : ChampionForm -> Element Msg
+editSportCareer champion =
+    Common.viewBlock "Carrière sportive"
+        [ viewChampionTextInput FrenchTeamParticipation champion
+        , viewChampionTextInput OlympicGamesParticipation champion
+        , viewChampionTextInput WorldCupParticipation champion
+        , viewChampionTextInput TrackRecord champion
+        , viewChampionTextInput BestMemory champion
+        , viewChampionTextInput Decoration champion
+        ]
+
+
+editProfessionalCareer : Sectors -> Dropdown.Model -> ChampionForm -> Element Msg
+editProfessionalCareer sectors sectorDropdown champion =
+    Common.viewBlock "Carrière professionnelle"
+        [ viewChampionTextInput Background champion
+        , viewChampionTextInput Volunteering champion
+        , column [ UI.defaultSpacing, width fill ]
+            [ el [ Font.bold, UI.largeFont ] <| text "Expériences professionnelles"
+            , editProExperiences sectors sectorDropdown champion
+            ]
         ]
 
 
@@ -175,9 +203,56 @@ editProExperiences sectors sectorDropdown { proExperiences } =
         ]
 
 
+editPictures : ChampionForm -> Element Msg
+editPictures champion =
+    let
+        id =
+            Model.getId champion
+    in
+    Common.viewBlock "Photos"
+        [ row [ width fill ]
+            (champion.pictures |> List.map (editPicture id))
+        , text "Ajouter une photo"
+            |> Button.makeButton (Just PressedAddPictureButton)
+            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.viewButton
+        ]
+
+
+editPicture : String -> Picture -> Element Msg
+editPicture championId { id, attachment } =
+    let
+        { filename, base64 } =
+            attachment
+    in
+    if filename == "" then
+        el [] <|
+            column [ spacing 10, padding 10, centerX ]
+                [ text "Uploader une photo"
+                    |> Button.makeButton (Just <| BeganFileSelection id)
+                    |> Button.withBackgroundColor UI.Color.green
+                    |> Button.viewButton
+                ]
+
+    else
+        column [ UI.defaultSpacing ]
+            [ let
+                src =
+                    base64 |> Maybe.withDefault ("/uploads/" ++ championId ++ "/" ++ filename)
+              in
+              image [ width <| px 200 ] { src = src, description = "Photo de profil" }
+            , el [ centerX ]
+                (text "Changer la photo"
+                    |> Button.makeButton (Just <| BeganFileSelection id)
+                    |> Button.withBackgroundColor UI.Color.green
+                    |> Button.viewButton
+                )
+            ]
+
+
 editMedals : Year -> ChampionForm -> Element Msg
 editMedals currentYear { medals, sport } =
-    column [ UI.largeSpacing ]
+    Common.viewBlock "Palmarès"
         [ column [ UI.defaultSpacing ]
             (medals
                 |> Dict.map
@@ -359,6 +434,30 @@ getChampionFormFieldData field champion =
         Intro ->
             ( "Intro", champion.intro |> Maybe.withDefault "" )
 
+        FrenchTeamParticipation ->
+            ( "Années en équipe de France", champion.frenchTeamParticipation |> Maybe.withDefault "" )
+
+        OlympicGamesParticipation ->
+            ( "Participation aux JO", champion.olympicGamesParticipation |> Maybe.withDefault "" )
+
+        WorldCupParticipation ->
+            ( "Championnats du monde", champion.worldCupParticipation |> Maybe.withDefault "" )
+
+        TrackRecord ->
+            ( "Palmarès", champion.trackRecord |> Maybe.withDefault "" )
+
+        BestMemory ->
+            ( "Ton meilleur souvenir", champion.bestMemory |> Maybe.withDefault "" )
+
+        Decoration ->
+            ( "Décoration", champion.decoration |> Maybe.withDefault "" )
+
+        Background ->
+            ( "Formation", champion.decoration |> Maybe.withDefault "" )
+
+        Volunteering ->
+            ( "Bénévolat", champion.decoration |> Maybe.withDefault "" )
+
         _ ->
             ( "", "" )
 
@@ -393,7 +492,7 @@ viewProfilePicture profilePicture =
                 el [ width fill ] <|
                     column [ spacing 10, padding 10, centerX ]
                         [ text "Uploader une photo"
-                            |> Button.makeButton (Just BeganFileSelection)
+                            |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
                             |> Button.withBackgroundColor UI.Color.green
                             |> Button.viewButton
                         ]
@@ -407,7 +506,7 @@ viewProfilePicture profilePicture =
                       image [ width <| px 200 ] { src = src, description = "Photo de profil" }
                     , el [ centerX ]
                         (text "Changer la photo"
-                            |> Button.makeButton (Just BeganFileSelection)
+                            |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
                             |> Button.withBackgroundColor UI.Color.green
                             |> Button.viewButton
                         )

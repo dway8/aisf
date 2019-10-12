@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (address, background, bestMemory, birthDate, decoration, email, firstName, frenchTeamParticipation, highlights, id, intro, isMember, lastName, medals, oldId, olympicGamesParticipation, phoneNumber, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, website, worldCupParticipation, yearsInFrenchTeam)
+module Aisf.Object.Champion exposing (address, background, bestMemory, birthDate, decoration, email, firstName, frenchTeamParticipation, highlights, id, intro, isMember, lastName, medals, oldId, olympicGamesParticipation, phoneNumber, pictures, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, website, worldCupParticipation, yearsInFrenchTeam)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -102,6 +102,11 @@ olympicGamesParticipation =
 phoneNumber : SelectionSet (Maybe String) Aisf.Object.Champion
 phoneNumber =
     Object.selectionForField "(Maybe String)" "phoneNumber" [] (Decode.string |> Decode.nullable)
+
+
+pictures : SelectionSet decodesTo Aisf.Object.Picture -> SelectionSet (List decodesTo) Aisf.Object.Champion
+pictures object_ =
+    Object.selectionForCompositeField "pictures" [] object_ (identity >> Decode.list)
 
 
 proExperiences : SelectionSet decodesTo Aisf.Object.ProExperience -> SelectionSet (List decodesTo) Aisf.Object.Champion

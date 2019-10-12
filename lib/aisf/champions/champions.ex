@@ -9,7 +9,11 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperiences
+  alias Aisf.Pictures.Pictures
   alias Aisf.Medals.{Medals, Medal}
+  alias Aisf.UploadUtils
+
+  @upload_dir Application.get_env(:aisf, AisfWeb.Endpoint)[:upload_dir]
 
   @doc """
   Returns the list of champions.
@@ -17,7 +21,7 @@ defmodule Aisf.Champions do
   def list_champions do
     Repo.all(Champion)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload(:medals)
+    |> Repo.preload([:medals, :pictures])
   end
 
   @doc """
@@ -26,7 +30,7 @@ defmodule Aisf.Champions do
   def list_members do
     Repo.all(from(c in Champion, where: c.is_member == true))
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload(:medals)
+    |> Repo.preload([:medals, :pictures])
   end
 
   @doc """
@@ -37,7 +41,7 @@ defmodule Aisf.Champions do
       from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
     )
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload(:medals)
+    |> Repo.preload([:medals, :pictures])
   end
 
   @doc """
@@ -48,7 +52,7 @@ defmodule Aisf.Champions do
   def get_champion!(id) do
     Repo.get!(Champion, id)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload(:medals)
+    |> Repo.preload([:medals, :pictures])
   end
 
   @doc """
@@ -57,7 +61,7 @@ defmodule Aisf.Champions do
   def get_champion(id) do
     Repo.get(Champion, id)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload(:medals)
+    |> Repo.preload([:medals, :pictures])
   end
 
   @doc """
@@ -77,7 +81,7 @@ defmodule Aisf.Champions do
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
-           |> Repo.preload(:medals)}
+           |> Repo.preload([:medals, :pictures])}
         end).()
   end
 
@@ -90,14 +94,11 @@ defmodule Aisf.Champions do
     new_attrs =
       if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
         %{filename: filename, base64: base64} = attrs.profile_picture
-        file = data_url_to_upload(base64)
+        file = UploadUtils.data_url_to_upload(base64)
         extension = Path.extname(filename)
         new_filename = "#{champion.id}-profile#{extension}"
 
-        upload_dir = Application.get_env(:aisf, AisfWeb.Endpoint)[:upload_dir]
-        Logger.info("Upload directory: #{upload_dir}")
-        File.mkdir_p(upload_dir)
-        File.cp(file.path, "#{upload_dir}/#{new_filename}")
+        UploadUtils.copy_file_to_dest(file, new_filename, @upload_dir)
 
         attrs
         |> Map.put(:profile_picture_filename, new_filename)
@@ -132,27 +133,22 @@ defmodule Aisf.Champions do
             end
           end)
 
+          new_attrs.pictures
+          |> Enum.map(fn p ->
+            if p.id == "new" do
+              Pictures.create_picture(champion, p)
+            else
+              p.id
+              |> Pictures.get_picture!()
+              |> Pictures.update_picture(p)
+            end
+          end)
+
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
-           |> Repo.preload(:medals)}
+           |> Repo.preload([:medals, :pictures])}
         end).()
-  end
-
-  defp data_url_to_upload(data_url) do
-    with %{scheme: "data"} = uri <- URI.parse(data_url),
-         %URL.Data{data: data} <- URL.Data.parse(uri) do
-      binary_to_upload(data)
-    end
-  end
-
-  defp binary_to_upload(binary) do
-    with {:ok, path} <- Plug.Upload.random_file("upload"),
-         {:ok, file} <- File.open(path, [:write, :binary]),
-         :ok <- IO.binwrite(file, binary),
-         :ok <- File.close(file) do
-      %Plug.Upload{path: path}
-    end
   end
 
   @doc """

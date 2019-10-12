@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, ProExperienceParams, ProExperienceParamsOptionalFields, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, PictureParams, PictureParamsRequiredFields, ProExperienceParams, ProExperienceParamsOptionalFields, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildPictureParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodePictureParams, encodeProExperienceParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -82,6 +82,33 @@ encodeMedalParams : MedalParams -> Value
 encodeMedalParams input =
     Encode.maybeObject
         [ ( "competition", Encode.string input.competition |> Just ), ( "id", Encode.string input.id |> Just ), ( "medalType", Encode.int input.medalType |> Just ), ( "specialty", Encode.string input.specialty |> Just ), ( "year", Encode.int input.year |> Just ) ]
+
+
+buildPictureParams : PictureParamsRequiredFields -> PictureParams
+buildPictureParams required =
+    { attachment = required.attachment, id = required.id }
+
+
+type alias PictureParamsRequiredFields =
+    { attachment : FileParams
+    , id : String
+    }
+
+
+{-| Type for the PictureParams input object.
+-}
+type alias PictureParams =
+    { attachment : FileParams
+    , id : String
+    }
+
+
+{-| Encode a PictureParams into a value that can be used as an argument.
+-}
+encodePictureParams : PictureParams -> Value
+encodePictureParams input =
+    Encode.maybeObject
+        [ ( "attachment", encodeFileParams input.attachment |> Just ), ( "id", Encode.string input.id |> Just ) ]
 
 
 buildProExperienceParams : ProExperienceParamsRequiredFields -> (ProExperienceParamsOptionalFields -> ProExperienceParamsOptionalFields) -> ProExperienceParams

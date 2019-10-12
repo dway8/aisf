@@ -5,6 +5,7 @@ import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
 import Aisf.Object.Medal as Medal
+import Aisf.Object.Picture as Picture
 import Aisf.Object.ProExperience as ProExperience
 import Aisf.Object.Sector as Sector
 import Aisf.Query as Query
@@ -16,7 +17,7 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), ProExperience, Sector, Specialty(..), Sport(..), Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sector, Specialty(..), Sport(..), Year(..))
 import RemoteData
 
 
@@ -101,6 +102,14 @@ championSelection =
         |> with Champion.background
         |> with Champion.volunteering
         |> with (SelectionSet.map (Maybe.map (String.fromInt >> Id)) Champion.oldId)
+        |> with (Champion.pictures pictureSelection)
+
+
+pictureSelection : SelectionSet Picture Aisf.Object.Picture
+pictureSelection =
+    SelectionSet.succeed Picture
+        |> with Picture.id
+        |> with (SelectionSet.map (\f -> Attachment f Nothing) Picture.filename)
 
 
 proExperienceSelection : SelectionSet ProExperience Aisf.Object.ProExperience
@@ -136,6 +145,7 @@ createChampion c =
         , medals = c.medals |> List.map medalToParams
         , isMember = c.isMember
         , highlights = c.highlights
+        , pictures = c.pictures |> List.map pictureToParams
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
@@ -170,6 +180,7 @@ updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFren
         , medals = medals |> List.map medalToParams
         , isMember = isMember
         , highlights = champion.highlights
+        , pictures = champion.pictures |> List.map pictureToParams
         }
         championSelection
         |> Graphql.Http.mutationRequest endpoint
@@ -196,6 +207,13 @@ medalToParams ({ competition, year, specialty, medalType } as medal) =
     , year = Model.getYear year
     , specialty = Model.specialtyToString specialty
     , medalType = Model.medalTypeToInt medalType
+    }
+
+
+pictureToParams : Picture -> Aisf.InputObject.PictureParams
+pictureToParams picture =
+    { id = Model.getId picture
+    , attachment = picture.attachment |> fileToParams
     }
 
 

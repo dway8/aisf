@@ -115,6 +115,13 @@ type alias Champion =
     , background : Maybe String
     , volunteering : Maybe String
     , oldId : Maybe Id
+    , pictures : List Picture
+    }
+
+
+type alias Picture =
+    { id : Id
+    , attachment : Attachment
     }
 
 
@@ -143,6 +150,7 @@ type alias ChampionForm =
     , decoration : Maybe String
     , background : Maybe String
     , volunteering : Maybe String
+    , pictures : List Picture
     }
 
 
@@ -836,10 +844,10 @@ type Msg
     | SelectedAYear String
     | PressedEditProExperienceButton Int
     | PressedEditMedalButton Int
-    | BeganFileSelection
+    | BeganFileSelection Id
     | CancelledFileSelection
-    | FileSelectionDone File
-    | GotFileUrl String
+    | FileSelectionDone Id File
+    | GotFileUrl Id String
     | UpdatedSearchQuery String
     | GotSectors (RemoteData (Graphql.Http.Error Sectors) Sectors)
     | SelectedASector String
@@ -858,6 +866,7 @@ type Msg
     | PressedConfirmHighlightButton Int
     | GoBack
     | PressedEditChampionButton Id
+    | PressedAddPictureButton
 
 
 type FormField
@@ -865,6 +874,14 @@ type FormField
     | LastName
     | Email
     | Intro
+    | FrenchTeamParticipation
+    | OlympicGamesParticipation
+    | WorldCupParticipation
+    | TrackRecord
+    | BestMemory
+    | Decoration
+    | Background
+    | Volunteering
     | Title
     | CompanyName
     | Description
@@ -1001,7 +1018,7 @@ acceptableSectors query sectors =
 
 createSector : String -> Sector
 createSector name =
-    Sector (Id "NEW") name
+    Sector (Id "new") name
 
 
 getSportIcon : Sport -> String
@@ -1064,3 +1081,10 @@ getIsMemberIcon isMember =
 
     else
         "logo_aisf_nb.png"
+
+
+initPicture : Picture
+initPicture =
+    { id = Id "new"
+    , attachment = Attachment "" Nothing
+    }
