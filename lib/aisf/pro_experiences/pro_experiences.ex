@@ -2,6 +2,7 @@ defmodule Aisf.ProExperiences.ProExperiences do
   @moduledoc """
   The ProExperiences context.
   """
+  require Logger
 
   import Ecto.Query, warn: false
   alias Aisf.Repo
@@ -42,6 +43,8 @@ defmodule Aisf.ProExperiences.ProExperiences do
 
   """
   def create_pro_experience(champion, attrs \\ %{}) do
+    Logger.info("Creating pro experience for champion #{champion.id} with attrs #{attrs}")
+
     champion
     |> Ecto.build_assoc(:pro_experiences)
     |> ProExperience.changeset(attrs)
@@ -53,14 +56,10 @@ defmodule Aisf.ProExperiences.ProExperiences do
 
   ## Examples
 
-      iex> update_pro_experience(pro_experience, %{field: new_value})
-      {:ok, %ProExperience{}}
-
-      iex> update_pro_experience(pro_experience, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
   def update_pro_experience(%ProExperience{} = pro_experience, attrs) do
+    Logger.info("Updating pro experience #{pro_experience.id} with attrs #{attrs}")
+
     pro_experience
     |> Repo.preload(:sectors)
     |> ProExperience.changeset(attrs)

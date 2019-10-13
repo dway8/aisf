@@ -2,6 +2,9 @@ defmodule Aisf.UploadUtils do
   @moduledoc """
   Upload utils for champions pictures.
   """
+
+  require Logger
+
   def data_url_to_upload(data_url) do
     with %{scheme: "data"} = uri <- URI.parse(data_url),
          %URL.Data{data: data} <- URL.Data.parse(uri) do
@@ -19,6 +22,7 @@ defmodule Aisf.UploadUtils do
   end
 
   def copy_file_to_dest(file, filename, dest_dir) do
+    Logger.info("Copying file #{filename} to dir #{dest_dir}")
     File.mkdir_p(dest_dir)
     File.cp(file.path, "#{dest_dir}/#{filename}")
   end

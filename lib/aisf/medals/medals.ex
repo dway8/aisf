@@ -2,6 +2,7 @@ defmodule Aisf.Medals.Medals do
   @moduledoc """
   The Medals context.
   """
+  require Logger
 
   import Ecto.Query, warn: false
   alias Aisf.Repo
@@ -41,6 +42,8 @@ defmodule Aisf.Medals.Medals do
   Creates a medal.
   """
   def create_medal(champion, attrs \\ %{}) do
+    Logger.info("Creating medal for champion #{champion.id} with attrs #{attrs}")
+
     champion
     |> Ecto.build_assoc(:medals)
     |> Medal.changeset(attrs)
@@ -52,14 +55,10 @@ defmodule Aisf.Medals.Medals do
 
   ## Examples
 
-      iex> update_medal(medal, %{field: new_value})
-      {:ok, %Medal{}}
-
-      iex> update_medal(medal, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
   def update_medal(%Medal{} = medal, attrs) do
+    Logger.info("Updating medal #{medal.id} with attrs #{attrs}")
+
     medal
     |> Medal.changeset(attrs)
     |> Repo.update()

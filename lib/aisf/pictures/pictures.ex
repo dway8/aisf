@@ -31,13 +31,14 @@ defmodule Aisf.Pictures.Pictures do
 
   """
   def create_picture(champion, attrs \\ %{}) do
+    Logger.info("Adding a picture for champion #{champion.id}")
     %{filename: filename, base64: base64} = attrs.attachment
 
     case champion
          |> Ecto.build_assoc(:pictures)
          |> Picture.changeset(attrs.attachment)
          |> Repo.insert() do
-      {:ok, picture} ->
+      {:ok, _picture} ->
         file = UploadUtils.data_url_to_upload(base64)
 
         upload_dir = "#{@upload_dir}/#{champion.id}"
@@ -55,6 +56,8 @@ defmodule Aisf.Pictures.Pictures do
 
   """
   def update_picture(%Picture{} = picture, attrs) do
+    Logger.info("Updating picture #{picture.id}")
+
     picture
     |> Picture.changeset(attrs)
     |> Repo.update()

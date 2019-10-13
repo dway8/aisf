@@ -19,6 +19,8 @@ defmodule Aisf.Champions do
   Returns the list of champions.
   """
   def list_champions do
+    Logger.info("Listing all champions")
+
     Repo.all(Champion)
     |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload([:medals, :pictures])
@@ -28,6 +30,8 @@ defmodule Aisf.Champions do
   Returns the list of members.
   """
   def list_members do
+    Logger.info("Listing all members")
+
     Repo.all(from(c in Champion, where: c.is_member == true))
     |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload([:medals, :pictures])
@@ -37,6 +41,8 @@ defmodule Aisf.Champions do
   Returns the list of champions with medals.
   """
   def list_champions_with_medals do
+    Logger.info("Listing all champions with medals")
+
     Repo.all(
       from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
     )
@@ -59,6 +65,8 @@ defmodule Aisf.Champions do
   Gets a single champion.
   """
   def get_champion(id) do
+    Logger.info("Getting champion with id #{id}")
+
     Repo.get(Champion, id)
     |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload([:medals, :pictures])
@@ -68,10 +76,14 @@ defmodule Aisf.Champions do
   Creates a champion.
   """
   def create_champion(attrs \\ %{}) do
+    Logger.info("Creating new champion")
+
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
     |> (fn {:ok, champion} ->
+          Logger.info("Creating champion OK")
+
           attrs.pro_experiences
           |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)
 
@@ -91,8 +103,11 @@ defmodule Aisf.Champions do
   ## Examples
   """
   def update_champion(%Champion{} = champion, attrs) do
+    Logger.info("Updating champion with id #{champion.id}")
+
     new_attrs =
       if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
+        Logger.info("Uploading profile picture for champion #{champion.id}")
         %{filename: filename, base64: base64} = attrs.profile_picture
         file = UploadUtils.data_url_to_upload(base64)
         extension = Path.extname(filename)
