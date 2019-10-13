@@ -870,6 +870,7 @@ type Msg
     | PressedAddPictureButton
     | ClickedOnPicture Int
     | ClickedOnPictureDialogBackground
+    | RequestedNextPicture Int
 
 
 type FormField

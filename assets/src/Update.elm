@@ -207,6 +207,9 @@ update msg model =
         ClickedOnPictureDialogBackground ->
             closePictureDialog model
 
+        RequestedNextPicture direction ->
+            showNextPicture direction model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -1370,6 +1373,36 @@ closePictureDialog model =
                 |> RD.map
                     (\champion ->
                         ( { model | currentPage = ChampionPage { cModel | pictureDialog = Nothing } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+showNextPicture : Int -> Model -> ( Model, Cmd Msg )
+showNextPicture direction model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            nextPicture =
+                                cModel.pictureDialog
+                                    |> Maybe.andThen (\p -> LE.elemIndex p champion.pictures)
+                                    |> Maybe.map ((+) direction)
+                                    |> Maybe.andThen (\newIndex -> LE.getAt newIndex champion.pictures)
+                                    |> (\maybePic ->
+                                            case maybePic of
+                                                Just pic ->
+                                                    Just pic
+
+                                                Nothing ->
+                                                    cModel.pictureDialog
+                                       )
+                        in
+                        ( { model | currentPage = ChampionPage { cModel | pictureDialog = nextPicture } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 

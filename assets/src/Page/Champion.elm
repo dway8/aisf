@@ -213,6 +213,7 @@ viewPictureDialog (Id championId) { attachment } pictures =
                 , centerY
                 , Font.color Color.white
                 , position
+                , onClick <| RequestedNextPicture move
                 ]
             <|
                 html <|
