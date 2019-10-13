@@ -32,12 +32,12 @@ let commonConfig = {
                 parallel: true,
                 sourceMap: false,
             }),
-            new OptimizeCSSAssetsPlugin(),
+            new OptimizeCSSAssetsPlugin({}),
         ],
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: "app.css",
+            filename: "../css/app.css",
         }),
     ],
     entry: {
