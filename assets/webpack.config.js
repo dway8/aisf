@@ -157,6 +157,9 @@ const prodConfig = {
             },
         ],
     },
+    plugins: [
+        new CopyWebpackPlugin([{ from: "static/images/", to: "../images/" }]),
+    ],
 };
 
 // additional webpack settings for prod env (when invoked via 'npm run build')
