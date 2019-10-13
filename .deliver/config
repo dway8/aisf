@@ -42,7 +42,7 @@ pre_erlang_clean_compile() {
       cd '$BUILD_AT'
       mkdir -p priv/static
       cd '$BUILD_AT/assets'
-      npm run deploy $SILENCE
+      npm run build $SILENCE
    "
 
   status "Running phx.digest"

@@ -1,11 +1,30 @@
 const path = require("path");
 const glob = require("glob");
+let merge = require("webpack-merge");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-module.exports = (env, options) => ({
+let prod = "production";
+let dev = "development";
+
+// determine build env
+let TARGET_ENV = process.env.npm_lifecycle_event === "build" ? prod : dev;
+let isDev = TARGET_ENV === dev;
+let isProd = TARGET_ENV === prod;
+
+console.log(`WEBPACK GO! Building for ${TARGET_ENV}`);
+
+let commonConfig = {
+    output: {
+        filename: "app.js",
+        path: path.resolve(__dirname, "../priv/static/js"),
+    },
+    performance: {
+        hints: false,
+    },
+
     optimization: {
         minimizer: [
             new UglifyJsPlugin({
@@ -13,50 +32,37 @@ module.exports = (env, options) => ({
                 parallel: true,
                 sourceMap: false,
             }),
-            new OptimizeCSSAssetsPlugin({}),
+            new OptimizeCSSAssetsPlugin(),
         ],
     },
+    plugins: [
+        new MiniCssExtractPlugin({
+            filename: "app.css",
+        }),
+    ],
     entry: {
         "./js/app.js": ["./js/app.js"].concat(glob.sync("./vendor/**/*.js")),
-    },
-    output: {
-        filename: "app.js",
-        path: path.resolve(__dirname, "../priv/static/js"),
     },
     module: {
         rules: [
             {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                },
-            },
-            {
-                test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, "css-loader"],
-            },
-
-            {
-                test: /\.elm$/,
-                exclude: [/elm-stuff/, /node_modules/],
+                test: /\.css$/i,
                 use: [
                     {
-                        loader: "elm-hot-webpack-loader",
-                    },
-                    {
-                        loader: "elm-webpack-loader",
+                        loader: MiniCssExtractPlugin.loader,
                         options: {
-                            verbose: true,
-                            // warn: true,
-                            debug: true,
-                            pathToElm: "./node_modules/.bin/elm",
+                            hmr: isDev,
                         },
                     },
+                    "css-loader",
                 ],
             },
         ],
     },
+};
+
+const devConfig = {
+    devtool: "source-map",
     devServer: {
         headers: {
             "Access-Control-Allow-Origin": "*",
@@ -78,6 +84,12 @@ module.exports = (env, options) => ({
             version: false,
             warnings: true,
         },
+
+        host: "0.0.0.0",
+
+        hot: true,
+
+        inline: true,
     },
     plugins: [
         new MiniCssExtractPlugin({ filename: "../css/app.css" }),
@@ -97,8 +109,61 @@ module.exports = (env, options) => ({
             }
         },
     ],
-
-    performance: {
-        hints: false,
+    module: {
+        rules: [
+            {
+                test: /\.elm$/,
+                exclude: [/elm-stuff/, /node_modules/],
+                use: [
+                    {
+                        loader: "elm-hot-webpack-loader",
+                    },
+                    {
+                        loader: "elm-webpack-loader",
+                        options: {
+                            verbose: true,
+                            // warn: true,
+                            debug: true,
+                            pathToElm: "./node_modules/.bin/elm",
+                        },
+                    },
+                ],
+            },
+        ],
     },
-});
+};
+
+if (isDev === true) {
+    console.log("Serving locally...");
+    module.exports = function() {
+        return merge(commonConfig, devConfig);
+    };
+}
+
+const prodConfig = {
+    module: {
+        rules: [
+            {
+                test: /\.elm$/,
+                exclude: [/elm-stuff/, /node_modules/],
+                use: [
+                    {
+                        loader: "elm-webpack-loader",
+                        options: {
+                            optimize: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    },
+};
+
+// additional webpack settings for prod env (when invoked via 'npm run build')
+if (isProd === true) {
+    console.log("Building for prod...");
+
+    module.exports = function() {
+        return merge(commonConfig, prodConfig);
+    };
+}
