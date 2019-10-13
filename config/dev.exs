@@ -76,4 +76,6 @@ config :aisf, Aisf.Repo,
   pool_size: 10
 
 # File uploads
-config :aisf, AisfWeb.Endpoint, upload_dir: "media"
+config :aisf, AisfWeb.Endpoint,
+  upload_dir: "media",
+  admin_cookie: "isAdmin"

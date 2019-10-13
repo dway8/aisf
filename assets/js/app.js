@@ -17,12 +17,11 @@ import "phoenix_html";
 // import socket from "./socket"
 
 import { Elm } from "../src/Main.elm";
-
 var cookies = document.cookie.split(";");
 var isAdmin = false;
 for (var i = 0; i < cookies.length; ++i) {
     var pair = cookies[i].trim().split("=");
-    if (pair[0] == "isAdmin") {
+    if (pair[0] == admin_cookie) {
         isAdmin = true;
     }
 }

@@ -31,4 +31,6 @@ config :wallaby,
 # max_wait_time: 20_000
 
 # File uploads
-config :aisf, AisfWeb.Endpoint, upload_dir: "media"
+config :aisf, AisfWeb.Endpoint,
+  upload_dir: "media",
+  admin_cookie: "isAdmin"
