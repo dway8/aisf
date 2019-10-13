@@ -166,6 +166,7 @@ profilePictureColumn =
                         [ HA.style "max-width" "35px"
                         , HA.style "max-height" "35px"
                         , HA.style "object-fit" "contain"
+                        , HA.style "vertical-align" "middle"
                         , HA.src src
                         ]
                         []
@@ -184,6 +185,7 @@ sportColumn =
                         [ HA.style "max-width" "35px"
                         , HA.style "max-height" "35px"
                         , HA.style "object-fit" "contain"
+                        , HA.style "vertical-align" "middle"
                         , HA.src <| "/images/" ++ Model.getSportIcon champion.sport
                         , HA.title <| Model.sportToString champion.sport
                         ]

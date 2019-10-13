@@ -94,10 +94,6 @@ type alias Champion =
     { id : Id
     , lastName : String
     , firstName : String
-    , email : Maybe String
-    , birthDate : Maybe String
-    , address : Maybe String
-    , phoneNumber : Maybe String
     , website : Maybe String
     , sport : Sport
     , proExperiences : List ProExperience
@@ -117,6 +113,10 @@ type alias Champion =
     , volunteering : Maybe String
     , oldId : Maybe Id
     , pictures : List Picture
+    , birthDate : Maybe String
+    , email : Maybe String
+    , address : Maybe String
+    , phoneNumber : Maybe String
     }
 
 
@@ -876,7 +876,6 @@ type Msg
 type FormField
     = FirstName
     | LastName
-    | Email
     | Intro
     | FrenchTeamParticipation
     | OlympicGamesParticipation
@@ -886,6 +885,10 @@ type FormField
     | Decoration
     | Background
     | Volunteering
+    | BirthDate
+    | Email
+    | Address
+    | PhoneNumber
     | Title
     | CompanyName
     | Description

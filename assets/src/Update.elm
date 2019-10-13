@@ -242,7 +242,7 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
                 |> Tuple.mapFirst TeamsPage
 
         ChampionRoute id ->
-            Page.Champion.init id
+            Page.Champion.init isAdmin id
                 |> Tuple.mapFirst ChampionPage
 
         EditChampionRoute maybeId ->
@@ -275,11 +275,44 @@ updateChampionForm field val model =
                                     LastName ->
                                         { champion | lastName = val }
 
+                                    Intro ->
+                                        { champion | intro = Just val }
+
+                                    FrenchTeamParticipation ->
+                                        { champion | frenchTeamParticipation = Just val }
+
+                                    OlympicGamesParticipation ->
+                                        { champion | olympicGamesParticipation = Just val }
+
+                                    WorldCupParticipation ->
+                                        { champion | worldCupParticipation = Just val }
+
+                                    TrackRecord ->
+                                        { champion | trackRecord = Just val }
+
+                                    BestMemory ->
+                                        { champion | bestMemory = Just val }
+
+                                    Decoration ->
+                                        { champion | decoration = Just val }
+
+                                    Background ->
+                                        { champion | background = Just val }
+
+                                    Volunteering ->
+                                        { champion | volunteering = Just val }
+
+                                    BirthDate ->
+                                        { champion | birthDate = Just val }
+
                                     Email ->
                                         { champion | email = Just val }
 
-                                    Intro ->
-                                        { champion | intro = Just val }
+                                    Address ->
+                                        { champion | address = Just val }
+
+                                    PhoneNumber ->
+                                        { champion | phoneNumber = Just val }
 
                                     _ ->
                                         champion

@@ -88,7 +88,6 @@ defmodule AisfWeb.Schema do
     field :create_champion, type: :champion do
       arg(:first_name, non_null(:string))
       arg(:last_name, non_null(:string))
-      arg(:email, :string)
       arg(:sport, non_null(:string))
       arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
       arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
@@ -105,6 +104,11 @@ defmodule AisfWeb.Schema do
       arg(:volunteering, :string)
       arg(:highlights, non_null(list_of(non_null(:string))))
       arg(:pictures, non_null(list_of(non_null(:picture_params))))
+      arg(:birth_date, :string)
+      arg(:address, :string)
+      arg(:email, :string)
+      arg(:phone_number, :string)
+      arg(:profile_picture, :file_params)
 
       resolve(&ChampionsResolver.create/2)
     end
@@ -113,7 +117,6 @@ defmodule AisfWeb.Schema do
       arg(:id, non_null(:string))
       arg(:first_name, non_null(:string))
       arg(:last_name, non_null(:string))
-      arg(:email, :string)
       arg(:sport, non_null(:string))
       arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
       arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
@@ -131,6 +134,10 @@ defmodule AisfWeb.Schema do
       arg(:volunteering, :string)
       arg(:highlights, non_null(list_of(non_null(:string))))
       arg(:pictures, non_null(list_of(non_null(:picture_params))))
+      arg(:birth_date, :string)
+      arg(:address, :string)
+      arg(:email, :string)
+      arg(:phone_number, :string)
 
       resolve(&ChampionsResolver.update/2)
     end

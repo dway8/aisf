@@ -32,7 +32,7 @@ init maybeId =
               , champion = Loading
               , sectorDropdown = Dropdown.init
               }
-            , Api.getChampion id
+            , Api.getChampion True id
             )
 
         Nothing ->
@@ -127,10 +127,9 @@ view rdSectors currentYear model =
                     [ viewButtons
                     , row [ UI.largeSpacing ]
                         [ viewProfilePicture champion.profilePicture
-                        , column [ UI.defaultSpacing ]
+                        , column [ UI.defaultSpacing, width fill ]
                             [ viewChampionTextInput FirstName champion
                             , viewChampionTextInput LastName champion
-                            , viewChampionTextInput Email champion
                             ]
                         ]
                     , Common.sportSelector False champion.sport
@@ -140,6 +139,7 @@ view rdSectors currentYear model =
                       in
                       viewTextArea label value (UpdatedChampionField Intro)
                     , editHighlights champion
+                    , editPrivateInfo champion
                     , editSportCareer champion
                     , editProfessionalCareer sectors model.sectorDropdown champion
                     , editPictures champion
@@ -150,6 +150,16 @@ view rdSectors currentYear model =
 
             _ ->
                 text "..."
+        ]
+
+
+editPrivateInfo : ChampionForm -> Element Msg
+editPrivateInfo champion =
+    Common.viewBlock "Informations privées"
+        [ viewChampionTextInput BirthDate champion
+        , viewChampionTextInput Address champion
+        , viewChampionTextInput Email champion
+        , viewChampionTextInput PhoneNumber champion
         ]
 
 
@@ -428,9 +438,6 @@ getChampionFormFieldData field champion =
         LastName ->
             ( "Nom", champion.lastName )
 
-        Email ->
-            ( "Email", champion.email |> Maybe.withDefault "" )
-
         Intro ->
             ( "Intro", champion.intro |> Maybe.withDefault "" )
 
@@ -453,10 +460,22 @@ getChampionFormFieldData field champion =
             ( "Décoration", champion.decoration |> Maybe.withDefault "" )
 
         Background ->
-            ( "Formation", champion.decoration |> Maybe.withDefault "" )
+            ( "Formation", champion.background |> Maybe.withDefault "" )
 
         Volunteering ->
-            ( "Bénévolat", champion.decoration |> Maybe.withDefault "" )
+            ( "Bénévolat", champion.volunteering |> Maybe.withDefault "" )
+
+        BirthDate ->
+            ( "Date de naissance", champion.birthDate |> Maybe.withDefault "" )
+
+        Address ->
+            ( "Adresse", champion.address |> Maybe.withDefault "" )
+
+        Email ->
+            ( "Adresse e-mail", champion.email |> Maybe.withDefault "" )
+
+        PhoneNumber ->
+            ( "N° de téléphone", champion.phoneNumber |> Maybe.withDefault "" )
 
         _ ->
             ( "", "" )

@@ -31,7 +31,7 @@ init =
 view : RemoteData (Graphql.Http.Error Sectors) Sectors -> AdminPageModel -> Element Msg
 view rdSectors model =
     column [ UI.largeSpacing, width fill ]
-        [ row [ UI.defaultSpacing, width fill ]
+        [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
             , sectorSelector rdSectors model.sector

@@ -128,6 +128,7 @@ tableColumns =
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
                         , HA.style "object-fit" "contain"
+                        , HA.style "vertical-align" "middle"
                         , HA.src <| "/images/" ++ Model.getIsMemberIcon isMember
                         ]
                         []

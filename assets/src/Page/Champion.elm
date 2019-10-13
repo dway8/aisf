@@ -19,14 +19,14 @@ import UI.Color as Color
 import Utils
 
 
-init : Id -> ( ChampionPageModel, Cmd Msg )
-init id =
+init : Bool -> Id -> ( ChampionPageModel, Cmd Msg )
+init isAdmin id =
     ( { id = id
       , champion = Loading
       , medalsTableState = Table.initialSort "ANNÉE"
       , pictureDialog = Nothing
       }
-    , Api.getChampion id
+    , Api.getChampion isAdmin id
     )
 
 
@@ -67,6 +67,7 @@ view isAdmin { id, champion, medalsTableState } =
                         |> Maybe.map (\intro -> paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text intro ])
                         |> Maybe.withDefault none
                     , viewHighlights champ.highlights
+                    , Utils.viewIf isAdmin <| viewPrivateInfo champ
                     , viewSportCareer champ
                     , viewProfessionalCareer champ
                     , viewPictures champ
@@ -91,6 +92,16 @@ viewHighlights highlights =
             (highlights
                 |> List.map (\h -> row [ UI.defaultSpacing ] [ text "-", text h ])
             )
+
+
+viewPrivateInfo : Champion -> Element Msg
+viewPrivateInfo champion =
+    Common.viewBlock "Informations privées"
+        [ Common.viewInfoRow "Date de naissance" (champion.birthDate |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Adresse" (champion.address |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Adresse e-mail" (champion.email |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "N° de téléphone" (champion.phoneNumber |> Maybe.withDefault "-" |> text)
+        ]
 
 
 viewSportCareer : Champion -> Element Msg
@@ -181,6 +192,7 @@ tableColumns =
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
                         , HA.style "object-fit" "contain"
+                        , HA.style "vertical-align" "middle"
                         , HA.src <| "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
                         , HA.title <| Model.medalTypeToDisplay medal.medalType
                         ]
