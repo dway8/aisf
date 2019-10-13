@@ -27,8 +27,8 @@ init year =
 
 view : TeamsPageModel -> Element Msg
 view model =
-    column [ width fill, UI.defaultSpacing ]
-        [ row [ width fill, UI.defaultSpacing ]
+    column [ width fill, UI.largeSpacing ]
+        [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
             , Common.yearSelector True model.currentYear SelectedAYear
@@ -43,6 +43,9 @@ view model =
                     |> Table.view tableConfig model.tableState
                     |> html
                     |> el [ htmlAttribute <| HA.id "teams-list" ]
+
+            Loading ->
+                UI.spinner
 
             _ ->
                 none

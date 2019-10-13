@@ -36,7 +36,7 @@ view isAdmin { id, champion, medalsTableState } =
         [ row [ UI.largeSpacing ]
             [ row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
                 |> Button.makeButton (Just GoBack)
-                |> Button.withBackgroundColor Color.lighterGrey
+                |> Button.withBackgroundColor Color.lightGrey
                 |> Button.withAttrs []
                 |> Button.viewButton
             , Utils.viewIf
@@ -50,7 +50,7 @@ view isAdmin { id, champion, medalsTableState } =
             ]
         , case champion of
             Success champ ->
-                column [ UI.largeSpacing, width fill ]
+                column [ UI.largerSpacing, width fill ]
                     [ row [ UI.largeSpacing ]
                         [ Common.viewProfilePicture 150 champ.profilePicture
                         , column [ UI.largeSpacing, alignTop ]
@@ -63,7 +63,9 @@ view isAdmin { id, champion, medalsTableState } =
                             , image [ width <| px 50 ] { src = "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
                             ]
                         ]
-                    , paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text (champ.intro |> Maybe.withDefault "") ]
+                    , champ.intro
+                        |> Maybe.map (\intro -> paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text intro ])
+                        |> Maybe.withDefault none
                     , viewHighlights champ.highlights
                     , viewSportCareer champ
                     , viewProfessionalCareer champ
@@ -84,10 +86,11 @@ view isAdmin { id, champion, medalsTableState } =
 
 viewHighlights : List String -> Element Msg
 viewHighlights highlights =
-    column [ UI.defaultSpacing, paddingXY 10 0 ]
-        (highlights
-            |> List.map (\h -> row [ UI.defaultSpacing ] [ text "-", text h ])
-        )
+    Utils.viewIf (highlights /= []) <|
+        column [ UI.defaultSpacing, paddingXY 10 0 ]
+            (highlights
+                |> List.map (\h -> row [ UI.defaultSpacing ] [ text "-", text h ])
+            )
 
 
 viewSportCareer : Champion -> Element Msg
@@ -108,11 +111,15 @@ viewProfessionalCareer champion =
         [ Common.viewInfoRow "Formation" (champion.background |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Bénévolat" (champion.volunteering |> Maybe.withDefault "-" |> text)
         , column [ UI.defaultSpacing, width fill ]
-            [ el [ Font.bold, UI.largeFont ] <| text "Expériences professionnelles"
-            , column [ spacing 7, width fill ]
-                (champion.proExperiences
-                    |> List.map Common.viewProExperience
-                )
+            [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
+            , if champion.proExperiences == [] then
+                el [ Font.italic ] <| text "Aucune expérience renseignée"
+
+              else
+                column [ spacing 7, width fill ]
+                    (champion.proExperiences
+                        |> List.map Common.viewProExperience
+                    )
             ]
         ]
 
@@ -124,13 +131,17 @@ viewPictures champion =
             Model.getId champion
     in
     Common.viewBlock "Photos"
-        [ row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
-            (champion.pictures
-                |> List.indexedMap
-                    (\idx { attachment } ->
-                        image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
-                    )
-            )
+        [ if champion.pictures == [] then
+            el [ Font.italic ] <| text "Aucune photo pour l'instant"
+
+          else
+            row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
+                (champion.pictures
+                    |> List.indexedMap
+                        (\idx { attachment } ->
+                            image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
+                        )
+                )
         ]
 
 

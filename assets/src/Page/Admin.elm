@@ -58,7 +58,7 @@ view rdSectors model =
                 none
 
             Loading ->
-                text "..."
+                UI.spinner
 
             _ ->
                 text "Une erreur s'est produite."

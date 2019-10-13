@@ -9,6 +9,7 @@ import Html.Attributes as HA
 import Model exposing (Champion, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
+import UI
 
 
 init : Year -> ( MedalsPageModel, Cmd Msg )
@@ -27,8 +28,8 @@ init year =
 
 view : MedalsPageModel -> Element Msg
 view model =
-    column [ width fill, spacing 20 ]
-        [ row [ width fill, spacing 20 ]
+    column [ width fill, UI.largeSpacing ]
+        [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
             , model.sport
@@ -46,6 +47,9 @@ view model =
                     |> Table.view tableConfig model.tableState
                     |> html
                     |> el [ htmlAttribute <| HA.id "medals-list" ]
+
+            Loading ->
+                UI.spinner
 
             _ ->
                 none

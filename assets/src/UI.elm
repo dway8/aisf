@@ -58,6 +58,11 @@ defaultSpacing =
     spacing 10
 
 
+largerSpacing : Attribute msg
+largerSpacing =
+    spacing 30
+
+
 largeSpacing : Attribute msg
 largeSpacing =
     spacing 20
@@ -264,3 +269,10 @@ viewDialog config =
         ]
     <|
         none
+
+
+spinner : Element msg
+spinner =
+    el [ centerX, Font.color UI.Color.grey ] <|
+        html <|
+            Html.i [ HA.class "zmdi zmdi-spinner zmdi-hc-lg zmdi-hc-spin" ] []
