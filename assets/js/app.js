@@ -8,9 +8,11 @@ import "phoenix_html";
 import { Elm } from "../src/Main.elm";
 var cookies = document.cookie.split(";");
 var isAdmin = false;
+console.log(admin_cookie);
 for (var i = 0; i < cookies.length; ++i) {
     var pair = cookies[i].trim().split("=");
     if (pair[0] == admin_cookie) {
+        console.log(pair[0]);
         isAdmin = true;
     }
 }
