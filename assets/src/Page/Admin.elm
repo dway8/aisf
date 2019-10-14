@@ -39,7 +39,7 @@ view rdSectors model =
         , link []
             { url = "/champions/new"
             , label =
-                text "Ajouter un champion"
+                row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
                     |> Button.makeButton Nothing
                     |> Button.withBackgroundColor UI.Color.green
                     |> Button.viewButton

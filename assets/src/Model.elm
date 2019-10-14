@@ -90,6 +90,8 @@ type alias EditChampionPageModel =
 type alias EventsPageModel =
     { events : RemoteData (Graphql.Http.Error Events) Events
     , tableState : Table.State
+    , newEvent : Maybe Event
+    , currentYear : Year
     }
 
 
@@ -186,8 +188,7 @@ type alias Events =
 
 
 type alias Event =
-    { id : Id
-    , competition : Competition
+    { competition : Competition
     , sport : Sport
     , year : Year
     , place : String
@@ -856,7 +857,8 @@ type Msg
     | SelectedAYearInFrenchTeam Int String
     | PressedAddMedalButton
     | PressedDeleteMedalButton Int
-    | SelectedACompetition Int String
+    | SelectedAMedalCompetition Int String
+    | SelectedACompetition String
     | SelectedAMedalYear Int String
     | SelectedAMedalSpecialty Int String
     | SelectedASpecialty String
@@ -892,6 +894,11 @@ type Msg
     | ClickedOnPictureDialogBackground
     | RequestedNextPicture Int
     | GotEvents (RemoteData (Graphql.Http.Error Events) Events)
+    | PressedAddEventButton
+    | CancelledNewEvent
+    | UpdatedNewEventPlace String
+    | SaveNewEvent
+    | GotSaveEventResponse (RemoteData (Graphql.Http.Error Event) Event)
 
 
 type FormField
@@ -1115,4 +1122,13 @@ initPicture : Picture
 initPicture =
     { id = Id "new"
     , attachment = Attachment "" Nothing
+    }
+
+
+initEvent : Year -> Event
+initEvent currentYear =
+    { competition = OlympicGames
+    , sport = SkiAlpin
+    , year = currentYear
+    , place = ""
     }

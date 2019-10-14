@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Event exposing (competition, id, place, sport, year)
+module Aisf.Object.Event exposing (competition, place, sport, year)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -22,11 +22,6 @@ import Json.Decode as Decode
 competition : SelectionSet String Aisf.Object.Event
 competition =
     Object.selectionForField "String" "competition" [] Decode.string
-
-
-id : SelectionSet Aisf.ScalarCodecs.Id Aisf.Object.Event
-id =
-    Object.selectionForField "ScalarCodecs.Id" "id" [] (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 place : SelectionSet String Aisf.Object.Event

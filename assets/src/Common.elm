@@ -231,6 +231,7 @@ yearSelector showOptionAll currentYear msg =
                 []
             )
                 ++ (List.range 1960 (Model.getYear currentYear)
+                        |> List.reverse
                         |> List.map String.fromInt
                    )
     in
@@ -329,3 +330,23 @@ viewBlockTitle title =
     <|
         text <|
             String.toUpper title
+
+
+competitionSelector : (String -> Msg) -> Element Msg
+competitionSelector msg =
+    el [] <|
+        html <|
+            Html.select
+                [ HE.on "change" <| D.map msg <| HE.targetValue
+                , HA.style "font-family" "Open Sans"
+                , HA.style "font-size" "15px"
+                ]
+                (Model.competitionsList
+                    |> List.map
+                        (\competition ->
+                            Html.option
+                                [ HA.value <| Model.competitionToString competition
+                                ]
+                                [ Html.text <| Model.competitionToDisplay competition ]
+                        )
+                )

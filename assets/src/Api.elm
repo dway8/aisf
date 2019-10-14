@@ -1,4 +1,4 @@
-module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getSectors, updateChampion)
+module Api exposing (createChampion, createEvent, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getSectors, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -263,8 +263,21 @@ getEvents =
 eventSelection : SelectionSet Event Aisf.Object.Event
 eventSelection =
     SelectionSet.succeed Event
-        |> with Event.id
         |> with (SelectionSet.map (Model.competitionFromString >> Maybe.withDefault OlympicGames) Event.competition)
         |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Event.sport)
         |> with (SelectionSet.map Year Event.year)
         |> with Event.place
+
+
+createEvent : Event -> Cmd Msg
+createEvent event =
+    Mutation.createEvent
+        { competition = Model.competitionToString event.competition
+        , sport = Model.sportToString event.sport
+        , year = Model.getYear event.year
+        , place = event.place
+        }
+        eventSelection
+        |> Graphql.Http.mutationRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotSaveEventResponse)

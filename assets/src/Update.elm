@@ -112,7 +112,7 @@ update msg model =
         PressedDeleteMedalButton id ->
             deleteMedal id model
 
-        SelectedACompetition id str ->
+        SelectedAMedalCompetition id str ->
             updateMedalCompetition id str model
 
         SelectedAMedalYear id str ->
@@ -214,6 +214,24 @@ update msg model =
         GotEvents resp ->
             handleEventsResponse resp model
 
+        PressedAddEventButton ->
+            addEvent model
+
+        SelectedACompetition str ->
+            updateCurrentCompetition str model
+
+        CancelledNewEvent ->
+            cancelNewEvent model
+
+        UpdatedNewEventPlace str ->
+            updateNewEventPlace str model
+
+        SaveNewEvent ->
+            saveNewEvent model
+
+        GotSaveEventResponse resp ->
+            handleSaveEventResponse resp model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -263,7 +281,7 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
                     |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key "/")
 
         EventsRoute ->
-            Page.Events.init
+            Page.Events.init currentYear
                 |> Tuple.mapFirst EventsPage
 
 
@@ -381,6 +399,18 @@ updateCurrentSport sportStr model =
             ( { model | currentPage = AdminPage (updateFn aModel) }
             , Cmd.none
             )
+
+        EventsPage eModel ->
+            case ( eModel.newEvent, Model.sportFromString sportStr ) of
+                ( Just event, Just sport ) ->
+                    let
+                        newEvent =
+                            { event | sport = sport }
+                    in
+                    ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -750,6 +780,18 @@ updateCurrentYear str model =
             ( { model | currentPage = TeamsPage (updateFn tModel) }
             , Cmd.none
             )
+
+        EventsPage eModel ->
+            case ( eModel.newEvent, String.toInt str ) of
+                ( Just event, Just year ) ->
+                    let
+                        newEvent =
+                            { event | year = Year year }
+                    in
+                    ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1462,6 +1504,94 @@ handleEventsResponse resp model =
     case model.currentPage of
         EventsPage eModel ->
             ( { model | currentPage = EventsPage { eModel | events = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+addEvent : Model -> ( Model, Cmd Msg )
+addEvent model =
+    case model.currentPage of
+        EventsPage eModel ->
+            ( { model | currentPage = EventsPage { eModel | newEvent = Just <| Model.initEvent model.currentYear } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateCurrentCompetition : String -> Model -> ( Model, Cmd Msg )
+updateCurrentCompetition str model =
+    case model.currentPage of
+        EventsPage eModel ->
+            case ( eModel.newEvent, Model.competitionFromString str ) of
+                ( Just event, Just competition ) ->
+                    let
+                        newEvent =
+                            { event | competition = competition }
+                    in
+                    ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+cancelNewEvent : Model -> ( Model, Cmd Msg )
+cancelNewEvent model =
+    case model.currentPage of
+        EventsPage eModel ->
+            ( { model | currentPage = EventsPage { eModel | newEvent = Nothing } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateNewEventPlace : String -> Model -> ( Model, Cmd Msg )
+updateNewEventPlace str model =
+    case model.currentPage of
+        EventsPage eModel ->
+            case eModel.newEvent of
+                Just event ->
+                    let
+                        newEvent =
+                            { event | place = str }
+                    in
+                    ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+saveNewEvent : Model -> ( Model, Cmd Msg )
+saveNewEvent model =
+    case model.currentPage of
+        EventsPage eModel ->
+            case eModel.newEvent of
+                Just event ->
+                    ( { model | currentPage = EventsPage { eModel | newEvent = Nothing } }, Api.createEvent event )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleSaveEventResponse : RemoteData (Graphql.Http.Error Event) Event -> Model -> ( Model, Cmd Msg )
+handleSaveEventResponse response model =
+    case ( model.currentPage, response ) of
+        ( EventsPage eModel, Success event ) ->
+            eModel.events
+                |> RD.map
+                    (\events ->
+                        ( { model | currentPage = EventsPage { eModel | events = Success (event :: events) } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

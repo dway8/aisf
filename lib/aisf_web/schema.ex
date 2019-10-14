@@ -62,7 +62,6 @@ defmodule AisfWeb.Schema do
   end
 
   object :event do
-    field(:id, non_null(:id))
     field(:competition, non_null(:string))
     field(:sport, non_null(:string))
     field(:year, non_null(:integer))
@@ -152,6 +151,14 @@ defmodule AisfWeb.Schema do
       arg(:phone_number, :string)
 
       resolve(&ChampionsResolver.update/2)
+    end
+
+    field :create_event, type: non_null(:event) do
+      arg(:competition, non_null(:string))
+      arg(:sport, non_null(:string))
+      arg(:year, non_null(:integer))
+      arg(:place, non_null(:string))
+      resolve(&EventsResolver.create/2)
     end
   end
 

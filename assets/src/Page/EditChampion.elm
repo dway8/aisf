@@ -369,31 +369,11 @@ viewMedalForm currentYear id sport medal =
     column []
         [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
         , column []
-            [ competitionSelector id
+            [ Common.competitionSelector (SelectedAMedalCompetition id)
             , Common.yearSelector False currentYear (SelectedAMedalYear id)
             , Common.specialtySelector False sport (SelectedAMedalSpecialty id)
             ]
         ]
-
-
-competitionSelector : Int -> Element Msg
-competitionSelector id =
-    el [] <|
-        html <|
-            Html.select
-                [ HE.on "change" <| D.map (SelectedACompetition id) <| HE.targetValue
-                , HA.style "font-family" "Open Sans"
-                , HA.style "font-size" "15px"
-                ]
-                (Model.competitionsList
-                    |> List.map
-                        (\competition ->
-                            Html.option
-                                [ HA.value <| Model.competitionToString competition
-                                ]
-                                [ Html.text <| Model.competitionToDisplay competition ]
-                        )
-                )
 
 
 viewChampionTextInput : FormField -> ChampionForm -> Element Msg

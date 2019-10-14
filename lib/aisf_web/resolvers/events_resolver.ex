@@ -5,4 +5,8 @@ defmodule AisfWeb.EventsResolver do
     events = Events.list_events()
     {:ok, events}
   end
+
+  def create(args, _info) do
+    Events.create_event(args)
+  end
 end

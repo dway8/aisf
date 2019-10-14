@@ -69,7 +69,7 @@ viewBody model =
                     Page.Admin.view model.sectors adminModel
 
                 EventsPage eventsModel ->
-                    Page.Events.view eventsModel
+                    Page.Events.view model.isAdmin eventsModel
             ]
 
 
