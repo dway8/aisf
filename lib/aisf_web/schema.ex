@@ -2,7 +2,7 @@ defmodule AisfWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Ecto, repo: App.Repo
 
-  alias AisfWeb.{ChampionsResolver, SectorsResolver}
+  alias AisfWeb.{ChampionsResolver, SectorsResolver, EventsResolver}
 
   object :champion do
     field(:id, non_null(:id))
@@ -61,6 +61,14 @@ defmodule AisfWeb.Schema do
     field(:name, non_null(:string))
   end
 
+  object :event do
+    field(:id, non_null(:id))
+    field(:competition, non_null(:string))
+    field(:sport, non_null(:string))
+    field(:year, non_null(:integer))
+    field(:place, non_null(:string))
+  end
+
   query do
     field :all_champions, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.all/3)
@@ -81,6 +89,10 @@ defmodule AisfWeb.Schema do
 
     field :sectors, non_null(list_of(non_null(:sector))) do
       resolve(&SectorsResolver.all/3)
+    end
+
+    field :events, non_null(list_of(non_null(:event))) do
+      resolve(&EventsResolver.all/3)
     end
   end
 

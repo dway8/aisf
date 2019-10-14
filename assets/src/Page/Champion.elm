@@ -205,21 +205,13 @@ tableColumns =
         , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.medalTypeToDisplay medal.medalType)
         , sorter = Table.decreasingOrIncreasingBy (.medalType >> Model.medalTypeToDisplay)
         }
-    , Table.veryCustomColumn
-        { name = "COMPÉTITION"
-        , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.competitionToDisplay medal.competition)
-        , sorter = Table.decreasingOrIncreasingBy (.competition >> Model.competitionToDisplay)
-        }
+    , Common.competitionColumn
     , Table.veryCustomColumn
         { name = "DISCIPLINE"
         , viewData = \medal -> Common.defaultCell [] (Html.text <| Model.specialtyToDisplay medal.specialty)
         , sorter = Table.decreasingOrIncreasingBy (.specialty >> Model.specialtyToDisplay)
         }
-    , Table.veryCustomColumn
-        { name = "ANNÉE"
-        , viewData = \medal -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
-        , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
-        }
+    , Common.yearColumn
     ]
 
 

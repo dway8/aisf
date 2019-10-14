@@ -16,6 +16,7 @@ import Model exposing (..)
 import Page.Admin
 import Page.Champion
 import Page.EditChampion
+import Page.Events
 import Page.Medals
 import Page.Members
 import Page.Teams
@@ -210,6 +211,9 @@ update msg model =
         RequestedNextPicture direction ->
             showNextPicture direction model
 
+        GotEvents resp ->
+            handleEventsResponse resp model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -257,6 +261,10 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
             else
                 Page.Members.init
                     |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key "/")
+
+        EventsRoute ->
+            Page.Events.init
+                |> Tuple.mapFirst EventsPage
 
 
 updateChampionForm : FormField -> String -> Model -> ( Model, Cmd Msg )
@@ -785,6 +793,12 @@ handleTableMsg tableState model =
 
                 AdminPage aModel ->
                     AdminPage (updateFn aModel)
+
+                ChampionPage cModel ->
+                    ChampionPage { cModel | medalsTableState = tableState }
+
+                EventsPage eModel ->
+                    EventsPage (updateFn eModel)
 
                 _ ->
                     model.currentPage
@@ -1438,6 +1452,16 @@ showNextPicture direction model =
                         ( { model | currentPage = ChampionPage { cModel | pictureDialog = nextPicture } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleEventsResponse : RemoteData (Graphql.Http.Error Events) Events -> Model -> ( Model, Cmd Msg )
+handleEventsResponse resp model =
+    case model.currentPage of
+        EventsPage eModel ->
+            ( { model | currentPage = EventsPage { eModel | events = resp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

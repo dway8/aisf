@@ -2,6 +2,7 @@ defmodule Aisf.DatabaseSeeder do
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperience
   alias Aisf.Medals.Medal
+  alias Aisf.Events.Event
   alias Aisf.Sectors.{Sectors, Sector}
   alias Aisf.Repo
 
@@ -9,6 +10,7 @@ defmodule Aisf.DatabaseSeeder do
 
   @sports Champion.sports()
   @years 1960..2019
+  @competitions ["OlympicGames", "WorldChampionships", "WorldCup"]
 
   def insert_champions do
     all_sectors = Sectors.list_sectors()
@@ -51,7 +53,7 @@ defmodule Aisf.DatabaseSeeder do
 
       Enum.each(0..Enum.random(0..6), fn _i ->
         %Medal{
-          competition: Enum.random(["OlympicGames", "WorldChampionships", "WorldCup"]),
+          competition: Enum.random(@competitions),
           medal_type: Enum.random(1..3),
           specialty: Enum.random(get_specialties_for_sport(sport)),
           year: Enum.random(@years),
@@ -168,7 +170,20 @@ defmodule Aisf.DatabaseSeeder do
       |> Repo.insert()
     end)
   end
+
+  def insert_events do
+    Enum.each(0..Enum.random(5..20), fn _i ->
+      %Event{
+        competition: Enum.random(@competitions),
+        sport: Enum.random(@sports),
+        year: Enum.random(@years),
+        place: Faker.Address.city()
+      }
+      |> Repo.insert!()
+    end)
+  end
 end
 
 Aisf.DatabaseSeeder.insert_sectors()
 Aisf.DatabaseSeeder.insert_champions()
+Aisf.DatabaseSeeder.insert_events()

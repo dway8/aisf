@@ -1,9 +1,10 @@
-module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getMembers, getSectors, updateChampion)
+module Api exposing (createChampion, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getSectors, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
+import Aisf.Object.Event as Event
 import Aisf.Object.Medal as Medal
 import Aisf.Object.Picture as Picture
 import Aisf.Object.ProExperience as ProExperience
@@ -17,7 +18,7 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sector, Specialty(..), Sport(..), Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, Medal, MedalType(..), Msg(..), Picture, ProExperience, Sector, Specialty(..), Sport(..), Year(..))
 import RemoteData
 
 
@@ -249,3 +250,21 @@ fileToParams { base64, filename } =
     { base64 = base64 |> GOA.fromMaybe
     , filename = filename
     }
+
+
+getEvents : Cmd Msg
+getEvents =
+    Query.events eventSelection
+        |> Graphql.Http.queryRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotEvents)
+
+
+eventSelection : SelectionSet Event Aisf.Object.Event
+eventSelection =
+    SelectionSet.succeed Event
+        |> with Event.id
+        |> with (SelectionSet.map (Model.competitionFromString >> Maybe.withDefault OlympicGames) Event.competition)
+        |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Event.sport)
+        |> with (SelectionSet.map Year Event.year)
+        |> with Event.place

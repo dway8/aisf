@@ -195,6 +195,24 @@ sportColumn =
         }
 
 
+competitionColumn : Table.Column { a | competition : Competition } Msg
+competitionColumn =
+    Table.veryCustomColumn
+        { name = "COMPÉTITION"
+        , viewData = \a -> defaultCell [] (Html.text <| Model.competitionToDisplay a.competition)
+        , sorter = Table.decreasingOrIncreasingBy (.competition >> Model.competitionToDisplay)
+        }
+
+
+yearColumn : Table.Column { a | year : Year } Msg
+yearColumn =
+    Table.veryCustomColumn
+        { name = "ANNÉE"
+        , viewData = \a -> centeredCell [] (Html.text <| String.fromInt <| Model.getYear a.year)
+        , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
+        }
+
+
 
 -----------------------
 -----------------------

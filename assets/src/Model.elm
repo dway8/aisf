@@ -31,6 +31,7 @@ type Page
     | ChampionPage ChampionPageModel
     | EditChampionPage EditChampionPageModel
     | AdminPage AdminPageModel
+    | EventsPage EventsPageModel
 
 
 type alias MembersPageModel =
@@ -83,6 +84,12 @@ type alias EditChampionPageModel =
     { id : Maybe Id
     , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
     , sectorDropdown : Dropdown.Model
+    }
+
+
+type alias EventsPageModel =
+    { events : RemoteData (Graphql.Http.Error Events) Events
+    , tableState : Table.State
     }
 
 
@@ -172,6 +179,19 @@ type Competition
     = OlympicGames
     | WorldChampionships
     | WorldCup
+
+
+type alias Events =
+    List Event
+
+
+type alias Event =
+    { id : Id
+    , competition : Competition
+    , sport : Sport
+    , year : Year
+    , place : String
+    }
 
 
 competitionsList : List Competition
@@ -871,6 +891,7 @@ type Msg
     | ClickedOnPicture Int
     | ClickedOnPictureDialogBackground
     | RequestedNextPicture Int
+    | GotEvents (RemoteData (Graphql.Http.Error Events) Events)
 
 
 type FormField

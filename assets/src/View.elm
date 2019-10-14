@@ -10,6 +10,7 @@ import Model exposing (Model, Msg, Page(..))
 import Page.Admin
 import Page.Champion
 import Page.EditChampion
+import Page.Events
 import Page.Medals
 import Page.Members
 import Page.Teams
@@ -66,6 +67,9 @@ viewBody model =
 
                 AdminPage adminModel ->
                     Page.Admin.view model.sectors adminModel
+
+                EventsPage eventsModel ->
+                    Page.Events.view eventsModel
             ]
 
 
@@ -89,6 +93,7 @@ viewMenu currentPage =
         [ menuItem MembersRoute "Membres AISF"
         , menuItem MedalsRoute "Palmarès"
         , menuItem TeamsRoute "Équipes de France"
+        , menuItem EventsRoute "Lieux des compétitions"
         ]
 
 
@@ -103,6 +108,9 @@ isCurrentPage route currentPage =
 
         TeamsPage _ ->
             route == TeamsRoute
+
+        EventsPage _ ->
+            route == EventsRoute
 
         _ ->
             False
