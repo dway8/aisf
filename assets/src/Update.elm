@@ -278,7 +278,7 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
 
             else
                 Page.Members.init
-                    |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key "/")
+                    |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key (Route.routeToString MembersRoute))
 
         EventsRoute ->
             Page.Events.init currentYear
@@ -849,8 +849,8 @@ handleTableMsg tableState model =
 
 
 selectChampion : Id -> Model -> ( Model, Cmd Msg )
-selectChampion (Id id) model =
-    ( model, Nav.pushUrl model.key ("/champions/" ++ id) )
+selectChampion id model =
+    ( model, Nav.pushUrl model.key (Route.routeToString <| ChampionRoute id) )
 
 
 handleChampionResponse : RemoteData (Graphql.Http.Error Champion) Champion -> Model -> ( Model, Cmd Msg )
@@ -1405,9 +1405,9 @@ confirmHighlight id model =
 
 
 editChampion : Id -> Model -> ( Model, Cmd Msg )
-editChampion (Id id) model =
+editChampion id model =
     if model.isAdmin then
-        ( model, Nav.pushUrl model.key ("/champions/edit/" ++ id) )
+        ( model, Nav.pushUrl model.key (Route.routeToString <| EditChampionRoute (Just id)) )
 
     else
         ( model, Cmd.none )

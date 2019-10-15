@@ -32,7 +32,7 @@ defmodule AisfWeb.Router do
       context: %{pubsub: AisfWeb.Endpoint}
   end
 
-  scope "/", AisfWeb do
+  scope "/elixir", AisfWeb do
     pipe_through :browser
 
     get "/*path", PageController, :index

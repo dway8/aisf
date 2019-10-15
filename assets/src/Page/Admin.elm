@@ -10,6 +10,7 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (AdminPageModel, Champion, Msg(..), Sector, Sectors, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
+import Route exposing (Route(..))
 import Table
 import UI
 import UI.Button as Button
@@ -37,7 +38,7 @@ view rdSectors model =
             , sectorSelector rdSectors model.sector
             ]
         , link []
-            { url = "/champions/new"
+            { url = Route.routeToString <| EditChampionRoute Nothing
             , label =
                 row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
                     |> Button.makeButton Nothing
