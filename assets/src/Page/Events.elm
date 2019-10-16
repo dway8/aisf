@@ -30,15 +30,18 @@ init currentYear =
 view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
     column [ centerX, UI.largeSpacing ]
-        [ el [ centerX ] <|
-            (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
-                |> Button.makeButton (Just PressedAddEventButton)
-                |> Button.withBackgroundColor Color.green
-                |> Button.viewButton
+        [ Utils.viewIf isAdmin <|
+            el [ centerX ] <|
+                (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
+                    |> Button.makeButton (Just PressedAddEventButton)
+                    |> Button.withBackgroundColor Color.green
+                    |> Button.viewButton
+                )
+        , Utils.viewIf isAdmin
+            (model.newEvent
+                |> Maybe.map (editNewEvent model.currentYear)
+                |> Maybe.withDefault none
             )
-        , model.newEvent
-            |> Maybe.map (editNewEvent model.currentYear)
-            |> Maybe.withDefault none
         , case model.events of
             Success events ->
                 events
