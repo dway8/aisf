@@ -29,9 +29,9 @@ place =
     Object.selectionForField "String" "place" [] Decode.string
 
 
-sport : SelectionSet String Aisf.Object.Event
+sport : SelectionSet (Maybe String) Aisf.Object.Event
 sport =
-    Object.selectionForField "String" "sport" [] Decode.string
+    Object.selectionForField "(Maybe String)" "sport" [] (Decode.string |> Decode.nullable)
 
 
 year : SelectionSet Int Aisf.Object.Event

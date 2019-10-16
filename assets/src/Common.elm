@@ -180,19 +180,22 @@ sportColumn =
         { name = "DISCIPLINE"
         , viewData =
             \champion ->
-                centeredCell []
-                    (Html.img
-                        [ HA.style "max-width" "35px"
-                        , HA.style "max-height" "35px"
-                        , HA.style "object-fit" "contain"
-                        , HA.style "vertical-align" "middle"
-                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon champion.sport
-                        , HA.title <| Model.sportToString champion.sport
-                        ]
-                        []
-                    )
+                centeredCell [] (sportIconHtml champion.sport)
         , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
         }
+
+
+sportIconHtml : Sport -> Html Msg
+sportIconHtml sport =
+    Html.img
+        [ HA.style "max-width" "35px"
+        , HA.style "max-height" "35px"
+        , HA.style "object-fit" "contain"
+        , HA.style "vertical-align" "middle"
+        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon sport
+        , HA.title <| Model.sportToString sport
+        ]
+        []
 
 
 competitionColumn : Table.Column { a | competition : Competition } Msg

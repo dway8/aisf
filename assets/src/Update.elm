@@ -401,11 +401,11 @@ updateCurrentSport sportStr model =
             )
 
         EventsPage eModel ->
-            case ( eModel.newEvent, Model.sportFromString sportStr ) of
-                ( Just event, Just sport ) ->
+            case eModel.newEvent of
+                Just event ->
                     let
                         newEvent =
-                            { event | sport = sport }
+                            { event | sport = Model.sportFromString sportStr }
                     in
                     ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
 
@@ -1526,8 +1526,15 @@ updateCurrentCompetition str model =
             case ( eModel.newEvent, Model.competitionFromString str ) of
                 ( Just event, Just competition ) ->
                     let
+                        newSport =
+                            if competition == OlympicGames then
+                                Nothing
+
+                            else
+                                event.sport
+
                         newEvent =
-                            { event | competition = competition }
+                            { event | competition = competition, sport = newSport }
                     in
                     ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
 

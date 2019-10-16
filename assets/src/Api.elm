@@ -264,16 +264,15 @@ eventSelection : SelectionSet Event Aisf.Object.Event
 eventSelection =
     SelectionSet.succeed Event
         |> with (SelectionSet.map (Model.competitionFromString >> Maybe.withDefault OlympicGames) Event.competition)
-        |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Event.sport)
+        |> with (SelectionSet.map (Maybe.andThen Model.sportFromString) Event.sport)
         |> with (SelectionSet.map Year Event.year)
         |> with Event.place
 
 
 createEvent : Event -> Cmd Msg
 createEvent event =
-    Mutation.createEvent
+    Mutation.createEvent (\optional -> { optional | sport = event.sport |> Maybe.map Model.sportToString |> GOA.fromMaybe })
         { competition = Model.competitionToString event.competition
-        , sport = Model.sportToString event.sport
         , year = Model.getYear event.year
         , place = event.place
         }

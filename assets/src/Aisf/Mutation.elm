@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Mutation exposing (CreateChampionOptionalArguments, CreateChampionRequiredArguments, CreateEventRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, createEvent, updateChampion)
+module Aisf.Mutation exposing (CreateChampionOptionalArguments, CreateChampionRequiredArguments, CreateEventOptionalArguments, CreateEventRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, createEvent, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -63,17 +63,28 @@ createChampion fillInOptionals requiredArgs object_ =
     Object.selectionForCompositeField "createChampion" (optionalArgs ++ [ Argument.required "firstName" requiredArgs.firstName Encode.string, Argument.required "highlights" requiredArgs.highlights (Encode.string |> Encode.list), Argument.required "isMember" requiredArgs.isMember Encode.bool, Argument.required "lastName" requiredArgs.lastName Encode.string, Argument.required "medals" requiredArgs.medals (Aisf.InputObject.encodeMedalParams |> Encode.list), Argument.required "pictures" requiredArgs.pictures (Aisf.InputObject.encodePictureParams |> Encode.list), Argument.required "proExperiences" requiredArgs.proExperiences (Aisf.InputObject.encodeProExperienceParams |> Encode.list), Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "yearsInFrenchTeam" requiredArgs.yearsInFrenchTeam (Encode.int |> Encode.list) ]) object_ (identity >> Decode.nullable)
 
 
+type alias CreateEventOptionalArguments =
+    { sport : OptionalArgument String }
+
+
 type alias CreateEventRequiredArguments =
     { competition : String
     , place : String
-    , sport : String
     , year : Int
     }
 
 
-createEvent : CreateEventRequiredArguments -> SelectionSet decodesTo Aisf.Object.Event -> SelectionSet decodesTo RootMutation
-createEvent requiredArgs object_ =
-    Object.selectionForCompositeField "createEvent" [ Argument.required "competition" requiredArgs.competition Encode.string, Argument.required "place" requiredArgs.place Encode.string, Argument.required "sport" requiredArgs.sport Encode.string, Argument.required "year" requiredArgs.year Encode.int ] object_ identity
+createEvent : (CreateEventOptionalArguments -> CreateEventOptionalArguments) -> CreateEventRequiredArguments -> SelectionSet decodesTo Aisf.Object.Event -> SelectionSet decodesTo RootMutation
+createEvent fillInOptionals requiredArgs object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { sport = Absent }
+
+        optionalArgs =
+            [ Argument.optional "sport" filledInOptionals.sport Encode.string ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "createEvent" (optionalArgs ++ [ Argument.required "competition" requiredArgs.competition Encode.string, Argument.required "place" requiredArgs.place Encode.string, Argument.required "year" requiredArgs.year Encode.int ]) object_ identity
 
 
 type alias UpdateChampionOptionalArguments =

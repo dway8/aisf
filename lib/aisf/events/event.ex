@@ -3,10 +3,10 @@ defmodule Aisf.Events.Event do
   import Ecto.Changeset
 
   schema "events" do
-    field :competition, :string
-    field :place, :string
-    field :sport, :string
-    field :year, :integer
+    field(:competition, :string)
+    field(:place, :string)
+    field(:sport, :string)
+    field(:year, :integer)
 
     timestamps()
   end
@@ -15,6 +15,6 @@ defmodule Aisf.Events.Event do
   def changeset(event, attrs) do
     event
     |> cast(attrs, [:competition, :sport, :year, :place])
-    |> validate_required([:competition, :sport, :year, :place])
+    |> validate_required([:competition, :year, :place])
   end
 end

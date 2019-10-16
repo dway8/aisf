@@ -7,12 +7,13 @@ import Element.Font as Font
 import Element.Input as Input
 import Html
 import Html.Attributes as HA
-import Model exposing (Event, EventsPageModel, Msg(..), Year)
+import Model exposing (Competition(..), Event, EventsPageModel, Msg(..), Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
 import UI.Button as Button
 import UI.Color as Color
+import Utils
 
 
 init : Year -> ( EventsPageModel, Cmd Msg )
@@ -80,7 +81,17 @@ tableColumns =
         , viewData = \event -> Common.defaultCell [ HA.style "font-weight" "bold" ] (Html.text event.place)
         , sorter = Table.decreasingOrIncreasingBy .place
         }
-    , Common.sportColumn
+    , Table.veryCustomColumn
+        { name = "DISCIPLINE"
+        , viewData =
+            \event ->
+                Common.centeredCell []
+                    (event.sport
+                        |> Maybe.map Common.sportIconHtml
+                        |> Maybe.withDefault (Html.text "")
+                    )
+        , sorter = Table.decreasingOrIncreasingBy (.sport >> Maybe.map Model.sportToString >> Maybe.withDefault "")
+        }
     ]
 
 
@@ -89,7 +100,7 @@ editNewEvent currentYear newEvent =
     row [ UI.largeSpacing ]
         [ Common.yearSelector False currentYear SelectedAYear
         , Common.competitionSelector SelectedACompetition
-        , Common.sportSelector False Nothing
+        , Utils.viewIf (newEvent.competition == WorldChampionships) <| Common.sportSelector False Nothing
         , UI.textInput []
             { onChange = UpdatedNewEventPlace
             , label = Nothing

@@ -189,7 +189,7 @@ type alias Events =
 
 type alias Event =
     { competition : Competition
-    , sport : Sport
+    , sport : Maybe Sport
     , year : Year
     , place : String
     }
@@ -1128,7 +1128,7 @@ initPicture =
 initEvent : Year -> Event
 initEvent currentYear =
     { competition = OlympicGames
-    , sport = SkiAlpin
+    , sport = Nothing
     , year = currentYear
     , place = ""
     }
