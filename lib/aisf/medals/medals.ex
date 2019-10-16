@@ -42,7 +42,7 @@ defmodule Aisf.Medals.Medals do
   Creates a medal.
   """
   def create_medal(champion, attrs \\ %{}) do
-    Logger.info("Creating medal for champion #{champion.id} with attrs #{attrs}")
+    Logger.info("Creating medal for champion #{champion.id}")
 
     champion
     |> Ecto.build_assoc(:medals)
@@ -57,7 +57,7 @@ defmodule Aisf.Medals.Medals do
 
   """
   def update_medal(%Medal{} = medal, attrs) do
-    Logger.info("Updating medal #{medal.id} with attrs #{attrs}")
+    Logger.info("Updating medal #{medal.id}")
 
     medal
     |> Medal.changeset(attrs)

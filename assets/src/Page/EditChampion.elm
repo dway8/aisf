@@ -248,7 +248,7 @@ editPicture championId { id, attachment } =
         column [ UI.defaultSpacing ]
             [ let
                 src =
-                    base64 |> Maybe.withDefault ("/uploads/" ++ championId ++ "/" ++ filename)
+                    base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ filename)
               in
               image [ width <| px 200 ] { src = src, description = "Photo de profil" }
             , el [ centerX ]
@@ -500,7 +500,7 @@ viewProfilePicture profilePicture =
                 column [ UI.defaultSpacing, width fill ]
                     [ let
                         src =
-                            base64 |> Maybe.withDefault ("/uploads/" ++ filename)
+                            base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ filename)
                       in
                       image [ width <| px 200 ] { src = src, description = "Photo de profil" }
                     , el [ centerX ]

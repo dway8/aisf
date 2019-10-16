@@ -157,7 +157,7 @@ profilePictureColumn =
                         src =
                             case champion.profilePicture of
                                 Just { filename } ->
-                                    "/uploads/" ++ filename
+                                    Model.baseEndpoint ++ "/uploads/" ++ filename
 
                                 _ ->
                                     Model.resourcesEndpoint ++ "/images/no-profile-pic.jpg"
@@ -290,7 +290,7 @@ viewProfilePicture widthPx profilePicture =
                 el [ width fill ] none
 
             Just { filename } ->
-                image [ width <| px widthPx ] { src = "/uploads/" ++ filename, description = "Photo de profil" }
+                image [ width <| px widthPx ] { src = Model.baseEndpoint ++ "/uploads/" ++ filename, description = "Photo de profil" }
 
 
 viewInfoRow : String -> Element Msg -> Element Msg

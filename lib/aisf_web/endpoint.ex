@@ -22,7 +22,7 @@ defmodule AisfWeb.Endpoint do
     only: ~w(css fonts images js favicon.ico robots.txt)
 
   plug Plug.Static,
-    at: "/uploads",
+    at: "/elixir/uploads",
     from: Path.expand(Application.get_env(:aisf, AisfWeb.Endpoint)[:upload_dir]),
     gzip: true
 

@@ -150,7 +150,7 @@ viewPictures champion =
                 (champion.pictures
                     |> List.indexedMap
                         (\idx { attachment } ->
-                            image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
+                            image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = Model.baseEndpoint ++ "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
                         )
                 )
         ]
@@ -243,6 +243,6 @@ viewPictureDialog (Id championId) { attachment } pictures =
             else
                 Nothing
         , body =
-            image [ centerX, centerY ] { src = "/uploads/" ++ championId ++ "/" ++ attachment.filename, description = "" }
+            image [ centerX, centerY ] { src = Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ attachment.filename, description = "" }
         , closable = Just ClickedOnPictureDialogBackground
         }

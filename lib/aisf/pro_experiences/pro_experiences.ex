@@ -43,7 +43,7 @@ defmodule Aisf.ProExperiences.ProExperiences do
 
   """
   def create_pro_experience(champion, attrs \\ %{}) do
-    Logger.info("Creating pro experience for champion #{champion.id} with attrs #{attrs}")
+    Logger.info("Creating pro experience for champion #{champion.id}")
 
     champion
     |> Ecto.build_assoc(:pro_experiences)
@@ -58,7 +58,7 @@ defmodule Aisf.ProExperiences.ProExperiences do
 
   """
   def update_pro_experience(%ProExperience{} = pro_experience, attrs) do
-    Logger.info("Updating pro experience #{pro_experience.id} with attrs #{attrs}")
+    Logger.info("Updating pro experience #{pro_experience.id}")
 
     pro_experience
     |> Repo.preload(:sectors)
