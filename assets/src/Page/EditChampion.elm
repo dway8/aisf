@@ -112,7 +112,7 @@ view : RemoteData (Graphql.Http.Error Sectors) Sectors -> Year -> EditChampionPa
 view rdSectors currentYear model =
     column [ UI.largeSpacing, width fill ]
         [ UI.heading 1
-            (el [ Font.bold, Font.size 18 ] <|
+            (el [ Font.bold, UI.fontSize 6 ] <|
                 text
                     (if model.id == Nothing then
                         "AJOUTER UN CHAMPION"
@@ -562,8 +562,9 @@ editHighlights { highlights } =
         ]
 
 
+viewButtons : Element Msg
 viewButtons =
-    row [ UI.largeSpacing ]
+    row [ width fill, spaceEvenly ]
         [ text "Annuler"
             |> Button.makeButton (Just GoBack)
             |> Button.withBackgroundColor UI.Color.lighterGrey

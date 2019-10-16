@@ -31,13 +31,13 @@ init =
 
 view : RemoteData (Graphql.Http.Error Sectors) Sectors -> AdminPageModel -> Element Msg
 view rdSectors model =
-    column [ UI.largeSpacing, width fill ]
+    column [ centerX, UI.largeSpacing ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
             , sectorSelector rdSectors model.sector
             ]
-        , link []
+        , link [ centerX ]
             { url = Route.routeToString <| EditChampionRoute Nothing
             , label =
                 row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
@@ -53,7 +53,7 @@ view rdSectors model =
                     |> filterBySector model.sector
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el [ htmlAttribute <| HA.id "admin-list" ]
+                    |> el [ htmlAttribute <| HA.id "admin-list", centerX ]
 
             NotAsked ->
                 none

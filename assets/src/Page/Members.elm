@@ -24,7 +24,7 @@ init =
 
 view : MembersPageModel -> Element Msg
 view model =
-    column [ UI.largeSpacing ]
+    column [ UI.largeSpacing, centerX ]
         [ row [ UI.largeSpacing ] [ Common.viewSearchQuery model.searchQuery, Common.sportSelector True model.sport ]
         , case model.champions of
             Success champions ->
@@ -33,7 +33,7 @@ view model =
                     |> filterBySport model.sport
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el []
+                    |> el [ centerX ]
 
             NotAsked ->
                 none

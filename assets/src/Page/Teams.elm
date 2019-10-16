@@ -27,7 +27,7 @@ init year =
 
 view : TeamsPageModel -> Element Msg
 view model =
-    column [ width fill, UI.largeSpacing ]
+    column [ centerX, UI.largeSpacing ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
@@ -42,7 +42,7 @@ view model =
                     |> filterByYear model.selectedYear
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el [ htmlAttribute <| HA.id "teams-list" ]
+                    |> el [ htmlAttribute <| HA.id "teams-list", centerX ]
 
             Loading ->
                 UI.spinner

@@ -42,7 +42,7 @@ viewBody model =
             ++ viewDialogs model
         )
     <|
-        column [ width fill, spacing 30 ]
+        column [ centerX, spacing 30 ]
             [ case model.currentPage of
                 EditChampionPage _ ->
                     none

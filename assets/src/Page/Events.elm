@@ -29,23 +29,22 @@ init currentYear =
 
 view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
-    column [ UI.largeSpacing ]
-        [ row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
-            |> Button.makeButton (Just PressedAddEventButton)
-            |> Button.withBackgroundColor Color.green
-            |> Button.viewButton
-        , case model.newEvent of
-            Nothing ->
-                none
-
-            Just newEvent ->
-                editNewEvent model.currentYear newEvent
+    column [ centerX, UI.largeSpacing ]
+        [ el [ centerX ] <|
+            (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
+                |> Button.makeButton (Just PressedAddEventButton)
+                |> Button.withBackgroundColor Color.green
+                |> Button.viewButton
+            )
+        , model.newEvent
+            |> Maybe.map (editNewEvent model.currentYear)
+            |> Maybe.withDefault none
         , case model.events of
             Success events ->
                 events
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el []
+                    |> el [ centerX ]
 
             NotAsked ->
                 none
