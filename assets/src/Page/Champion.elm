@@ -57,10 +57,10 @@ view isAdmin { id, champion, medalsTableState } =
                             [ el [ Font.bold, UI.largestFont ] <| text champ.lastName
                             , el [ Font.bold, UI.largestFont ] <| text champ.firstName
                             , row [ UI.defaultSpacing ]
-                                [ image [ width <| px 50 ] { src = "/images/" ++ Model.getSportIcon champ.sport, description = Model.sportToString champ.sport }
+                                [ image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon champ.sport, description = Model.sportToString champ.sport }
                                 , text (Model.sportToString champ.sport)
                                 ]
-                            , image [ width <| px 50 ] { src = "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
+                            , image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
                             ]
                         ]
                     , champ.intro
@@ -193,7 +193,7 @@ tableColumns =
                         , HA.style "max-height" "25px"
                         , HA.style "object-fit" "contain"
                         , HA.style "vertical-align" "middle"
-                        , HA.src <| "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
+                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
                         , HA.title <| Model.medalTypeToDisplay medal.medalType
                         ]
                         []

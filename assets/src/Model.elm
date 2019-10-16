@@ -1132,3 +1132,13 @@ initEvent currentYear =
     , year = currentYear
     , place = ""
     }
+
+
+baseEndpoint : String
+baseEndpoint =
+    "/elixir"
+
+
+resourcesEndpoint : String
+resourcesEndpoint =
+    baseEndpoint ++ "/resources"

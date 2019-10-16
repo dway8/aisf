@@ -16,7 +16,7 @@ defmodule AisfWeb.Endpoint do
   # You should set gzip to true if you are running phx.digest
   # when deploying your static files in production.
   plug Plug.Static,
-    at: "/",
+    at: "/elixir/resources",
     from: :aisf,
     gzip: true,
     only: ~w(css fonts images js favicon.ico robots.txt)

@@ -160,7 +160,7 @@ profilePictureColumn =
                                     "/uploads/" ++ filename
 
                                 _ ->
-                                    "/images/no-profile-pic.jpg"
+                                    Model.resourcesEndpoint ++ "/images/no-profile-pic.jpg"
                     in
                     Html.img
                         [ HA.style "max-width" "35px"
@@ -186,7 +186,7 @@ sportColumn =
                         , HA.style "max-height" "35px"
                         , HA.style "object-fit" "contain"
                         , HA.style "vertical-align" "middle"
-                        , HA.src <| "/images/" ++ Model.getSportIcon champion.sport
+                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon champion.sport
                         , HA.title <| Model.sportToString champion.sport
                         ]
                         []
