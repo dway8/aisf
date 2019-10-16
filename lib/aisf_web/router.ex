@@ -14,7 +14,7 @@ defmodule AisfWeb.Router do
   end
 
   # graphql API scope
-  scope "/" do
+  scope "/elixir" do
     pipe_through(:graphql)
     forward("/graphql", Absinthe.Plug, schema: AisfWeb.Schema)
   end
@@ -23,7 +23,7 @@ defmodule AisfWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/" do
+  scope "/elixir" do
     pipe_through :api
 
     forward "/graphiql", Absinthe.Plug.GraphiQL,

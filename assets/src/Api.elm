@@ -24,7 +24,7 @@ import RemoteData
 
 endpoint : String
 endpoint =
-    "/graphql"
+    Model.baseEndpoint ++ "/graphql"
 
 
 getChampions : Cmd Msg
