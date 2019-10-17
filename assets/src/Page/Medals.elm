@@ -28,7 +28,7 @@ init year =
 
 view : MedalsPageModel -> Element Msg
 view model =
-    column [ centerX, UI.largeSpacing ]
+    column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
@@ -46,7 +46,7 @@ view model =
                     |> filterByYear model.selectedYear
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el [ htmlAttribute <| HA.id "medals-list", centerX ]
+                    |> el [ htmlAttribute <| HA.id "medals-list", width fill ]
 
             Loading ->
                 UI.spinner

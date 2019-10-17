@@ -29,14 +29,13 @@ init currentYear =
 
 view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
-    column [ centerX, UI.largeSpacing ]
+    column [ UI.largeSpacing, width fill ]
         [ Utils.viewIf isAdmin <|
-            el [ centerX ] <|
-                (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
-                    |> Button.makeButton (Just PressedAddEventButton)
-                    |> Button.withBackgroundColor Color.green
-                    |> Button.viewButton
-                )
+            (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
+                |> Button.makeButton (Just PressedAddEventButton)
+                |> Button.withBackgroundColor Color.green
+                |> Button.viewButton
+            )
         , Utils.viewIf isAdmin
             (model.newEvent
                 |> Maybe.map (editNewEvent model.currentYear)
@@ -47,7 +46,7 @@ view isAdmin model =
                 events
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el [ centerX ]
+                    |> el [ width fill ]
 
             NotAsked ->
                 none

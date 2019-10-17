@@ -1,4 +1,4 @@
-module Api exposing (createChampion, createEvent, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getSectors, updateChampion)
+module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getRecords, getSectors, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -8,7 +8,9 @@ import Aisf.Object.Event as Event
 import Aisf.Object.Medal as Medal
 import Aisf.Object.Picture as Picture
 import Aisf.Object.ProExperience as ProExperience
+import Aisf.Object.Record as Record
 import Aisf.Object.Sector as Sector
+import Aisf.Object.Winner as Winner
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Dict
@@ -18,7 +20,7 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, Medal, MedalType(..), Msg(..), Picture, ProExperience, Sector, Specialty(..), Sport(..), Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, Medal, MedalType(..), Msg(..), Picture, ProExperience, Record, RecordType(..), Sector, Specialty(..), Sport(..), Winner, Year(..))
 import RemoteData
 
 
@@ -280,3 +282,52 @@ createEvent event =
         |> Graphql.Http.mutationRequest endpoint
         |> Graphql.Http.withCredentials
         |> Graphql.Http.send (RemoteData.fromResult >> GotSaveEventResponse)
+
+
+getRecords : Cmd Msg
+getRecords =
+    Query.records recordSelection
+        |> Graphql.Http.queryRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotRecords)
+
+
+recordSelection : SelectionSet Record Aisf.Object.Record
+recordSelection =
+    SelectionSet.succeed Record
+        |> with (SelectionSet.map (Model.recordTypeFromInt >> Maybe.withDefault Triple) Record.recordType)
+        |> with (SelectionSet.map Year Record.year)
+        |> with Record.place
+        |> with (SelectionSet.map (Model.specialtyFromString >> Maybe.withDefault Slalom) Record.specialty)
+        |> with (SelectionSet.map Dict.fromList (Record.winners winnerSelection))
+
+
+winnerSelection : SelectionSet ( Int, Winner ) Aisf.Object.Winner
+winnerSelection =
+    SelectionSet.succeed (\l f p -> ( p, Winner l f ))
+        |> with Winner.lastName
+        |> with Winner.firstName
+        |> with Winner.position
+
+
+createRecord : Record -> Cmd Msg
+createRecord record =
+    Mutation.createRecord
+        { recordType = Model.recordTypeToInt record.recordType
+        , year = Model.getYear record.year
+        , place = record.place
+        , specialty = Model.specialtyToString record.specialty
+        , winners = record.winners |> Dict.toList |> List.map winnerToParams
+        }
+        recordSelection
+        |> Graphql.Http.mutationRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotSaveRecordResponse)
+
+
+winnerToParams : ( Int, Winner ) -> Aisf.InputObject.WinnerParams
+winnerToParams ( index, winner ) =
+    { lastName = winner.lastName
+    , firstName = winner.firstName
+    , position = index
+    }

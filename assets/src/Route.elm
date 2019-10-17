@@ -14,23 +14,26 @@ type Route
     | EditChampionRoute (Maybe Id)
     | AdminRoute
     | EventsRoute
+    | RecordsRoute
 
 
 parseUrl : Url -> Route
 parseUrl url =
     url
         |> parse
-            (oneOf
-                [ map MembersRoute (s "elixir")
-                , map MembersRoute (s "elixir" </> s "champions")
-                , map MedalsRoute (s "elixir" </> s "medals")
-                , map TeamsRoute (s "elixir" </> s "teams")
-                , map (EditChampionRoute Nothing) (s "elixir" </> s "champions" </> s "new")
-                , map (\intId -> EditChampionRoute <| Just <| Id (String.fromInt intId)) (s "elixir" </> s "champions" </> s "edit" </> int)
-                , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "elixir" </> s "champions" </> int)
-                , map AdminRoute (s "elixir" </> s "admin")
-                , map EventsRoute (s "elixir" </> s "events")
-                ]
+            (s "elixir"
+                </> oneOf
+                        [ map MembersRoute top
+                        , map MembersRoute (s "champions")
+                        , map MedalsRoute (s "medals")
+                        , map TeamsRoute (s "teams")
+                        , map (EditChampionRoute Nothing) (s "champions" </> s "new")
+                        , map (\intId -> EditChampionRoute <| Just <| Id (String.fromInt intId)) (s "champions" </> s "edit" </> int)
+                        , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
+                        , map AdminRoute (s "admin")
+                        , map EventsRoute (s "events")
+                        , map RecordsRoute (s "records")
+                        ]
             )
         |> Maybe.withDefault MembersRoute
 
@@ -62,4 +65,7 @@ routeToString route =
 
                 EventsRoute ->
                     "/events"
+
+                RecordsRoute ->
+                    "/records"
            )
