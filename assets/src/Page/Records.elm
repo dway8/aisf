@@ -51,7 +51,7 @@ view isAdmin model =
                             (\( title, recordType ) ->
                                 column [ UI.largeSpacing ]
                                     [ el [ Font.bold, UI.fontSize 6 ] <| text title
-                                    , column [ UI.largeSpacing ]
+                                    , column [ UI.largeSpacing, paddingEach { top = 0, bottom = 0, left = 20, right = 0 } ]
                                         (records
                                             |> List.filter (.recordType >> (==) recordType)
                                             |> List.map viewRecord
@@ -74,12 +74,12 @@ view isAdmin model =
 viewRecord : Record -> Element Msg
 viewRecord record =
     column [ UI.defaultSpacing ]
-        [ paragraph [ Font.italic, Font.bold ]
-            [ el [] <| text <| String.fromInt <| Model.getYear record.year
-            , text "\u{00A0}: "
+        [ paragraph []
+            [ el [ Font.bold ] <| text <| String.fromInt <| Model.getYear record.year
+            , text " | "
             , text <| String.toUpper record.place
-            , text " en "
-            , text <| String.toLower <| Model.specialtyToDisplay record.specialty
+            , el [ Font.italic ] <| text " en "
+            , el [ Font.italic ] <| text <| String.toLower <| Model.specialtyToDisplay record.specialty
             ]
         , row [ UI.defaultSpacing ]
             (record.winners
