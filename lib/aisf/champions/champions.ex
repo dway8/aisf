@@ -90,6 +90,10 @@ defmodule Aisf.Champions do
           attrs.medals
           |> Enum.map(fn m -> Medals.create_medal(champion, m) end)
 
+          if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
+            {:ok, champion} = update_profile_picture(champion, attrs.profile_picture)
+          end
+
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
@@ -105,28 +109,11 @@ defmodule Aisf.Champions do
   def update_champion(%Champion{} = champion, attrs) do
     Logger.info("Updating champion with id #{champion.id}")
 
-    new_attrs =
-      if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
-        Logger.info("Uploading profile picture for champion #{champion.id}")
-        %{filename: filename, base64: base64} = attrs.profile_picture
-        file = UploadUtils.data_url_to_upload(base64)
-        extension = Path.extname(filename)
-        new_filename = "#{champion.id}-profile#{extension}"
-
-        UploadUtils.copy_file_to_dest(file, new_filename, @upload_dir)
-
-        attrs
-        |> Map.put(:profile_picture_filename, new_filename)
-        |> Map.delete(:profile_picture)
-      else
-        attrs
-      end
-
     champion
-    |> Champion.changeset(new_attrs)
+    |> Champion.changeset(attrs)
     |> Repo.update()
     |> (fn {:ok, _champion} ->
-          new_attrs.pro_experiences
+          attrs.pro_experiences
           |> Enum.map(fn p ->
             if p.id == "new" do
               ProExperiences.create_pro_experience(champion, p)
@@ -137,7 +124,7 @@ defmodule Aisf.Champions do
             end
           end)
 
-          new_attrs.medals
+          attrs.medals
           |> Enum.map(fn m ->
             if m.id == "new" do
               Medals.create_medal(champion, m)
@@ -148,7 +135,7 @@ defmodule Aisf.Champions do
             end
           end)
 
-          new_attrs.pictures
+          attrs.pictures
           |> Enum.map(fn p ->
             if p.id == "new" do
               Pictures.create_picture(champion, p)
@@ -159,11 +146,29 @@ defmodule Aisf.Champions do
             end
           end)
 
+          if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
+            {:ok, champion} = update_profile_picture(champion, attrs.profile_picture)
+          end
+
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
            |> Repo.preload([:medals, :pictures])}
         end).()
+  end
+
+  defp update_profile_picture(champion, profile_picture_attrs) do
+    Logger.info("Uploading profile picture for champion #{champion.id}")
+    %{filename: filename, base64: base64} = profile_picture_attrs
+    file = UploadUtils.data_url_to_upload(base64)
+    extension = Path.extname(filename)
+    new_filename = "#{champion.id}-profile#{extension}"
+
+    UploadUtils.copy_file_to_dest(file, new_filename, @upload_dir)
+
+    champion
+    |> Champion.changeset(%{profile_picture_filename: new_filename})
+    |> Repo.update()
   end
 
   @doc """
