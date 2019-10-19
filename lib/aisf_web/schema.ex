@@ -2,7 +2,7 @@ defmodule AisfWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Ecto, repo: App.Repo
 
-  alias AisfWeb.{ChampionsResolver, SectorsResolver, EventsResolver}
+  alias AisfWeb.{ChampionsResolver, SectorsResolver, EventsResolver, RecordsResolver}
 
   object :champion do
     field(:id, non_null(:id))
@@ -68,6 +68,20 @@ defmodule AisfWeb.Schema do
     field(:place, non_null(:string))
   end
 
+  object :record do
+    field(:record_type, non_null(:integer))
+    field(:year, non_null(:integer))
+    field(:place, non_null(:string))
+    field(:specialty, non_null(:string))
+    field(:winners, non_null(list_of(non_null(:winner))))
+  end
+
+  object :winner do
+    field(:last_name, non_null(:string))
+    field(:first_name, non_null(:string))
+    field(:position, non_null(:integer))
+  end
+
   query do
     field :all_champions, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.all/3)
@@ -92,6 +106,10 @@ defmodule AisfWeb.Schema do
 
     field :events, non_null(list_of(non_null(:event))) do
       resolve(&EventsResolver.all/3)
+    end
+
+    field :records, non_null(list_of(non_null(:record))) do
+      resolve(&RecordsResolver.all/3)
     end
   end
 
@@ -160,6 +178,15 @@ defmodule AisfWeb.Schema do
       arg(:place, non_null(:string))
       resolve(&EventsResolver.create/2)
     end
+
+    field :create_record, type: non_null(:record) do
+      arg(:record_type, non_null(:integer))
+      arg(:year, non_null(:integer))
+      arg(:place, non_null(:string))
+      arg(:specialty, non_null(:string))
+      arg(:winners, non_null(list_of(non_null(:winner_params))))
+      resolve(&RecordsResolver.create/2)
+    end
   end
 
   input_object :pro_experience_params do
@@ -188,5 +215,11 @@ defmodule AisfWeb.Schema do
   input_object :file_params do
     field(:filename, non_null(:string))
     field(:base64, :string)
+  end
+
+  input_object :winner_params do
+    field(:last_name, non_null(:string))
+    field(:first_name, non_null(:string))
+    field(:position, non_null(:integer))
   end
 end

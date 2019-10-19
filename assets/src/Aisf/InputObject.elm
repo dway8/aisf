@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, PictureParams, PictureParamsRequiredFields, ProExperienceParams, ProExperienceParamsOptionalFields, ProExperienceParamsRequiredFields, buildFileParams, buildMedalParams, buildPictureParams, buildProExperienceParams, encodeFileParams, encodeMedalParams, encodePictureParams, encodeProExperienceParams)
+module Aisf.InputObject exposing (FileParams, FileParamsOptionalFields, FileParamsRequiredFields, MedalParams, MedalParamsRequiredFields, PictureParams, PictureParamsRequiredFields, ProExperienceParams, ProExperienceParamsOptionalFields, ProExperienceParamsRequiredFields, WinnerParams, WinnerParamsRequiredFields, buildFileParams, buildMedalParams, buildPictureParams, buildProExperienceParams, buildWinnerParams, encodeFileParams, encodeMedalParams, encodePictureParams, encodeProExperienceParams, encodeWinnerParams)
 
 import Aisf.Interface
 import Aisf.Object
@@ -155,3 +155,32 @@ encodeProExperienceParams : ProExperienceParams -> Value
 encodeProExperienceParams input =
     Encode.maybeObject
         [ ( "companyName", Encode.string |> Encode.optional input.companyName ), ( "contact", Encode.string |> Encode.optional input.contact ), ( "description", Encode.string |> Encode.optional input.description ), ( "id", Encode.string input.id |> Just ), ( "sectors", (Encode.string |> Encode.list) input.sectors |> Just ), ( "title", Encode.string |> Encode.optional input.title ), ( "website", Encode.string |> Encode.optional input.website ) ]
+
+
+buildWinnerParams : WinnerParamsRequiredFields -> WinnerParams
+buildWinnerParams required =
+    { firstName = required.firstName, lastName = required.lastName, position = required.position }
+
+
+type alias WinnerParamsRequiredFields =
+    { firstName : String
+    , lastName : String
+    , position : Int
+    }
+
+
+{-| Type for the WinnerParams input object.
+-}
+type alias WinnerParams =
+    { firstName : String
+    , lastName : String
+    , position : Int
+    }
+
+
+{-| Encode a WinnerParams into a value that can be used as an argument.
+-}
+encodeWinnerParams : WinnerParams -> Value
+encodeWinnerParams input =
+    Encode.maybeObject
+        [ ( "firstName", Encode.string input.firstName |> Just ), ( "lastName", Encode.string input.lastName |> Just ), ( "position", Encode.int input.position |> Just ) ]

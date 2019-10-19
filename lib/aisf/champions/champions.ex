@@ -82,7 +82,7 @@ defmodule Aisf.Champions do
     |> Champion.changeset(attrs)
     |> Repo.insert()
     |> (fn {:ok, champion} ->
-          Logger.info("Creating champion OK")
+          Logger.info("Creating champion OK with id #{champion.id}")
 
           attrs.pro_experiences
           |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)

@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Mutation exposing (CreateChampionOptionalArguments, CreateChampionRequiredArguments, CreateEventOptionalArguments, CreateEventRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, createEvent, updateChampion)
+module Aisf.Mutation exposing (CreateChampionOptionalArguments, CreateChampionRequiredArguments, CreateEventOptionalArguments, CreateEventRequiredArguments, CreateRecordRequiredArguments, UpdateChampionOptionalArguments, UpdateChampionRequiredArguments, createChampion, createEvent, createRecord, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -85,6 +85,20 @@ createEvent fillInOptionals requiredArgs object_ =
                 |> List.filterMap identity
     in
     Object.selectionForCompositeField "createEvent" (optionalArgs ++ [ Argument.required "competition" requiredArgs.competition Encode.string, Argument.required "place" requiredArgs.place Encode.string, Argument.required "year" requiredArgs.year Encode.int ]) object_ identity
+
+
+type alias CreateRecordRequiredArguments =
+    { place : String
+    , recordType : Int
+    , specialty : String
+    , winners : List Aisf.InputObject.WinnerParams
+    , year : Int
+    }
+
+
+createRecord : CreateRecordRequiredArguments -> SelectionSet decodesTo Aisf.Object.Record -> SelectionSet decodesTo RootMutation
+createRecord requiredArgs object_ =
+    Object.selectionForCompositeField "createRecord" [ Argument.required "place" requiredArgs.place Encode.string, Argument.required "recordType" requiredArgs.recordType Encode.int, Argument.required "specialty" requiredArgs.specialty Encode.string, Argument.required "winners" requiredArgs.winners (Aisf.InputObject.encodeWinnerParams |> Encode.list), Argument.required "year" requiredArgs.year Encode.int ] object_ identity
 
 
 type alias UpdateChampionOptionalArguments =

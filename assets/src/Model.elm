@@ -32,6 +32,7 @@ type Page
     | EditChampionPage EditChampionPageModel
     | AdminPage AdminPageModel
     | EventsPage EventsPageModel
+    | RecordsPage RecordsPageModel
 
 
 type alias MembersPageModel =
@@ -92,6 +93,39 @@ type alias EventsPageModel =
     , tableState : Table.State
     , newEvent : Maybe Event
     , currentYear : Year
+    }
+
+
+type alias RecordsPageModel =
+    { records : RemoteData (Graphql.Http.Error Records) Records
+    , newRecord : Maybe Record
+    , currentYear : Year
+    }
+
+
+type alias Records =
+    List Record
+
+
+type alias Record =
+    { recordType : RecordType
+    , year : Year
+    , place : String
+    , specialty : Specialty
+    , winners : Dict Int Winner
+    }
+
+
+type RecordType
+    = Triple
+    | FirstFour
+    | FirstFive
+    | FirstSix
+
+
+type alias Winner =
+    { lastName : String
+    , firstName : String
     }
 
 
@@ -899,6 +933,15 @@ type Msg
     | UpdatedNewEventPlace String
     | SaveNewEvent
     | GotSaveEventResponse (RemoteData (Graphql.Http.Error Event) Event)
+    | GotRecords (RemoteData (Graphql.Http.Error Records) Records)
+    | PressedAddRecordButton
+    | UpdatedNewRecordPlace String
+    | SaveNewRecord
+    | CancelledNewRecord
+    | GotSaveRecordResponse (RemoteData (Graphql.Http.Error Record) Record)
+    | SelectedARecordType String
+    | UpdatedRecordWinnerLastName Int String
+    | UpdatedRecordWinnerFirstName Int String
 
 
 type FormField
@@ -1142,3 +1185,64 @@ baseEndpoint =
 resourcesEndpoint : String
 resourcesEndpoint =
     baseEndpoint ++ "/resources"
+
+
+initRecord : Year -> Record
+initRecord currentYear =
+    { recordType = Triple
+    , year = currentYear
+    , place = ""
+    , specialty = Slalom
+    , winners = List.range 1 3 |> List.map (\i -> ( i, Winner "" "" )) |> Dict.fromList
+    }
+
+
+recordTypeFromInt : Int -> Maybe RecordType
+recordTypeFromInt int =
+    case int of
+        3 ->
+            Just Triple
+
+        4 ->
+            Just FirstFour
+
+        5 ->
+            Just FirstFive
+
+        6 ->
+            Just FirstSix
+
+        _ ->
+            Nothing
+
+
+recordTypeToInt : RecordType -> Int
+recordTypeToInt recordType =
+    case recordType of
+        Triple ->
+            3
+
+        FirstFour ->
+            4
+
+        FirstFive ->
+            5
+
+        FirstSix ->
+            6
+
+
+recordTypeToDisplay : RecordType -> String
+recordTypeToDisplay recordType =
+    case recordType of
+        Triple ->
+            "Triplé"
+
+        FirstFour ->
+            "Quatre premiers"
+
+        FirstFive ->
+            "Cinq premiers"
+
+        FirstSix ->
+            "Six premiers"

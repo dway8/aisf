@@ -19,6 +19,7 @@ import Page.EditChampion
 import Page.Events
 import Page.Medals
 import Page.Members
+import Page.Records
 import Page.Teams
 import RemoteData as RD exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
@@ -232,6 +233,33 @@ update msg model =
         GotSaveEventResponse resp ->
             handleSaveEventResponse resp model
 
+        GotRecords resp ->
+            handleRecordsResponse resp model
+
+        PressedAddRecordButton ->
+            addRecord model
+
+        CancelledNewRecord ->
+            cancelNewRecord model
+
+        UpdatedNewRecordPlace str ->
+            updateNewRecordPlace str model
+
+        SaveNewRecord ->
+            saveNewRecord model
+
+        GotSaveRecordResponse resp ->
+            handleSaveRecordResponse resp model
+
+        SelectedARecordType str ->
+            updateNewRecordType str model
+
+        UpdatedRecordWinnerLastName index str ->
+            updateRecordWinnerLastName index str model
+
+        UpdatedRecordWinnerFirstName index str ->
+            updateRecordWinnerFirstName index str model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -283,6 +311,10 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
         EventsRoute ->
             Page.Events.init currentYear
                 |> Tuple.mapFirst EventsPage
+
+        RecordsRoute ->
+            Page.Records.init currentYear
+                |> Tuple.mapFirst RecordsPage
 
 
 updateChampionForm : FormField -> String -> Model -> ( Model, Cmd Msg )
@@ -1599,6 +1631,160 @@ handleSaveEventResponse response model =
                         ( { model | currentPage = EventsPage { eModel | events = Success (event :: events) } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleRecordsResponse : RemoteData (Graphql.Http.Error Records) Records -> Model -> ( Model, Cmd Msg )
+handleRecordsResponse resp model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            ( { model | currentPage = RecordsPage { rModel | records = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+addRecord : Model -> ( Model, Cmd Msg )
+addRecord model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            ( { model | currentPage = RecordsPage { rModel | newRecord = Just <| Model.initRecord model.currentYear } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+cancelNewRecord : Model -> ( Model, Cmd Msg )
+cancelNewRecord model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            ( { model | currentPage = RecordsPage { rModel | newRecord = Nothing } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateNewRecordPlace : String -> Model -> ( Model, Cmd Msg )
+updateNewRecordPlace str model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            case rModel.newRecord of
+                Just record ->
+                    let
+                        newRecord =
+                            { record | place = str }
+                    in
+                    ( { model | currentPage = RecordsPage { rModel | newRecord = Just newRecord } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+saveNewRecord : Model -> ( Model, Cmd Msg )
+saveNewRecord model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            case rModel.newRecord of
+                Just record ->
+                    if
+                        record.winners
+                            |> Dict.values
+                            |> List.any (\w -> String.isEmpty w.lastName || String.isEmpty w.firstName)
+                    then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model | currentPage = RecordsPage { rModel | newRecord = Nothing } }, Api.createRecord record )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleSaveRecordResponse : RemoteData (Graphql.Http.Error Record) Record -> Model -> ( Model, Cmd Msg )
+handleSaveRecordResponse response model =
+    case ( model.currentPage, response ) of
+        ( RecordsPage rModel, Success record ) ->
+            rModel.records
+                |> RD.map
+                    (\records ->
+                        ( { model | currentPage = RecordsPage { rModel | records = Success (record :: records) } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateNewRecordType : String -> Model -> ( Model, Cmd Msg )
+updateNewRecordType str model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            case ( rModel.newRecord, str |> String.toInt ) of
+                ( Just record, Just recordTypeInt ) ->
+                    case Model.recordTypeFromInt recordTypeInt of
+                        Just recordType ->
+                            let
+                                newWinners =
+                                    List.range 1 recordTypeInt
+                                        |> List.foldl
+                                            (\i acc ->
+                                                Dict.get i record.winners
+                                                    |> Maybe.withDefault (Winner "" "")
+                                                    |> (\w -> Dict.insert i w acc)
+                                            )
+                                            Dict.empty
+
+                                newRecord =
+                                    { record | recordType = recordType, winners = newWinners }
+                            in
+                            ( { model | currentPage = RecordsPage { rModel | newRecord = Just newRecord } }, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateRecordWinnerLastName : Int -> String -> Model -> ( Model, Cmd Msg )
+updateRecordWinnerLastName index str model =
+    updateRecordWinnerNameField index str (\winner -> Winner str winner.firstName) model
+
+
+updateRecordWinnerFirstName : Int -> String -> Model -> ( Model, Cmd Msg )
+updateRecordWinnerFirstName index str model =
+    updateRecordWinnerNameField index str (\winner -> Winner winner.lastName str) model
+
+
+updateRecordWinnerNameField : Int -> String -> (Winner -> Winner) -> Model -> ( Model, Cmd Msg )
+updateRecordWinnerNameField index str updateFn model =
+    case model.currentPage of
+        RecordsPage rModel ->
+            case rModel.newRecord of
+                Just record ->
+                    let
+                        newWinners =
+                            record.winners
+                                |> Dict.update index (Maybe.map updateFn)
+
+                        newRecord =
+                            { record | winners = newWinners }
+                    in
+                    ( { model | currentPage = RecordsPage { rModel | newRecord = Just newRecord } }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Query exposing (ChampionRequiredArguments, allChampions, champion, championsWithMedals, events, getMembers, sectors)
+module Aisf.Query exposing (ChampionRequiredArguments, allChampions, champion, championsWithMedals, events, getMembers, records, sectors)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -46,6 +46,11 @@ events object_ =
 getMembers : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
 getMembers object_ =
     Object.selectionForCompositeField "getMembers" [] object_ (identity >> Decode.list)
+
+
+records : SelectionSet decodesTo Aisf.Object.Record -> SelectionSet (List decodesTo) RootQuery
+records object_ =
+    Object.selectionForCompositeField "records" [] object_ (identity >> Decode.list)
 
 
 sectors : SelectionSet decodesTo Aisf.Object.Sector -> SelectionSet (List decodesTo) RootQuery

@@ -1,4 +1,4 @@
-module View exposing (view)
+module View exposing (..)
 
 import Browser exposing (Document)
 import Element exposing (..)
@@ -13,6 +13,7 @@ import Page.EditChampion
 import Page.Events
 import Page.Medals
 import Page.Members
+import Page.Records
 import Page.Teams
 import RemoteData as RD
 import Route exposing (Route(..))
@@ -70,6 +71,9 @@ viewBody model =
 
                 EventsPage eventsModel ->
                     Page.Events.view model.isAdmin eventsModel
+
+                RecordsPage recordsModel ->
+                    Page.Records.view model.isAdmin recordsModel
             ]
 
 
@@ -89,11 +93,12 @@ viewMenu currentPage =
             in
             link ([ Font.bold, UI.defaultPadding, Border.rounded 3, UI.largestFont, Background.color UI.Color.blue, Font.color UI.Color.white, mouseOver [ Background.color <| UI.Color.makeOpaque 0.5 UI.Color.blue ] ] ++ attrs) { url = Route.routeToString route, label = text label }
     in
-    row [ spacing 20 ]
+    row [ UI.largeSpacing ]
         [ menuItem MembersRoute "Membres AISF"
         , menuItem MedalsRoute "Palmarès"
         , menuItem TeamsRoute "Équipes de France"
         , menuItem EventsRoute "Lieux des compétitions"
+        , menuItem RecordsRoute "Records"
         ]
 
 
@@ -111,6 +116,9 @@ isCurrentPage route currentPage =
 
         EventsPage _ ->
             route == EventsRoute
+
+        RecordsPage _ ->
+            route == RecordsRoute
 
         _ ->
             False
