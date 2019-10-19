@@ -1570,6 +1570,9 @@ updateCurrentCompetition str model =
                     in
                     ( { model | currentPage = EventsPage { eModel | newEvent = Just newEvent } }, Cmd.none )
 
+                ( Nothing, _ ) ->
+                    ( { model | currentPage = EventsPage { eModel | competition = Model.competitionFromString str } }, Cmd.none )
+
                 _ ->
                     ( model, Cmd.none )
 

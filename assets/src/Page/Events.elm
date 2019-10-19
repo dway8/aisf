@@ -8,7 +8,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Html
 import Html.Attributes as HA
-import Model exposing (Competition(..), Event, EventsPageModel, Msg(..), Year)
+import Model exposing (Competition(..), Event, Events, EventsPageModel, Msg(..), Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
@@ -23,6 +23,7 @@ init currentYear =
       , tableState = Table.initialSort "ANNÉE"
       , newEvent = Nothing
       , currentYear = currentYear
+      , competition = Nothing
       }
     , Api.getEvents
     )
@@ -31,7 +32,8 @@ init currentYear =
 view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
     column [ UI.largeSpacing, width fill ]
-        [ Utils.viewIf isAdmin <|
+        [ Common.competitionSelector True SelectedACompetition
+        , Utils.viewIf isAdmin <|
             (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
                 |> Button.makeButton (Just PressedAddEventButton)
                 |> Button.withBackgroundColor Color.green
@@ -45,6 +47,7 @@ view isAdmin model =
         , case model.events of
             Success events ->
                 events
+                    |> filterByCompetition model.competition
                     |> Table.view tableConfig model.tableState
                     |> html
                     |> el [ width fill ]
@@ -58,6 +61,17 @@ view isAdmin model =
             _ ->
                 text "Une erreur s'est produite."
         ]
+
+
+filterByCompetition : Maybe Competition -> Events -> Events
+filterByCompetition competition events =
+    case competition of
+        Nothing ->
+            events
+
+        Just c ->
+            events
+                |> List.filter (.competition >> (==) c)
 
 
 tableConfig : Table.Config Event Msg
@@ -109,7 +123,7 @@ editNewEvent : Year -> Event -> Element Msg
 editNewEvent currentYear newEvent =
     row [ UI.largeSpacing ]
         [ Common.yearSelector False currentYear SelectedAYear
-        , Common.competitionSelector SelectedACompetition
+        , Common.competitionSelector False SelectedACompetition
         , Utils.viewIf (newEvent.competition == WorldChampionships) <| Common.sportSelector False Nothing
         , UI.textInput []
             { onChange = UpdatedNewEventPlace

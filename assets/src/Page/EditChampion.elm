@@ -369,7 +369,7 @@ viewMedalForm currentYear id sport medal =
     column []
         [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
         , column []
-            [ Common.competitionSelector (SelectedAMedalCompetition id)
+            [ Common.competitionSelector False (SelectedAMedalCompetition id)
             , Common.yearSelector False currentYear (SelectedAMedalYear id)
             , Common.specialtySelector False sport (SelectedAMedalSpecialty id)
             ]

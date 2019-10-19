@@ -397,8 +397,8 @@ viewBlockTitle title =
             String.toUpper title
 
 
-competitionSelector : (String -> Msg) -> Element Msg
-competitionSelector msg =
+competitionSelector : Bool -> (String -> Msg) -> Element Msg
+competitionSelector showOptionAll msg =
     el [] <|
         html <|
             Html.select
@@ -406,12 +406,22 @@ competitionSelector msg =
                 , HA.style "font-family" "Open Sans"
                 , HA.style "font-size" "15px"
                 ]
-                (Model.competitionsList
-                    |> List.map
-                        (\competition ->
-                            Html.option
-                                [ HA.value <| Model.competitionToString competition
-                                ]
-                                [ Html.text <| Model.competitionToDisplay competition ]
-                        )
+                ((if showOptionAll then
+                    [ Html.option
+                        []
+                        [ Html.text "Toutes les compétitions" ]
+                    ]
+
+                  else
+                    []
+                 )
+                    ++ (Model.competitionsList
+                            |> List.map
+                                (\competition ->
+                                    Html.option
+                                        [ HA.value <| Model.competitionToString competition
+                                        ]
+                                        [ Html.text <| Model.competitionToDisplay competition ]
+                                )
+                       )
                 )

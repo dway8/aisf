@@ -93,6 +93,7 @@ type alias EventsPageModel =
     , tableState : Table.State
     , newEvent : Maybe Event
     , currentYear : Year
+    , competition : Maybe Competition
     }
 
 
