@@ -86,7 +86,7 @@ tableColumns =
         { name = "DISCIPLINE"
         , viewData =
             \event ->
-                Common.centeredCell []
+                Common.defaultCell []
                     (event.sport
                         |> Maybe.map Common.sportIconHtml
                         |> Maybe.withDefault (Html.text "")

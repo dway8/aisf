@@ -180,7 +180,7 @@ sportColumn =
         { name = "DISCIPLINE"
         , viewData =
             \champion ->
-                centeredCell [] (sportIconHtml champion.sport)
+                defaultCell [] (sportIconHtml champion.sport)
         , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
         }
 
@@ -211,7 +211,7 @@ yearColumn : Table.Column { a | year : Year } Msg
 yearColumn =
     Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \a -> centeredCell [] (Html.text <| String.fromInt <| Model.getYear a.year)
+        , viewData = \a -> defaultCell [] (Html.text <| String.fromInt <| Model.getYear a.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
 

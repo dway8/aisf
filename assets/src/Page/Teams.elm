@@ -123,7 +123,7 @@ tableColumns =
         { name = "MEMBRE"
         , viewData =
             \{ isMember } ->
-                Common.centeredCell []
+                Common.defaultCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"

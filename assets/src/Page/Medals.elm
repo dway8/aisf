@@ -132,7 +132,7 @@ tableColumns =
         { name = "MÉDAILLE"
         , viewData =
             \medal ->
-                Common.centeredCell []
+                Common.defaultCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
@@ -157,7 +157,7 @@ tableColumns =
         }
     , Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \medal -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
+        , viewData = \medal -> Common.defaultCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
     ]
