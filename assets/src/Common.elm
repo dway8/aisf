@@ -2,7 +2,7 @@ module Common exposing (..)
 
 import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
-import Dict
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
@@ -15,7 +15,7 @@ import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
-import UI.Color
+import UI.Color as Color
 
 
 sportSelector : Bool -> Maybe Sport -> Element Msg
@@ -113,13 +113,75 @@ specialtySelector showOptionAll maybeSport msg =
 -----------------------
 
 
-tableCustomizations : Table.Customizations data msg
-tableCustomizations =
+tableCustomizations : Dict String (List (Html.Attribute msg)) -> Table.Customizations data msg
+tableCustomizations attrsForHeaders =
     let
         default =
             Table.defaultCustomizations
+
+        customThead headers =
+            Table.HtmlDetails [] (List.map (simpleTheadHelp attrsForHeaders) headers)
     in
-    { default | tableAttrs = [ HA.class "table table-hover table-striped table-middle" ] }
+    { default
+        | tableAttrs = [ HA.class "table table-hover table-striped table-middle" ]
+        , thead =
+            customThead
+    }
+
+
+
+-- thead code copied and customized from elm-sortable-table package
+
+
+simpleTheadHelp : Dict String (List (Html.Attribute msg)) -> ( String, Table.Status, Html.Attribute msg ) -> Html.Html msg
+simpleTheadHelp attrsForHeaders ( name, status, click ) =
+    let
+        content =
+            case status of
+                Table.Unsortable ->
+                    [ Html.text name ]
+
+                Table.Sortable selected ->
+                    [ Html.text name
+                    , if selected then
+                        darkGrey "↓"
+
+                      else
+                        lightGrey "↓"
+                    ]
+
+                Table.Reversible Nothing ->
+                    [ Html.text name
+                    , lightGrey "↕"
+                    ]
+
+                Table.Reversible (Just isReversed) ->
+                    [ Html.text name
+                    , darkGrey
+                        (if isReversed then
+                            "↑"
+
+                         else
+                            "↓"
+                        )
+                    ]
+
+        attrs =
+            attrsForHeaders
+                |> Dict.get name
+                |> Maybe.withDefault []
+    in
+    Html.th (click :: (HA.style "border-bottom" <| "1px solid " ++ Color.colorToString Color.darkGrey) :: attrs) content
+
+
+darkGrey : String -> Html.Html msg
+darkGrey symbol =
+    Html.span [ HA.style "color" <| Color.colorToString Color.darkGrey ] [ Html.text ("\u{00A0}" ++ symbol) ]
+
+
+lightGrey : String -> Html.Html msg
+lightGrey symbol =
+    Html.span [ HA.style "color" <| Color.colorToString Color.lightGrey ] [ Html.text ("\u{00A0}" ++ symbol) ]
 
 
 toRowAttrs : { a | id : Id } -> List (Html.Attribute Msg)
@@ -180,7 +242,7 @@ sportColumn =
         { name = "DISCIPLINE"
         , viewData =
             \champion ->
-                defaultCell [] (sportIconHtml champion.sport)
+                centeredCell [] (sportIconHtml champion.sport)
         , sorter = Table.decreasingOrIncreasingBy (.sport >> Model.sportToString)
         }
 
@@ -211,7 +273,7 @@ yearColumn : Table.Column { a | year : Year } Msg
 yearColumn =
     Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \a -> defaultCell [] (Html.text <| String.fromInt <| Model.getYear a.year)
+        , viewData = \a -> centeredCell [] (Html.text <| String.fromInt <| Model.getYear a.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
 
@@ -324,10 +386,10 @@ viewBlockTitle title =
     el
         [ width fill
         , UI.largestFont
-        , Font.color UI.Color.blue
+        , Font.color Color.blue
         , Font.bold
         , Border.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
-        , Border.color UI.Color.blue
+        , Border.color Color.blue
         , paddingEach { top = 0, bottom = 3, left = 0, right = 0 }
         ]
     <|

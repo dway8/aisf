@@ -2,6 +2,7 @@ module Page.Events exposing (init, view)
 
 import Api
 import Common
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
@@ -63,7 +64,7 @@ tableConfig : Table.Config Event Msg
 tableConfig =
     let
         tableCustomizations =
-            Common.tableCustomizations
+            Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
         { toId = .place
@@ -71,6 +72,14 @@ tableConfig =
         , columns = tableColumns
         , customizations = { tableCustomizations | rowAttrs = always [] }
         }
+
+
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "ANNÉE", [ HA.style "text-align" "center" ] )
+        , ( "DISCIPLINE", [ HA.style "text-align" "center" ] )
+        ]
 
 
 tableColumns : List (Table.Column Event Msg)
@@ -86,7 +95,7 @@ tableColumns =
         { name = "DISCIPLINE"
         , viewData =
             \event ->
-                Common.defaultCell []
+                Common.centeredCell []
                     (event.sport
                         |> Maybe.map Common.sportIconHtml
                         |> Maybe.withDefault (Html.text "")

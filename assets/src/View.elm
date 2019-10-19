@@ -18,7 +18,7 @@ import Page.Teams
 import RemoteData as RD
 import Route exposing (Route(..))
 import UI
-import UI.Color
+import UI.Color as Color
 
 
 view : Model -> Document Msg
@@ -43,7 +43,7 @@ viewBody model =
             ++ viewDialogs model
         )
     <|
-        column [ centerX, spacing 30 ]
+        column [ centerX, UI.largerSpacing, width <| px 800 ]
             [ case model.currentPage of
                 EditChampionPage _ ->
                     none
@@ -84,16 +84,26 @@ viewMenu currentPage =
             let
                 attrs =
                     (if isCurrentPage route currentPage then
-                        [ Background.color <| UI.Color.makeOpaque 0.5 UI.Color.blue ]
+                        [ Background.color Color.blue ]
 
                      else
                         []
                     )
                         ++ []
             in
-            link ([ Font.bold, UI.defaultPadding, Border.rounded 3, UI.largestFont, Background.color UI.Color.blue, Font.color UI.Color.white, mouseOver [ Background.color <| UI.Color.makeOpaque 0.5 UI.Color.blue ] ] ++ attrs) { url = Route.routeToString route, label = text label }
+            link
+                ([ paddingXY 10 8
+                 , Border.roundEach { topLeft = 3, topRight = 3, bottomLeft = 0, bottomRight = 0 }
+                 , UI.fontSize 4
+                 , Background.color <| Color.makeOpaque 0.5 Color.blue
+                 , Font.color Color.white
+                 , mouseOver [ Background.color Color.blue ]
+                 ]
+                    ++ attrs
+                )
+                { url = Route.routeToString route, label = el [] <| text label }
     in
-    row [ UI.largeSpacing ]
+    row [ width fill, spaceEvenly, Border.widthEach { bottom = 2, top = 0, right = 0, left = 0 }, Border.color <| Color.makeOpaque 0.5 Color.blue ]
         [ menuItem MembersRoute "Membres AISF"
         , menuItem MedalsRoute "Palmarès"
         , menuItem TeamsRoute "Équipes de France"

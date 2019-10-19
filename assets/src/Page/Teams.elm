@@ -3,6 +3,7 @@ module Page.Teams exposing (init, view)
 import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
+import Dict exposing (Dict)
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
@@ -107,7 +108,7 @@ tableConfig : Table.Config YearInTeamFromChampion Msg
 tableConfig =
     let
         tableCustomizations =
-            Common.tableCustomizations
+            Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
         { toId = Model.getId
@@ -117,13 +118,22 @@ tableConfig =
         }
 
 
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "MEMBRE", [ HA.style "text-align" "center" ] )
+        , ( "ANNÉE", [ HA.style "text-align" "center" ] )
+        , ( "DISCIPLINE", [ HA.style "text-align" "center" ] )
+        ]
+
+
 tableColumns : List (Table.Column YearInTeamFromChampion Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "MEMBRE"
         , viewData =
             \{ isMember } ->
-                Common.defaultCell []
+                Common.centeredCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
@@ -151,7 +161,7 @@ tableColumns =
     , Common.sportColumn
     , Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \champion -> Common.defaultCell [] (Html.text <| String.fromInt <| Model.getYear champion.year)
+        , viewData = \champion -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear champion.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
     ]

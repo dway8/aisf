@@ -3,6 +3,7 @@ module Page.Champion exposing (init, view, viewPictureDialog)
 import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -171,7 +172,7 @@ tableConfig : Table.Config Medal Msg
 tableConfig =
     let
         tableCustomizations =
-            Common.tableCustomizations
+            Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
         { toId = Model.getId
@@ -181,13 +182,21 @@ tableConfig =
         }
 
 
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "MÉDAILLE", [ HA.style "text-align" "center" ] )
+        , ( "ANNÉE", [ HA.style "text-align" "center" ] )
+        ]
+
+
 tableColumns : List (Table.Column Medal Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
         , viewData =
             \medal ->
-                Common.defaultCell []
+                Common.centeredCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"

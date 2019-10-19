@@ -2,6 +2,7 @@ module Page.Members exposing (init, view)
 
 import Api
 import Common
+import Dict exposing (Dict)
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
@@ -61,7 +62,7 @@ tableConfig : Table.Config Champion Msg
 tableConfig =
     let
         tableCustomizations =
-            Common.tableCustomizations
+            Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
         { toId = Model.getId
@@ -69,6 +70,12 @@ tableConfig =
         , columns = tableColumns
         , customizations = { tableCustomizations | rowAttrs = Common.toRowAttrs }
         }
+
+
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "DISCIPLINE", [ HA.style "text-align" "center" ] ) ]
 
 
 tableColumns : List (Table.Column Champion Msg)

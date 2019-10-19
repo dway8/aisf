@@ -3,6 +3,7 @@ module Page.Medals exposing (init, view)
 import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
+import Dict exposing (Dict)
 import Element exposing (..)
 import Html
 import Html.Attributes as HA
@@ -116,7 +117,7 @@ tableConfig : Table.Config MedalFromChampion Msg
 tableConfig =
     let
         tableCustomizations =
-            Common.tableCustomizations
+            Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
         { toId = Model.getId
@@ -126,13 +127,21 @@ tableConfig =
         }
 
 
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "MÉDAILLE", [ HA.style "text-align" "center" ] )
+        , ( "ANNÉE", [ HA.style "text-align" "center" ] )
+        ]
+
+
 tableColumns : List (Table.Column MedalFromChampion Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
         , viewData =
             \medal ->
-                Common.defaultCell []
+                Common.centeredCell []
                     (Html.img
                         [ HA.style "max-width" "25px"
                         , HA.style "max-height" "25px"
@@ -157,7 +166,7 @@ tableColumns =
         }
     , Table.veryCustomColumn
         { name = "ANNÉE"
-        , viewData = \medal -> Common.defaultCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
+        , viewData = \medal -> Common.centeredCell [] (Html.text <| String.fromInt <| Model.getYear medal.year)
         , sorter = Table.decreasingOrIncreasingBy (.year >> Model.getYear)
         }
     ]
