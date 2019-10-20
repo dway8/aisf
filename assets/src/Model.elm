@@ -903,6 +903,7 @@ type Msg
     | DropdownStateChanged Menu.Msg
     | UpdatedDropdownQuery String
     | DropdownGotFocus
+    | ResetSectorDropdown
     | DropdownLostFocus
     | ClosedDropdown
     | RemovedItemFromDropdown String

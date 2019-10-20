@@ -12,7 +12,7 @@ import Html.Events as HE
 import Json.Decode as D
 import Menu
 import UI exposing (..)
-import UI.Color
+import UI.Color as Color
 import Utils
 
 
@@ -63,13 +63,22 @@ addSelected data model =
     { model | selected = model.selected ++ [ data ] }
 
 
-removeSelected : Model -> Model
-removeSelected model =
-    { model | selected = [] }
+removeSelected : String -> Model -> Model
+removeSelected str model =
+    let
+        selected =
+            model.selected |> List.filter ((/=) str)
+    in
+    { model | selected = selected }
 
 
-updateConfig : (String -> msg) -> msg -> Menu.UpdateConfig msg String
-updateConfig selectMsg createMsg =
+emptyState : Model -> Model
+emptyState model =
+    { model | state = Menu.empty }
+
+
+updateConfig : (String -> msg) -> msg -> msg -> Menu.UpdateConfig msg String
+updateConfig selectMsg createMsg resetMsg =
     Menu.updateConfig
         { toId = identity
         , onKeyDown =
@@ -83,14 +92,14 @@ updateConfig selectMsg createMsg =
                             Just <| selectMsg id
 
                         _ ->
-                            Just <| createMsg
+                            Just createMsg
 
                 else
                     Nothing
         , onTooLow = Nothing
         , onTooHigh = Nothing
         , onMouseEnter = \_ -> Nothing
-        , onMouseLeave = \_ -> Nothing
+        , onMouseLeave = \_ -> Just resetMsg
         , onMouseClick = selectMsg >> Just
         , separateSelections = False
         }
@@ -149,26 +158,28 @@ viewDropdownInput config dropdownModel itemsList =
         [ width fill ]
         [ column [ UI.smallSpacing, width fill ]
             [ config.label
-                |> Maybe.map (\label -> el [ Font.bold, Font.color UI.Color.darkerGrey, UI.mediumFont ] <| text label)
+                |> Maybe.map (\label -> el [ Font.bold, Font.color Color.darkerGrey, UI.mediumFont ] <| text label)
                 |> Maybe.withDefault none
             , wrappedRow
                 [ Border.width 1
                 , Border.rounded 8
                 , width fill
-                , Border.color UI.Color.lightGrey
+                , Border.color Color.lightGrey
                 , UI.smallSpacing
                 , htmlAttribute <| HA.class "focus-within"
                 , UI.mediumFont
+                , paddingXY 5 0
                 ]
                 ((dropdownModel.selected
                     |> List.map
                         (\item ->
                             row
                                 [ Border.width 1
-                                , Border.rounded 1
+                                , Border.rounded 4
                                 , UI.smallPadding
-                                , Border.color UI.Color.lightGrey
-                                , Background.color UI.Color.lightestGrey
+                                , Border.color Color.blue
+                                , Background.color Color.blue
+                                , Font.color Color.white
                                 , UI.smallSpacing
                                 ]
                                 [ el [ UI.mediumFont, pointer, Events.onClick <| removeMsg item ] <| UI.viewIcon "close"
@@ -176,19 +187,18 @@ viewDropdownInput config dropdownModel itemsList =
                                 ]
                         )
                  )
-                    ++ [ el [ htmlAttribute <| HA.class "no-focus" ] <|
+                    ++ [ el [ htmlAttribute <| HA.class "no-focus", width fill ] <|
                             UI.textInput
                                 [ Events.onFocus focusMsg
                                 , htmlAttribute <| HE.preventDefaultOn "keydown" upDownEscDecoder
                                 , htmlAttribute <| HE.on "blur" (blurDecoder noOp blurMsg)
                                 , Border.width 0
-                                , width <| px 100
                                 , padding 0
                                 ]
                                 { onChange = inputMsg
                                 , label = Nothing
                                 , text = dropdownModel.query |> Maybe.withDefault ""
-                                , placeholder = Just <| Input.placeholder [] <| text "Ajouter..."
+                                , placeholder = config.placeholder
                                 }
                        ]
                 )
@@ -200,22 +210,28 @@ viewDropdownInput config dropdownModel itemsList =
                         [ UI.defaultSpacing
                         , Border.width 1
                         , Border.rounded 2
-                        , Border.color UI.Color.lightGrey
-                        , width shrink
-                        , Background.color UI.Color.white
+                        , Border.color Color.lightGrey
+                        , Background.color Color.white
                         , htmlAttribute <| HA.style "z-index" "1"
-                        , Font.color UI.Color.grey
+                        , Font.color Color.grey
                         , moveDown 5
+                        , padding 0
                         ]
                         [ config.header |> Maybe.withDefault none
-                        , el [ width fill, defaultPadding ] <|
+                        , el [ width fill ] <|
                             html <|
                                 Html.div [ HA.class "autocomplete-menu" ] <|
                                     if itemsList == [] then
-                                        [ Html.text <|
-                                            "Aucun résultat, appuyez sur Entrée pour ajouter \""
-                                                ++ (dropdownModel.query |> Maybe.withDefault "" |> Utils.capitalize)
-                                                ++ "\""
+                                        [ Html.div
+                                            [ HA.style "padding" "10px"
+                                            , HA.style "color" <|
+                                                Color.colorToString Color.darkerGrey
+                                            ]
+                                            [ Html.text <|
+                                                "Aucun résultat, appuyez sur Entrée pour ajouter \""
+                                                    ++ (dropdownModel.query |> Maybe.withDefault "" |> Utils.capitalize)
+                                                    ++ "\""
+                                            ]
                                         ]
 
                                     else
@@ -261,7 +277,7 @@ menuViewConfig displayFn =
                 , HA.style "list-style" "none"
                 , HA.style "background-color" <|
                     if keySelected || mouseSelected then
-                        UI.Color.colorToString UI.Color.lightestGrey
+                        Color.colorToString Color.lightestGrey
 
                     else
                         ""
@@ -276,6 +292,11 @@ menuViewConfig displayFn =
     in
     Menu.viewConfig
         { toId = identity
-        , ul = [ HA.class "autocomplete-list", HA.style "padding" "0" ]
+        , ul =
+            [ HA.class "autocomplete-list"
+            , HA.style "padding" "0"
+            , HA.style "margin-block-start" "0"
+            , HA.style "margin-block-end" "0"
+            ]
         , li = customizedLi
         }

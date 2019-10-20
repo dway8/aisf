@@ -189,8 +189,8 @@ editProfessionalCareer sectors sectorDropdown champion =
 
 editProExperiences : Sectors -> Dropdown.Model -> ChampionForm -> Element Msg
 editProExperiences sectors sectorDropdown { proExperiences } =
-    column [ UI.largeSpacing ]
-        [ column [ UI.defaultSpacing ]
+    column [ UI.largeSpacing, width fill ]
+        [ column [ UI.defaultSpacing, width fill ]
             (proExperiences
                 |> Dict.map
                     (\id exp ->
@@ -315,9 +315,9 @@ viewProExperienceForm sectors sectorDropdown id newE =
         fields =
             [ Title, CompanyName, Description, Website, Contact ]
     in
-    column []
+    column [ width fill ]
         [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton id, label = text "Supprimer" } ]
-        , column [ UI.defaultSpacing ]
+        , column [ UI.defaultSpacing, width fill ]
             (viewSectorDropdown sectors sectorDropdown newE
                 :: (fields
                         |> List.map
@@ -326,7 +326,7 @@ viewProExperienceForm sectors sectorDropdown id newE =
                                     ( label, value ) =
                                         getProExperienceFormFieldData field newE
                                 in
-                                UI.textInput []
+                                UI.textInput [ width fill ]
                                     { onChange = UpdatedProExperienceField id field
                                     , text = value
                                     , placeholder = Nothing
@@ -355,9 +355,9 @@ viewSectorDropdown sectors sectorDropdown proExperience =
                 , noOp = NoOp
                 , removeMsg = RemovedItemFromDropdown
                 }
-            , displayFn = \data -> el [ UI.defaultPadding, UI.mediumFont ] <| text data
+            , displayFn = \data -> el [ UI.defaultPadding, UI.mediumFont, Font.color Color.darkerGrey ] <| text data
             , header = Nothing
-            , placeholder = Just <| Input.placeholder [] <| text "Rechercher..."
+            , placeholder = Just <| Input.placeholder [ Font.italic ] <| text "Rechercher..."
             , inputAttrs = []
             }
     in

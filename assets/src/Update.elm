@@ -151,6 +151,9 @@ update msg model =
         UpdatedSearchQuery query ->
             updateSearchQuery query model
 
+        ResetSectorDropdown ->
+            resetSectorDropdown model
+
         GotSectors resp ->
             handleSectorsResponse resp model
 
@@ -1135,15 +1138,27 @@ changeDropdownState menuMsg model =
                 dropdown =
                     eModel.sectorDropdown
 
+                acceptableSectors =
+                    Model.acceptableSectors dropdown.query sectors
+
                 ( newState, maybeMsg ) =
-                    Menu.update (Dropdown.updateConfig SelectedASector CreatedASectorFromQuery)
+                    Menu.update (Dropdown.updateConfig SelectedASector CreatedASectorFromQuery ResetSectorDropdown)
                         menuMsg
                         20
                         dropdown.state
-                        (Model.acceptableSectors dropdown.query sectors)
+                        acceptableSectors
+
+                newDropdown =
+                    Dropdown.setState newState eModel.sectorDropdown
+                        |> (if acceptableSectors == [] then
+                                Dropdown.emptyState
+
+                            else
+                                identity
+                           )
 
                 newEModel =
-                    { eModel | sectorDropdown = Dropdown.setState newState eModel.sectorDropdown }
+                    { eModel | sectorDropdown = newDropdown }
 
                 newModel =
                     { model | currentPage = EditChampionPage newEModel }
@@ -1213,7 +1228,7 @@ removeItemFromDropdown str model =
                     { eModel
                         | sectorDropdown =
                             eModel.sectorDropdown
-                                |> Dropdown.removeSelected
+                                |> Dropdown.removeSelected str
                     }
             in
             ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
@@ -1243,6 +1258,20 @@ createASectorFromQuery model =
                         ( { model | currentPage = EditChampionPage newEModel, sectors = newSectors }, Cmd.none )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+resetSectorDropdown : Model -> ( Model, Cmd Msg )
+resetSectorDropdown model =
+    case model.currentPage of
+        EditChampionPage ({ sectorDropdown } as eModel) ->
+            let
+                newSectorDropdown =
+                    sectorDropdown |> Dropdown.emptyState
+            in
+            ( { model | currentPage = EditChampionPage { eModel | sectorDropdown = newSectorDropdown } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
