@@ -25,25 +25,16 @@ type alias Model =
 
 
 type Page
-    = MembersPage MembersPageModel
+    = ChampionsPage ChampionsPageModel
     | MedalsPage MedalsPageModel
     | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
     | EditChampionPage EditChampionPageModel
-    | AdminPage AdminPageModel
     | EventsPage EventsPageModel
     | RecordsPage RecordsPageModel
 
 
-type alias MembersPageModel =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , sport : Maybe Sport
-    , tableState : Table.State
-    , searchQuery : Maybe String
-    }
-
-
-type alias AdminPageModel =
+type alias ChampionsPageModel =
     { champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sport : Maybe Sport
     , tableState : Table.State

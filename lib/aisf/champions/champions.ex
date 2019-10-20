@@ -27,17 +27,6 @@ defmodule Aisf.Champions do
   end
 
   @doc """
-  Returns the list of members.
-  """
-  def list_members do
-    Logger.info("Listing all members")
-
-    Repo.all(from(c in Champion, where: c.is_member == true))
-    |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals, :pictures])
-  end
-
-  @doc """
   Returns the list of champions with medals.
   """
   def list_champions_with_medals do

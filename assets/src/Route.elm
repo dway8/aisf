@@ -7,12 +7,11 @@ import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, string, to
 
 
 type Route
-    = MembersRoute
+    = ChampionsRoute
     | MedalsRoute
     | TeamsRoute
     | ChampionRoute Id
     | EditChampionRoute (Maybe Id)
-    | AdminRoute
     | EventsRoute
     | RecordsRoute
 
@@ -23,26 +22,25 @@ parseUrl url =
         |> parse
             (s "elixir"
                 </> oneOf
-                        [ map MembersRoute top
-                        , map MembersRoute (s "champions")
+                        [ map ChampionsRoute top
+                        , map ChampionsRoute (s "champions")
                         , map MedalsRoute (s "medals")
                         , map TeamsRoute (s "teams")
                         , map (EditChampionRoute Nothing) (s "champions" </> s "new")
                         , map (\intId -> EditChampionRoute <| Just <| Id (String.fromInt intId)) (s "champions" </> s "edit" </> int)
                         , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
-                        , map AdminRoute (s "admin")
                         , map EventsRoute (s "events")
                         , map RecordsRoute (s "records")
                         ]
             )
-        |> Maybe.withDefault MembersRoute
+        |> Maybe.withDefault ChampionsRoute
 
 
 routeToString : Route -> String
 routeToString route =
     Model.baseEndpoint
         ++ (case route of
-                MembersRoute ->
+                ChampionsRoute ->
                     "/champions"
 
                 MedalsRoute ->
@@ -59,9 +57,6 @@ routeToString route =
 
                 EditChampionRoute Nothing ->
                     "/champions/new"
-
-                AdminRoute ->
-                    "/admin"
 
                 EventsRoute ->
                     "/events"

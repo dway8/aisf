@@ -83,12 +83,8 @@ defmodule AisfWeb.Schema do
   end
 
   query do
-    field :all_champions, non_null(list_of(non_null(:champion))) do
+    field :champions, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.all/3)
-    end
-
-    field :get_members, non_null(list_of(non_null(:champion))) do
-      resolve(&ChampionsResolver.get_members/3)
     end
 
     field :champion, non_null(:champion) do

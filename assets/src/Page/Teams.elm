@@ -129,30 +129,7 @@ attrsForHeaders =
 
 tableColumns : List (Table.Column YearInTeamFromChampion Msg)
 tableColumns =
-    [ Table.veryCustomColumn
-        { name = "MEMBRE"
-        , viewData =
-            \{ isMember } ->
-                Common.centeredCell []
-                    (Html.img
-                        [ HA.style "max-width" "25px"
-                        , HA.style "max-height" "25px"
-                        , HA.style "object-fit" "contain"
-                        , HA.style "vertical-align" "middle"
-                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getIsMemberIcon isMember
-                        ]
-                        []
-                    )
-        , sorter =
-            Table.decreasingOrIncreasingBy
-                (\c ->
-                    if c.isMember then
-                        0
-
-                    else
-                        1
-                )
-        }
+    [ Common.memberColumn
     , Table.veryCustomColumn
         { name = "NOM / PRÉNOM"
         , viewData = \champion -> Common.defaultCell [] (Html.text <| champion.name)

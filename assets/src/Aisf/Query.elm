@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Query exposing (ChampionRequiredArguments, allChampions, champion, championsWithMedals, events, getMembers, records, sectors)
+module Aisf.Query exposing (ChampionRequiredArguments, champion, champions, championsWithMedals, events, records, sectors)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -19,11 +19,6 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode exposing (Decoder)
 
 
-allChampions : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
-allChampions object_ =
-    Object.selectionForCompositeField "allChampions" [] object_ (identity >> Decode.list)
-
-
 type alias ChampionRequiredArguments =
     { id : Aisf.ScalarCodecs.Id }
 
@@ -31,6 +26,11 @@ type alias ChampionRequiredArguments =
 champion : ChampionRequiredArguments -> SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet decodesTo RootQuery
 champion requiredArgs object_ =
     Object.selectionForCompositeField "champion" [ Argument.required "id" requiredArgs.id (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapEncoder .codecId) ] object_ identity
+
+
+champions : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
+champions object_ =
+    Object.selectionForCompositeField "champions" [] object_ (identity >> Decode.list)
 
 
 championsWithMedals : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
@@ -41,11 +41,6 @@ championsWithMedals object_ =
 events : SelectionSet decodesTo Aisf.Object.Event -> SelectionSet (List decodesTo) RootQuery
 events object_ =
     Object.selectionForCompositeField "events" [] object_ (identity >> Decode.list)
-
-
-getMembers : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
-getMembers object_ =
-    Object.selectionForCompositeField "getMembers" [] object_ (identity >> Decode.list)
 
 
 records : SelectionSet decodesTo Aisf.Object.Record -> SelectionSet (List decodesTo) RootQuery

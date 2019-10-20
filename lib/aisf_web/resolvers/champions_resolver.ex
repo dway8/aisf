@@ -6,11 +6,6 @@ defmodule AisfWeb.ChampionsResolver do
     {:ok, champions}
   end
 
-  def get_members(_root, _args, _info) do
-    champions = Champions.list_members()
-    {:ok, champions}
-  end
-
   def get(%{id: id}, _info) do
     case Champions.get_champion(id) do
       nil -> {:error, "Champion with id #{id} not found!"}

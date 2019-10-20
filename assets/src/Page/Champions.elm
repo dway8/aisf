@@ -1,4 +1,4 @@
-module Page.Admin exposing (init, view)
+module Page.Champions exposing (init, view)
 
 import Api
 import Common
@@ -9,16 +9,17 @@ import Html
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (AdminPageModel, Champion, Msg(..), Sector, Sectors, Sport)
+import Model exposing (Champion, ChampionsPageModel, Msg(..), Sector, Sectors, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Table
 import UI
 import UI.Button as Button
-import UI.Color
+import UI.Color as Color
+import Utils
 
 
-init : ( AdminPageModel, Cmd Msg )
+init : ( ChampionsPageModel, Cmd Msg )
 init =
     ( { champions = Loading
       , sport = Nothing
@@ -30,31 +31,37 @@ init =
     )
 
 
-view : RemoteData (Graphql.Http.Error Sectors) Sectors -> AdminPageModel -> Element Msg
-view rdSectors model =
+view : Bool -> RemoteData (Graphql.Http.Error Sectors) Sectors -> ChampionsPageModel -> Element Msg
+view isAdmin rdSectors model =
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
-            , sectorSelector rdSectors model.sector
+            , Utils.viewIf isAdmin <| sectorSelector rdSectors model.sector
             ]
-        , link []
-            { url = Route.routeToString <| EditChampionRoute Nothing
-            , label =
-                row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
-                    |> Button.makeButton Nothing
-                    |> Button.withBackgroundColor UI.Color.green
-                    |> Button.viewButton
-            }
+        , Utils.viewIf isAdmin <|
+            link []
+                { url = Route.routeToString <| EditChampionRoute Nothing
+                , label =
+                    row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
+                        |> Button.makeButton Nothing
+                        |> Button.withBackgroundColor Color.green
+                        |> Button.viewButton
+                }
         , case model.champions of
             Success champions ->
                 champions
                     |> Common.filterBySearchQuery model.searchQuery
                     |> filterBySport model.sport
-                    |> filterBySector model.sector
+                    |> (if isAdmin then
+                            filterBySector model.sector
+
+                        else
+                            identity
+                       )
                     |> Table.view tableConfig model.tableState
                     |> html
-                    |> el [ htmlAttribute <| HA.id "admin-list", width fill ]
+                    |> el [ htmlAttribute <| HA.id "champions-list", width fill ]
 
             NotAsked ->
                 none
@@ -106,12 +113,15 @@ tableConfig =
 attrsForHeaders : Dict String (List (Html.Attribute msg))
 attrsForHeaders =
     Dict.fromList <|
-        [ ( "DISCIPLINE", [ HA.style "text-align" "center" ] ) ]
+        [ ( "MEMBRE", [ HA.style "text-align" "center" ] )
+        , ( "DISCIPLINE", [ HA.style "text-align" "center" ] )
+        ]
 
 
 tableColumns : List (Table.Column Champion Msg)
 tableColumns =
     [ Common.profilePictureColumn
+    , Common.memberColumn
     , Common.nameColumn
     , Common.sportColumn
     ]

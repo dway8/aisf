@@ -13,12 +13,11 @@ import Graphql.Http
 import List.Extra as LE
 import Menu
 import Model exposing (..)
-import Page.Admin
 import Page.Champion
+import Page.Champions
 import Page.EditChampion
 import Page.Events
 import Page.Medals
-import Page.Members
 import Page.Records
 import Page.Teams
 import RemoteData as RD exposing (RemoteData(..), WebData)
@@ -279,9 +278,9 @@ goBack model =
 getPageAndCmdFromRoute : Year -> Bool -> Nav.Key -> Route -> ( Page, Cmd Msg )
 getPageAndCmdFromRoute currentYear isAdmin key route =
     case route of
-        MembersRoute ->
-            Page.Members.init
-                |> Tuple.mapFirst MembersPage
+        ChampionsRoute ->
+            Page.Champions.init
+                |> Tuple.mapFirst ChampionsPage
 
         MedalsRoute ->
             Page.Medals.init currentYear
@@ -298,15 +297,6 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
         EditChampionRoute maybeId ->
             Page.EditChampion.init maybeId
                 |> Tuple.mapFirst EditChampionPage
-
-        AdminRoute ->
-            if isAdmin then
-                Page.Admin.init
-                    |> Tuple.mapFirst AdminPage
-
-            else
-                Page.Members.init
-                    |> Tuple.mapBoth MembersPage (\cmds -> Nav.pushUrl key (Route.routeToString MembersRoute))
 
         EventsRoute ->
             Page.Events.init currentYear
@@ -412,8 +402,8 @@ updateCurrentSport sportStr model =
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
-        MembersPage memModel ->
-            ( { model | currentPage = MembersPage (updateFn memModel) }
+        ChampionsPage cModel ->
+            ( { model | currentPage = ChampionsPage (updateFn cModel) }
             , Cmd.none
             )
 
@@ -424,11 +414,6 @@ updateCurrentSport sportStr model =
 
         TeamsPage tModel ->
             ( { model | currentPage = TeamsPage (updateFn tModel) }
-            , Cmd.none
-            )
-
-        AdminPage aModel ->
-            ( { model | currentPage = AdminPage (updateFn aModel) }
             , Cmd.none
             )
 
@@ -832,17 +817,14 @@ updateCurrentYear str model =
 handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
 handleChampionsResponse resp model =
     case model.currentPage of
-        MembersPage memModel ->
-            ( { model | currentPage = MembersPage { memModel | champions = resp, sport = Nothing } }, Cmd.none )
+        ChampionsPage cModel ->
+            ( { model | currentPage = ChampionsPage { cModel | champions = resp, sport = Nothing } }, Cmd.none )
 
         MedalsPage mModel ->
             ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
 
         TeamsPage tModel ->
             ( { model | currentPage = TeamsPage { tModel | champions = resp } }, Cmd.none )
-
-        AdminPage aModel ->
-            ( { model | currentPage = AdminPage { aModel | champions = resp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -856,17 +838,14 @@ handleTableMsg tableState model =
 
         newPage =
             case model.currentPage of
-                MembersPage memModel ->
-                    MembersPage (updateFn memModel)
+                ChampionsPage cModel ->
+                    ChampionsPage (updateFn cModel)
 
                 MedalsPage mModel ->
                     MedalsPage (updateFn mModel)
 
                 TeamsPage tModel ->
                     TeamsPage (updateFn tModel)
-
-                AdminPage aModel ->
-                    AdminPage (updateFn aModel)
 
                 ChampionPage cModel ->
                     ChampionPage { cModel | medalsTableState = tableState }
@@ -1090,11 +1069,8 @@ updateChampionPicturesWithFileUrl idToUpdate base64file champion =
 updateSearchQuery : String -> Model -> ( Model, Cmd Msg )
 updateSearchQuery query model =
     case model.currentPage of
-        AdminPage aModel ->
-            ( { model | currentPage = AdminPage { aModel | searchQuery = Just query } }, Cmd.none )
-
-        MembersPage mModel ->
-            ( { model | currentPage = MembersPage { mModel | searchQuery = Just query } }, Cmd.none )
+        ChampionsPage cModel ->
+            ( { model | currentPage = ChampionsPage { cModel | searchQuery = Just query } }, Cmd.none )
 
         TeamsPage tModel ->
             ( { model | currentPage = TeamsPage { tModel | searchQuery = Just query } }, Cmd.none )
@@ -1113,13 +1089,13 @@ handleSectorsResponse resp model =
 
 updateCurrentSector : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSector name model =
-    case ( model.currentPage, model.sectors ) of
-        ( AdminPage aModel, Success sectors ) ->
-            ( { model | currentPage = AdminPage { aModel | sector = Model.findSectorByName sectors name } }
+    case ( model.currentPage, model.isAdmin, model.sectors ) of
+        ( ChampionsPage cModel, True, Success sectors ) ->
+            ( { model | currentPage = ChampionsPage { cModel | sector = Model.findSectorByName sectors name } }
             , Cmd.none
             )
 
-        ( EditChampionPage eModel, _ ) ->
+        ( EditChampionPage eModel, True, _ ) ->
             ( { model | currentPage = EditChampionPage (updateChampionWithProExperienceSector name eModel) }, Cmd.none )
 
         _ ->

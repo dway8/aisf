@@ -7,12 +7,11 @@ import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
 import Model exposing (Model, Msg, Page(..))
-import Page.Admin
 import Page.Champion
+import Page.Champions
 import Page.EditChampion
 import Page.Events
 import Page.Medals
-import Page.Members
 import Page.Records
 import Page.Teams
 import RemoteData as RD
@@ -51,8 +50,8 @@ viewBody model =
                 _ ->
                     viewMenu model.currentPage
             , case model.currentPage of
-                MembersPage membersModel ->
-                    Page.Members.view membersModel
+                ChampionsPage championsModel ->
+                    Page.Champions.view model.isAdmin model.sectors championsModel
 
                 MedalsPage medalsModel ->
                     Page.Medals.view medalsModel
@@ -65,9 +64,6 @@ viewBody model =
 
                 EditChampionPage editChampionModel ->
                     Page.EditChampion.view model.sectors model.currentYear editChampionModel
-
-                AdminPage adminModel ->
-                    Page.Admin.view model.sectors adminModel
 
                 EventsPage eventsModel ->
                     Page.Events.view model.isAdmin eventsModel
@@ -104,7 +100,7 @@ viewMenu currentPage =
                 { url = Route.routeToString route, label = el [] <| text label }
     in
     row [ width fill, spacing 3, Border.widthEach { bottom = 3, top = 0, right = 0, left = 0 }, Border.color <| Color.makeOpaque 0.5 Color.blue ]
-        [ menuItem MembersRoute "Membres AISF"
+        [ menuItem ChampionsRoute "Coureurs"
         , menuItem MedalsRoute "Palmarès"
         , menuItem TeamsRoute "Équipes de France"
         , menuItem EventsRoute "Lieux compétitions"
@@ -115,8 +111,8 @@ viewMenu currentPage =
 isCurrentPage : Route -> Page -> Bool
 isCurrentPage route currentPage =
     case currentPage of
-        MembersPage _ ->
-            route == MembersRoute
+        ChampionsPage _ ->
+            route == ChampionsRoute
 
         MedalsPage _ ->
             route == MedalsRoute

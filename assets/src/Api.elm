@@ -1,4 +1,4 @@
-module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getMembers, getRecords, getSectors, updateChampion)
+module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getRecords, getSectors, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -31,17 +31,9 @@ endpoint =
 
 getChampions : Cmd Msg
 getChampions =
-    Query.allChampions (championSelection False)
+    Query.champions (championSelection False)
         |> Graphql.Http.queryRequest endpoint
         -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
-        |> Graphql.Http.withCredentials
-        |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
-
-
-getMembers : Cmd Msg
-getMembers =
-    Query.getMembers (championSelection False)
-        |> Graphql.Http.queryRequest endpoint
         |> Graphql.Http.withCredentials
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
 
