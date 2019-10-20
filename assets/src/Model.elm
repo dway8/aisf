@@ -882,6 +882,7 @@ type Msg
     | UpdatedProExperienceField Int FormField String
     | PressedAddYearInFrenchTeamButton
     | SelectedAYearInFrenchTeam Int String
+    | PressedDeleteYearInFrenchTeamButton Int
     | PressedAddMedalButton
     | PressedDeleteMedalButton Int
     | SelectedAMedalCompetition Int String

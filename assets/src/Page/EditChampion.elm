@@ -396,24 +396,32 @@ tableColumns sport currentYear =
 
 editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
 editYearsInFrenchTeam currentYear champion =
-    column [ UI.largeSpacing ]
-        [ column [ UI.defaultSpacing ]
-            (champion.yearsInFrenchTeam
-                |> Dict.map
-                    (\id year ->
-                        case year of
-                            ReadOnly y ->
-                                text <| String.fromInt (Model.getYear y)
+    Common.viewBlock "Années en équipe de France"
+        [ column [ UI.largeSpacing ]
+            [ column [ UI.defaultSpacing ]
+                (champion.yearsInFrenchTeam
+                    |> Dict.map
+                        (\id year ->
+                            row [ UI.defaultSpacing ]
+                                [ case year of
+                                    ReadOnly y ->
+                                        text <| String.fromInt (Model.getYear y)
 
-                            Editable _ newY ->
-                                Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id) (Just newY)
-                    )
-                |> Dict.values
-            )
-        , text "Ajouter une année"
-            |> Button.makeButton (Just PressedAddYearInFrenchTeamButton)
-            |> Button.withBackgroundColor Color.grey
-            |> Button.viewButton
+                                    Editable _ newY ->
+                                        Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id) (Just newY)
+                                , (el [ htmlAttribute <| HA.title "Supprimer", Font.color Color.red, UI.largeFont ] <| UI.viewIcon "close")
+                                    |> Button.makeButton (Just <| PressedDeleteYearInFrenchTeamButton id)
+                                    |> Button.withPadding (padding 0)
+                                    |> Button.viewButton
+                                ]
+                        )
+                    |> Dict.values
+                )
+            , (el [ htmlAttribute <| HA.title "Ajouter une année", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
+                |> Button.makeButton (Just PressedAddYearInFrenchTeamButton)
+                |> Button.withPadding (padding 0)
+                |> Button.viewButton
+            ]
         ]
 
 
