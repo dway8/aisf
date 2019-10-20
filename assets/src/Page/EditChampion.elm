@@ -21,7 +21,7 @@ import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
-import UI.Color
+import UI.Color as Color
 
 
 init : Maybe Id -> ( EditChampionPageModel, Cmd Msg )
@@ -208,7 +208,7 @@ editProExperiences sectors sectorDropdown { proExperiences } =
             )
         , text "Ajouter une expérience"
             |> Button.makeButton (Just PressedAddProExperienceButton)
-            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.withBackgroundColor Color.grey
             |> Button.viewButton
         ]
 
@@ -220,11 +220,11 @@ editPictures champion =
             Model.getId champion
     in
     Common.viewBlock "Photos"
-        [ row [ width fill ]
+        [ row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
             (champion.pictures |> List.map (editPicture id))
         , text "Ajouter une photo"
             |> Button.makeButton (Just PressedAddPictureButton)
-            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.withBackgroundColor Color.grey
             |> Button.viewButton
         ]
 
@@ -240,7 +240,7 @@ editPicture championId { id, attachment } =
             column [ spacing 10, padding 10, centerX ]
                 [ text "Uploader une photo"
                     |> Button.makeButton (Just <| BeganFileSelection id)
-                    |> Button.withBackgroundColor UI.Color.green
+                    |> Button.withBackgroundColor Color.green
                     |> Button.viewButton
                 ]
 
@@ -254,7 +254,7 @@ editPicture championId { id, attachment } =
             , el [ centerX ]
                 (text "Changer la photo"
                     |> Button.makeButton (Just <| BeganFileSelection id)
-                    |> Button.withBackgroundColor UI.Color.green
+                    |> Button.withBackgroundColor Color.green
                     |> Button.viewButton
                 )
             ]
@@ -281,7 +281,7 @@ editMedals currentYear { medals, sport } =
             )
         , text "Ajouter une médaille"
             |> Button.makeButton (Just PressedAddMedalButton)
-            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.withBackgroundColor Color.grey
             |> Button.viewButton
         ]
 
@@ -304,7 +304,7 @@ editYearsInFrenchTeam currentYear champion =
             )
         , text "Ajouter une année"
             |> Button.makeButton (Just PressedAddYearInFrenchTeamButton)
-            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.withBackgroundColor Color.grey
             |> Button.viewButton
         ]
 
@@ -397,7 +397,7 @@ viewTextArea label value msg =
         , Border.rounded 8
         , paddingXY 13 7
         , Border.width 1
-        , width <| px 400
+        , width fill
         ]
         { onChange = msg
         , text = value
@@ -492,7 +492,7 @@ viewProfilePicture profilePicture =
                     column [ spacing 10, padding 10, centerX ]
                         [ text "Uploader une photo"
                             |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
-                            |> Button.withBackgroundColor UI.Color.green
+                            |> Button.withBackgroundColor Color.green
                             |> Button.viewButton
                         ]
 
@@ -506,7 +506,7 @@ viewProfilePicture profilePicture =
                     , el [ centerX ]
                         (text "Changer la photo"
                             |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
-                            |> Button.withBackgroundColor UI.Color.green
+                            |> Button.withBackgroundColor Color.green
                             |> Button.viewButton
                         )
                     ]
@@ -527,11 +527,11 @@ editHighlights { highlights } =
                                     , text "Éditer"
                                         |> Button.makeButton
                                             (Just <| PressedEditHighlightButton id)
-                                        |> Button.withBackgroundColor UI.Color.grey
+                                        |> Button.withBackgroundColor Color.grey
                                         |> Button.viewButton
                                     , text "Supprimer"
                                         |> Button.makeButton (Just <| PressedDeleteHighlightButton id)
-                                        |> Button.withBackgroundColor UI.Color.red
+                                        |> Button.withBackgroundColor Color.red
                                         |> Button.viewButton
                                     ]
 
@@ -544,11 +544,11 @@ editHighlights { highlights } =
                                         }
                                     , text "OK"
                                         |> Button.makeButton (Just <| PressedConfirmHighlightButton id)
-                                        |> Button.withBackgroundColor UI.Color.green
+                                        |> Button.withBackgroundColor Color.green
                                         |> Button.viewButton
                                     , text "Annuler"
                                         |> Button.makeButton (Just <| CancelledHighlightEdition id)
-                                        |> Button.withBackgroundColor UI.Color.grey
+                                        |> Button.withBackgroundColor Color.grey
                                         |> Button.viewButton
                                     ]
                             )
@@ -557,7 +557,7 @@ editHighlights { highlights } =
             )
         , text "Ajouter un fait marquant"
             |> Button.makeButton (Just PressedAddHighlightButton)
-            |> Button.withBackgroundColor UI.Color.grey
+            |> Button.withBackgroundColor Color.grey
             |> Button.viewButton
         ]
 
@@ -567,11 +567,11 @@ viewButtons =
     row [ width fill, spaceEvenly ]
         [ text "Annuler"
             |> Button.makeButton (Just GoBack)
-            |> Button.withBackgroundColor UI.Color.lighterGrey
+            |> Button.withBackgroundColor Color.lighterGrey
             |> Button.viewButton
         , text "Enregistrer les modifications"
             |> Button.makeButton (Just PressedSaveChampionButton)
-            |> Button.withBackgroundColor UI.Color.green
+            |> Button.withBackgroundColor Color.green
             |> Button.withAttrs [ htmlAttribute <| HA.id "save-champion-btn" ]
             |> Button.viewButton
         ]

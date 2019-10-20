@@ -26,4 +26,9 @@ defmodule Aisf.UploadUtils do
     File.mkdir_p(dest_dir)
     File.cp(file.path, "#{dest_dir}/#{filename}")
   end
+
+  def remove_file_at_dest(filename, dest_dir) do
+    Logger.info("Removing file #{filename} in dir #{dest_dir}")
+    File.rm("#{dest_dir}/#{filename}")
+  end
 end

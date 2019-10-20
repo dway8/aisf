@@ -9,7 +9,7 @@ defmodule Aisf.Champions do
 
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperiences
-  alias Aisf.Pictures.Pictures
+  alias Aisf.Pictures.{Pictures, Picture}
   alias Aisf.Medals.{Medals, Medal}
   alias Aisf.UploadUtils
 
@@ -23,7 +23,8 @@ defmodule Aisf.Champions do
 
     Repo.all(Champion)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals, :pictures])
+    |> Repo.preload([:medals])
+    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
   end
 
   @doc """
@@ -36,7 +37,8 @@ defmodule Aisf.Champions do
       from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
     )
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals, :pictures])
+    |> Repo.preload([:medals])
+    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
   end
 
   @doc """
@@ -47,7 +49,8 @@ defmodule Aisf.Champions do
   def get_champion!(id) do
     Repo.get!(Champion, id)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals, :pictures])
+    |> Repo.preload([:medals])
+    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
   end
 
   @doc """
@@ -58,7 +61,8 @@ defmodule Aisf.Champions do
 
     Repo.get(Champion, id)
     |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals, :pictures])
+    |> Repo.preload([:medals])
+    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
   end
 
   @doc """
@@ -86,7 +90,8 @@ defmodule Aisf.Champions do
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
-           |> Repo.preload([:medals, :pictures])}
+           |> Repo.preload([:medals])
+           |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
         end).()
   end
 
@@ -129,9 +134,12 @@ defmodule Aisf.Champions do
             if p.id == "new" do
               Pictures.create_picture(champion, p)
             else
-              p.id
-              |> Pictures.get_picture!()
-              |> Pictures.update_picture(p)
+              picture = Pictures.get_picture!(p.id)
+
+              if picture.filename !== p.attachment.filename do
+                champion
+                |> Pictures.update_picture(picture, p)
+              end
             end
           end)
 
@@ -142,7 +150,8 @@ defmodule Aisf.Champions do
           {:ok,
            champion
            |> Repo.preload(pro_experiences: [:sectors])
-           |> Repo.preload([:medals, :pictures])}
+           |> Repo.preload([:medals])
+           |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
         end).()
   end
 
@@ -162,15 +171,6 @@ defmodule Aisf.Champions do
 
   @doc """
   Deletes a Champion.
-
-  ## Examples
-
-      iex> delete_champion(champion)
-      {:ok, %Champion{}}
-
-      iex> delete_champion(champion)
-      {:error, %Ecto.Changeset{}}
-
   """
   def delete_champion(%Champion{} = champion) do
     Repo.delete(champion)
@@ -178,12 +178,6 @@ defmodule Aisf.Champions do
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking champion changes.
-
-  ## Examples
-
-      iex> change_champion(champion)
-      %Ecto.Changeset{source: %Champion{}}
-
   """
   def change_champion(%Champion{} = champion) do
     Champion.changeset(champion, %{})

@@ -55,11 +55,18 @@ defmodule Aisf.Pictures.Pictures do
 
 
   """
-  def update_picture(%Picture{} = picture, attrs) do
-    Logger.info("Updating picture #{picture.id}")
+  def update_picture(champion, %Picture{} = picture, attrs) do
+    Logger.info("Updating picture #{picture.id} of champion #{champion.id}")
+    %{filename: filename, base64: base64} = attrs.attachment
+    upload_dir = "#{@upload_dir}/#{champion.id}"
+
+    UploadUtils.remove_file_at_dest(picture.filename, upload_dir)
+
+    file = UploadUtils.data_url_to_upload(base64)
+    UploadUtils.copy_file_to_dest(file, filename, upload_dir)
 
     picture
-    |> Picture.changeset(attrs)
+    |> Picture.changeset(attrs.attachment)
     |> Repo.update()
   end
 
