@@ -163,7 +163,7 @@ viewMedals tableState champion =
         (champion.medals
             |> Table.view tableConfig tableState
             |> html
-            |> el [ htmlAttribute <| HA.id "champion-medals-list", width <| maximum 680 fill ]
+            |> el [ htmlAttribute <| HA.id "champion-medals-list", width fill ]
             |> List.singleton
         )
 
@@ -194,19 +194,7 @@ tableColumns : List (Table.Column Medal Msg)
 tableColumns =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
-        , viewData =
-            \medal ->
-                Common.centeredCell []
-                    (Html.img
-                        [ HA.style "max-width" "25px"
-                        , HA.style "max-height" "25px"
-                        , HA.style "object-fit" "contain"
-                        , HA.style "vertical-align" "middle"
-                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
-                        , HA.title <| Model.medalTypeToDisplay medal.medalType
-                        ]
-                        []
-                    )
+        , viewData = \medal -> Common.centeredCell [] (Common.medalIconHtml medal)
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn

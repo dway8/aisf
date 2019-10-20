@@ -81,3 +81,9 @@ th {
   background-color: #f5f5f5;
 }
 
+
+button:focus, i:focus, div:focus {
+    box-shadow: none !important;
+    outline: none;
+}
+

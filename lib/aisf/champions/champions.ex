@@ -106,42 +106,12 @@ defmodule Aisf.Champions do
     champion
     |> Champion.changeset(attrs)
     |> Repo.update()
-    |> (fn {:ok, _champion} ->
-          attrs.pro_experiences
-          |> Enum.map(fn p ->
-            if p.id == "new" do
-              ProExperiences.create_pro_experience(champion, p)
-            else
-              p.id
-              |> ProExperiences.get_pro_experience!()
-              |> ProExperiences.update_pro_experience(p)
-            end
-          end)
+    |> (fn {:ok, champion} ->
+          update_pro_experiences(champion, attrs.pro_experiences)
 
-          attrs.medals
-          |> Enum.map(fn m ->
-            if m.id == "new" do
-              Medals.create_medal(champion, m)
-            else
-              m.id
-              |> Medals.get_medal!()
-              |> Medals.update_medal(m)
-            end
-          end)
+          update_medals(champion, attrs.medals)
 
-          attrs.pictures
-          |> Enum.map(fn p ->
-            if p.id == "new" do
-              Pictures.create_picture(champion, p)
-            else
-              picture = Pictures.get_picture!(p.id)
-
-              if picture.filename !== p.attachment.filename do
-                champion
-                |> Pictures.update_picture(picture, p)
-              end
-            end
-          end)
+          update_pictures(champion, attrs.pictures)
 
           if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
             {:ok, champion} = update_profile_picture(champion, attrs.profile_picture)
@@ -153,6 +123,70 @@ defmodule Aisf.Champions do
            |> Repo.preload([:medals])
            |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
         end).()
+  end
+
+  defp update_pro_experiences(champion, attrs) do
+    received_pro_experience_ids = attrs |> Enum.map(&(&1.id |> String.to_integer()))
+
+    # delete removed pro_experiences
+    champion.pro_experiences
+    |> Enum.map(fn m ->
+      if !Enum.member?(received_pro_experience_ids, m.id) do
+        ProExperiences.delete_pro_experience(m)
+      end
+    end)
+
+    # add or update other pro_experiences
+    attrs
+    |> Enum.map(fn p ->
+      if p.id == "new" do
+        ProExperiences.create_pro_experience(champion, p)
+      else
+        p.id
+        |> ProExperiences.get_pro_experience!()
+        |> ProExperiences.update_pro_experience(p)
+      end
+    end)
+  end
+
+  defp update_medals(champion, attrs) do
+    received_medal_ids = attrs |> Enum.map(&(&1.id |> String.to_integer()))
+
+    # delete removed medals
+    champion.medals
+    |> Enum.map(fn m ->
+      if !Enum.member?(received_medal_ids, m.id) do
+        Medals.delete_medal(m)
+      end
+    end)
+
+    # add or update other medals
+    attrs
+    |> Enum.map(fn m ->
+      if m.id == "new" do
+        Medals.create_medal(champion, m)
+      else
+        m.id
+        |> Medals.get_medal!()
+        |> Medals.update_medal(m)
+      end
+    end)
+  end
+
+  defp update_pictures(champion, attrs) do
+    attrs
+    |> Enum.map(fn p ->
+      if p.id == "new" do
+        Pictures.create_picture(champion, p)
+      else
+        picture = Pictures.get_picture!(p.id)
+
+        if picture.filename !== p.attachment.filename do
+          champion
+          |> Pictures.update_picture(picture, p)
+        end
+      end
+    end)
   end
 
   defp update_profile_picture(champion, profile_picture_attrs) do

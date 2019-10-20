@@ -3,7 +3,7 @@ module Page.EditChampion exposing (championToForm, init, view)
 import Aisf.Scalar exposing (Id(..))
 import Api
 import Common
-import Dict
+import Dict exposing (Dict)
 import Dropdown
 import Editable exposing (Editable(..))
 import Element exposing (..)
@@ -17,8 +17,9 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, Msg(..), Picture, ProExperience, Sectors, Sport, Year)
+import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sectors, Sport, Year)
 import RemoteData exposing (RemoteData(..), WebData)
+import Table
 import UI
 import UI.Button as Button
 import UI.Color as Color
@@ -31,6 +32,7 @@ init maybeId =
             ( { id = Just id
               , champion = Loading
               , sectorDropdown = Dropdown.init
+              , medalsTableState = Table.initialSort "ANNÉE"
               }
             , Api.getChampion True id
             )
@@ -39,6 +41,7 @@ init maybeId =
             ( { id = Nothing
               , champion = Success initChampionForm
               , sectorDropdown = Dropdown.init
+              , medalsTableState = Table.initialSort "ANNÉE"
               }
             , Cmd.none
             )
@@ -143,7 +146,7 @@ view rdSectors currentYear model =
                     , editSportCareer champion
                     , editProfessionalCareer sectors model.sectorDropdown champion
                     , editPictures champion
-                    , editMedals currentYear champion
+                    , editMedals currentYear model.medalsTableState champion
                     , editYearsInFrenchTeam currentYear champion
                     , viewButtons
                     ]
@@ -158,8 +161,10 @@ editPrivateInfo champion =
     Common.viewBlock "Informations privées"
         [ viewChampionTextInput BirthDate champion
         , viewChampionTextInput Address champion
-        , viewChampionTextInput Email champion
-        , viewChampionTextInput PhoneNumber champion
+        , row [ UI.defaultSpacing, width fill ]
+            [ viewChampionTextInput Email champion
+            , viewChampionTextInput PhoneNumber champion
+            ]
         ]
 
 
@@ -181,7 +186,13 @@ editProfessionalCareer sectors sectorDropdown champion =
         [ viewChampionTextInput Background champion
         , viewChampionTextInput Volunteering champion
         , column [ UI.defaultSpacing, width fill ]
-            [ el [ Font.bold, UI.largeFont ] <| text "Expériences professionnelles"
+            [ row [ UI.defaultSpacing ]
+                [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
+                , (el [ htmlAttribute <| HA.title "Ajouter une expérience", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
+                    |> Button.makeButton (Just PressedAddProExperienceButton)
+                    |> Button.withPadding (padding 0)
+                    |> Button.viewButton
+                ]
             , editProExperiences sectors sectorDropdown champion
             ]
         ]
@@ -189,28 +200,22 @@ editProfessionalCareer sectors sectorDropdown champion =
 
 editProExperiences : Sectors -> Dropdown.Model -> ChampionForm -> Element Msg
 editProExperiences sectors sectorDropdown { proExperiences } =
-    column [ UI.largeSpacing, width fill ]
-        [ column [ UI.defaultSpacing, width fill ]
-            (proExperiences
-                |> Dict.map
-                    (\id exp ->
-                        case exp of
-                            ReadOnly e ->
-                                column [ spacing 5 ]
-                                    [ Input.button [ Font.bold ] { onPress = Just <| PressedEditProExperienceButton id, label = text "Éditer" }
-                                    , Common.viewProExperience e
-                                    ]
+    column [ UI.defaultSpacing, width fill ]
+        (proExperiences
+            |> Dict.map
+                (\id exp ->
+                    case exp of
+                        ReadOnly e ->
+                            column [ spacing 5 ]
+                                [ Input.button [ Font.bold ] { onPress = Just <| PressedEditProExperienceButton id, label = text "Éditer" }
+                                , Common.viewProExperience e
+                                ]
 
-                            Editable oldE newE ->
-                                viewProExperienceForm sectors sectorDropdown id newE
-                    )
-                |> Dict.values
-            )
-        , text "Ajouter une expérience"
-            |> Button.makeButton (Just PressedAddProExperienceButton)
-            |> Button.withBackgroundColor Color.grey
-            |> Button.viewButton
-        ]
+                        Editable oldE newE ->
+                            viewProExperienceForm sectors sectorDropdown id newE
+                )
+            |> Dict.values
+        )
 
 
 editPictures : ChampionForm -> Element Msg
@@ -260,30 +265,133 @@ editPicture championId { id, attachment } =
             ]
 
 
-editMedals : Year -> ChampionForm -> Element Msg
-editMedals currentYear { medals, sport } =
+editMedals : Year -> Table.State -> ChampionForm -> Element Msg
+editMedals currentYear tableState { medals, sport } =
     Common.viewBlock "Palmarès"
-        [ column [ UI.defaultSpacing ]
-            (medals
-                |> Dict.map
-                    (\id medal ->
-                        case medal of
-                            ReadOnly m ->
-                                column [ spacing 5 ]
-                                    [ Input.button [ Font.bold ] { onPress = Just <| PressedEditMedalButton id, label = text "Éditer" }
-                                    , Common.viewMedal m
-                                    ]
-
-                            Editable _ newM ->
-                                viewMedalForm currentYear id sport newM
-                    )
-                |> Dict.values
-            )
-        , text "Ajouter une médaille"
-            |> Button.makeButton (Just PressedAddMedalButton)
-            |> Button.withBackgroundColor Color.grey
-            |> Button.viewButton
+        [ column [ width fill ]
+            [ (el [ htmlAttribute <| HA.title "Ajouter une médaille", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
+                |> Button.makeButton (Just PressedAddMedalButton)
+                |> Button.withPadding (padding 0)
+                |> Button.viewButton
+            , medals
+                |> Dict.toList
+                |> Table.view (tableConfig sport currentYear) tableState
+                |> html
+                |> el [ htmlAttribute <| HA.id "edit-champion-medals-list", width fill ]
+            ]
         ]
+
+
+tableConfig : Maybe Sport -> Year -> Table.Config ( Int, Editable Medal ) Msg
+tableConfig sport currentYear =
+    let
+        tableCustomizations =
+            Common.tableCustomizations attrsForHeaders
+    in
+    Table.customConfig
+        { toId = Tuple.second >> Editable.value >> Model.getId
+        , toMsg = TableMsg
+        , columns = tableColumns sport currentYear
+        , customizations = { tableCustomizations | rowAttrs = always [] }
+        }
+
+
+attrsForHeaders : Dict String (List (Html.Attribute msg))
+attrsForHeaders =
+    Dict.fromList <|
+        [ ( "MÉDAILLE", [ HA.style "text-align" "center" ] )
+        , ( "ANNÉE", [ HA.style "text-align" "center" ] )
+        ]
+
+
+tableColumns : Maybe Sport -> Year -> List (Table.Column ( Int, Editable Medal ) Msg)
+tableColumns sport currentYear =
+    [ Table.veryCustomColumn
+        { name = "MÉDAILLE"
+        , viewData =
+            \( id, editableMedal ) ->
+                let
+                    medal =
+                        Editable.value editableMedal
+                in
+                Common.centeredCell [] (Common.medalIconHtml medal)
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = "TYPE"
+        , viewData =
+            \( id, editableMedal ) ->
+                Common.defaultCell []
+                    (case editableMedal of
+                        ReadOnly medal ->
+                            Html.text <| Model.medalTypeToDisplay medal.medalType
+
+                        Editable _ newM ->
+                            UI.defaultLayoutForTable <| medalTypeSelector id newM.medalType
+                    )
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = "COMPÉTITION"
+        , viewData =
+            \( id, editableMedal ) ->
+                Common.defaultCell []
+                    (case editableMedal of
+                        ReadOnly medal ->
+                            Html.text <| Model.competitionToDisplay medal.competition
+
+                        Editable _ newM ->
+                            UI.defaultLayoutForTable <| Common.competitionSelector False (SelectedAMedalCompetition id) (Just newM.competition)
+                    )
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = "DISCIPLINE"
+        , viewData =
+            \( id, editableMedal ) ->
+                Common.defaultCell []
+                    (case editableMedal of
+                        ReadOnly medal ->
+                            Html.text <| Model.specialtyToDisplay medal.specialty
+
+                        Editable _ newM ->
+                            UI.defaultLayoutForTable <| Common.specialtySelector False sport (SelectedAMedalSpecialty id) (Just newM.specialty)
+                    )
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = "ANNÉE"
+        , viewData =
+            \( id, editableMedal ) ->
+                Common.centeredCell []
+                    (case editableMedal of
+                        ReadOnly medal ->
+                            Html.text <| String.fromInt <| Model.getYear medal.year
+
+                        Editable _ newM ->
+                            UI.defaultLayoutForTable <| Common.yearSelector False currentYear (SelectedAMedalYear id) (Just newM.year)
+                    )
+        , sorter = Table.decreasingOrIncreasingBy (\( _, editableMedal ) -> editableMedal |> Editable.value |> .year |> Model.getYear)
+        }
+    , Table.veryCustomColumn
+        { name = ""
+        , viewData =
+            \( id, _ ) ->
+                Common.centeredCell
+                    [ HA.style "color" <| Color.colorToString Color.green ]
+                    (Html.i [ HA.class <| "zmdi zmdi-edit", HA.style "cursor" "pointer", HA.title "Modifier", HE.onClick <| PressedEditMedalButton id ] [])
+        , sorter = Table.unsortable
+        }
+    , Table.veryCustomColumn
+        { name = ""
+        , viewData =
+            \( id, _ ) ->
+                Common.centeredCell
+                    [ HA.style "color" <| Color.colorToString Color.red ]
+                    (Html.i [ HA.class <| "zmdi zmdi-close", HA.style "cursor" "pointer", HA.title "Supprimer", HE.onClick <| PressedDeleteMedalButton id ] [])
+        , sorter = Table.unsortable
+        }
+    ]
 
 
 editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
@@ -297,8 +405,8 @@ editYearsInFrenchTeam currentYear champion =
                             ReadOnly y ->
                                 text <| String.fromInt (Model.getYear y)
 
-                            Editable _ _ ->
-                                Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id)
+                            Editable _ newY ->
+                                Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id) (Just newY)
                     )
                 |> Dict.values
             )
@@ -311,31 +419,41 @@ editYearsInFrenchTeam currentYear champion =
 
 viewProExperienceForm : Sectors -> Dropdown.Model -> Int -> ProExperience -> Element Msg
 viewProExperienceForm sectors sectorDropdown id newE =
-    let
-        fields =
-            [ Title, CompanyName, Description, Website, Contact ]
-    in
     column [ width fill ]
-        [ row [] [ el [] <| text "Expérience professionnelle", Input.button [] { onPress = Just <| PressedDeleteProExperienceButton id, label = text "Supprimer" } ]
+        [ row [ UI.defaultSpacing ]
+            [ el [] <| text "Expérience professionnelle"
+            , Input.button []
+                { onPress = Just <| PressedDeleteProExperienceButton id
+                , label = el [ htmlAttribute <| HA.title "Supprimer", Font.color Color.red, UI.largeFont ] <| UI.viewIcon "close"
+                }
+            ]
         , column [ UI.defaultSpacing, width fill ]
-            (viewSectorDropdown sectors sectorDropdown newE
-                :: (fields
-                        |> List.map
-                            (\field ->
-                                let
-                                    ( label, value ) =
-                                        getProExperienceFormFieldData field newE
-                                in
-                                UI.textInput [ width fill ]
-                                    { onChange = UpdatedProExperienceField id field
-                                    , text = value
-                                    , placeholder = Nothing
-                                    , label = Just label
-                                    }
-                            )
-                   )
-            )
+            [ viewSectorDropdown sectors sectorDropdown newE
+            , row [ UI.defaultSpacing, width fill ]
+                [ viewProExperienceTextInput id Title newE
+                , viewProExperienceTextInput id CompanyName newE
+                ]
+            , viewProExperienceTextInput id Description newE
+            , row [ UI.defaultSpacing, width fill ]
+                [ viewProExperienceTextInput id Website newE
+                , viewProExperienceTextInput id Contact newE
+                ]
+            ]
         ]
+
+
+viewProExperienceTextInput : Int -> FormField -> ProExperience -> Element Msg
+viewProExperienceTextInput id field exp =
+    let
+        ( label, value ) =
+            getProExperienceFormFieldData field exp
+    in
+    UI.textInput [ width fill ]
+        { onChange = UpdatedProExperienceField id field
+        , text = value
+        , placeholder = Nothing
+        , label = Just label
+        }
 
 
 viewSectorDropdown : Sectors -> Dropdown.Model -> ProExperience -> Element Msg
@@ -364,18 +482,6 @@ viewSectorDropdown sectors sectorDropdown proExperience =
     Dropdown.viewDropdownInput config sectorDropdown list
 
 
-viewMedalForm : Year -> Int -> Maybe Sport -> Medal -> Element Msg
-viewMedalForm currentYear id sport medal =
-    column []
-        [ row [] [ el [] <| text "Médaille", Input.button [] { onPress = Just <| PressedDeleteMedalButton id, label = text "Supprimer" } ]
-        , column []
-            [ Common.competitionSelector False (SelectedAMedalCompetition id)
-            , Common.yearSelector False currentYear (SelectedAMedalYear id)
-            , Common.specialtySelector False sport (SelectedAMedalSpecialty id)
-            ]
-        ]
-
-
 viewChampionTextInput : FormField -> ChampionForm -> Element Msg
 viewChampionTextInput field champion =
     let
@@ -398,6 +504,7 @@ viewTextArea label value msg =
         , paddingXY 13 7
         , Border.width 1
         , width fill
+        , height <| minimum 80 fill
         ]
         { onChange = msg
         , text = value
@@ -575,3 +682,24 @@ viewButtons =
             |> Button.withAttrs [ htmlAttribute <| HA.id "save-champion-btn" ]
             |> Button.viewButton
         ]
+
+
+medalTypeSelector : Int -> MedalType -> Element Msg
+medalTypeSelector index currentMedalType =
+    el [] <|
+        html <|
+            Html.select
+                [ HE.on "change" <| D.map (SelectedAMedalType index) <| HE.targetValue
+                , HA.style "font-family" "Open Sans"
+                , HA.style "font-size" "15px"
+                ]
+                ([ Gold, Silver, Bronze ]
+                    |> List.map
+                        (\medalType ->
+                            Html.option
+                                [ HA.value <| String.fromInt <| Model.medalTypeToInt medalType
+                                , HA.selected (currentMedalType == medalType)
+                                ]
+                                [ Html.text <| Model.medalTypeToDisplay medalType ]
+                        )
+                )

@@ -76,6 +76,7 @@ type alias EditChampionPageModel =
     { id : Maybe Id
     , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
     , sectorDropdown : Dropdown.Model
+    , medalsTableState : Table.State
     }
 
 
@@ -935,6 +936,7 @@ type Msg
     | SelectedARecordType String
     | UpdatedRecordWinnerLastName Int String
     | UpdatedRecordWinnerFirstName Int String
+    | SelectedAMedalType Int String
 
 
 type FormField

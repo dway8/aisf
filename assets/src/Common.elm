@@ -72,8 +72,8 @@ viewMedal { competition, year, specialty, medalType } =
         ]
 
 
-specialtySelector : Bool -> Maybe Sport -> (String -> Msg) -> Element Msg
-specialtySelector showOptionAll maybeSport msg =
+specialtySelector : Bool -> Maybe Sport -> (String -> Msg) -> Maybe Specialty -> Element Msg
+specialtySelector showOptionAll maybeSport msg currentSpecialty =
     case maybeSport of
         Nothing ->
             text "Veuillez choisir d'abord une discipline"
@@ -100,6 +100,7 @@ specialtySelector showOptionAll maybeSport msg =
                                         (\specialty ->
                                             Html.option
                                                 [ HA.value <| Model.specialtyToString specialty
+                                                , HA.selected (currentSpecialty == Just specialty)
                                                 ]
                                                 [ Html.text <| Model.specialtyToDisplay specialty ]
                                         )
@@ -260,6 +261,19 @@ sportIconHtml sport =
         []
 
 
+medalIconHtml : { a | competition : Competition, medalType : MedalType } -> Html Msg
+medalIconHtml medal =
+    Html.img
+        [ HA.style "max-width" "25px"
+        , HA.style "max-height" "25px"
+        , HA.style "object-fit" "contain"
+        , HA.style "vertical-align" "middle"
+        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
+        , HA.title <| Model.medalTypeToDisplay medal.medalType
+        ]
+        []
+
+
 competitionColumn : Table.Column { a | competition : Competition } Msg
 competitionColumn =
     Table.veryCustomColumn
@@ -312,22 +326,8 @@ memberColumn =
 -----------------------
 
 
-yearSelector : Bool -> Year -> (String -> Msg) -> Element Msg
-yearSelector showOptionAll currentYear msg =
-    let
-        list : List String
-        list =
-            (if showOptionAll then
-                [ "Toutes les années" ]
-
-             else
-                []
-            )
-                ++ (List.range 1960 (Model.getYear currentYear)
-                        |> List.reverse
-                        |> List.map String.fromInt
-                   )
-    in
+yearSelector : Bool -> Year -> (String -> Msg) -> Maybe Year -> Element Msg
+yearSelector showOptionAll currentYear msg maybeSelectedYear =
     el [] <|
         html <|
             Html.select
@@ -335,14 +335,26 @@ yearSelector showOptionAll currentYear msg =
                 , HA.style "font-family" "Open Sans"
                 , HA.style "font-size" "15px"
                 ]
-                (list
-                    |> List.map
-                        (\year ->
-                            Html.option
-                                [ HA.value year
-                                ]
-                                [ Html.text year ]
-                        )
+                ((if showOptionAll then
+                    [ Html.option
+                        []
+                        [ Html.text "Toutes les années" ]
+                    ]
+
+                  else
+                    []
+                 )
+                    ++ (List.range 1960 (Model.getYear currentYear)
+                            |> List.reverse
+                            |> List.map
+                                (\year ->
+                                    Html.option
+                                        [ HA.value <| String.fromInt year
+                                        , HA.selected (maybeSelectedYear == Just (Year year))
+                                        ]
+                                        [ Html.text <| String.fromInt year ]
+                                )
+                       )
                 )
 
 
@@ -425,8 +437,8 @@ viewBlockTitle title =
             String.toUpper title
 
 
-competitionSelector : Bool -> (String -> Msg) -> Element Msg
-competitionSelector showOptionAll msg =
+competitionSelector : Bool -> (String -> Msg) -> Maybe Competition -> Element Msg
+competitionSelector showOptionAll msg currentCompetition =
     el [] <|
         html <|
             Html.select
@@ -448,6 +460,7 @@ competitionSelector showOptionAll msg =
                                 (\competition ->
                                     Html.option
                                         [ HA.value <| Model.competitionToString competition
+                                        , HA.selected (currentCompetition == Just competition)
                                         ]
                                         [ Html.text <| Model.competitionToDisplay competition ]
                                 )

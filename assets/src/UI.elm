@@ -42,7 +42,7 @@ defaultFocusStyle =
             Just
                 { color = UI.Color.blue
                 , offset = ( 0, 0 )
-                , blur = 3
+                , blur = 2
                 , size = 1
                 }
         }

@@ -262,6 +262,9 @@ update msg model =
         UpdatedRecordWinnerFirstName index str ->
             updateRecordWinnerFirstName index str model
 
+        SelectedAMedalType index str ->
+            updateMedalType index str model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -887,6 +890,7 @@ handleChampionResponse resp model =
                             { id = id
                             , champion = Success (Page.EditChampion.championToForm champion)
                             , sectorDropdown = Dropdown.init
+                            , medalsTableState = Table.initialSort "ANNÉE"
                             }
                   }
                 , Cmd.none
@@ -951,6 +955,7 @@ editMedal id model =
                         let
                             newMedals =
                                 champion.medals
+                                    |> Dict.map (\_ medal -> Editable.save medal)
                                     |> Dict.update id (Maybe.map Editable.edit)
 
                             newChampion =
@@ -1793,6 +1798,34 @@ updateRecordWinnerNameField index str updateFn model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateMedalType : Int -> String -> Model -> ( Model, Cmd Msg )
+updateMedalType id str model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        case str |> String.toInt |> Maybe.andThen Model.medalTypeFromInt of
+                            Just medalType ->
+                                let
+                                    newMedals =
+                                        champion.medals
+                                            |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | medalType = medalType })))
+
+                                    newChampion =
+                                        { champion | medals = newMedals }
+                                in
+                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+
+                            Nothing ->
+                                ( model, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

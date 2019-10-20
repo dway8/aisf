@@ -94,7 +94,7 @@ editNewRecord : Year -> Record -> Element Msg
 editNewRecord currentYear newRecord =
     column [ UI.largeSpacing ]
         [ row [ UI.largeSpacing ]
-            [ Common.yearSelector False currentYear SelectedAYear
+            [ Common.yearSelector False currentYear SelectedAYear Nothing
             , specialtySelector
             , UI.textInput []
                 { onChange = UpdatedNewRecordPlace

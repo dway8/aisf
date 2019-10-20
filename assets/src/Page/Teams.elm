@@ -32,7 +32,7 @@ view model =
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
-            , Common.yearSelector True model.currentYear SelectedAYear
+            , Common.yearSelector True model.currentYear SelectedAYear Nothing
             ]
         , case model.champions of
             Success champions ->

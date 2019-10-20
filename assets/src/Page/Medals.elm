@@ -34,9 +34,9 @@ view model =
             [ Common.viewSearchQuery model.searchQuery
             , Common.sportSelector True model.sport
             , model.sport
-                |> Maybe.map (\sport -> Common.specialtySelector True (Just sport) SelectedASpecialty)
+                |> Maybe.map (\sport -> Common.specialtySelector True (Just sport) SelectedASpecialty Nothing)
                 |> Maybe.withDefault none
-            , Common.yearSelector True model.currentYear SelectedAYear
+            , Common.yearSelector True model.currentYear SelectedAYear Nothing
             ]
         , case model.champions of
             Success champions ->
@@ -140,18 +140,7 @@ tableColumns =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
         , viewData =
-            \medal ->
-                Common.centeredCell []
-                    (Html.img
-                        [ HA.style "max-width" "25px"
-                        , HA.style "max-height" "25px"
-                        , HA.style "object-fit" "contain"
-                        , HA.style "vertical-align" "middle"
-                        , HA.src <| Model.resourcesEndpoint ++ "/images/" ++ Model.getMedalIcon medal.competition medal.medalType
-                        , HA.title <| Model.medalTypeToDisplay medal.medalType
-                        ]
-                        []
-                    )
+            \medal -> Common.centeredCell [] (Common.medalIconHtml medal)
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn

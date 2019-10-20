@@ -77,6 +77,7 @@ defmodule Aisf.Medals.Medals do
 
   """
   def delete_medal(%Medal{} = medal) do
+    Logger.info("Deleting medal #{medal.id}")
     Repo.delete(medal)
   end
 
