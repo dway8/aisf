@@ -11,7 +11,7 @@ import Element.Events exposing (onClick)
 import Element.Font as Font
 import Html
 import Html.Attributes as HA
-import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Picture, Sport)
+import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Picture, ProExperience, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
@@ -130,9 +130,21 @@ viewProfessionalCareer champion =
               else
                 column [ spacing 7, width fill ]
                     (champion.proExperiences
-                        |> List.map Common.viewProExperience
+                        |> List.map viewProExperience
                     )
             ]
+        ]
+
+
+viewProExperience : ProExperience -> Element Msg
+viewProExperience exp =
+    column [ UI.smallSpacing, width fill, Background.color Color.lightestGrey, UI.largePadding ]
+        [ Common.viewInfoRow "Secteurs" (exp.sectors |> String.join ", " |> text)
+        , Common.viewInfoRow "Titre" (exp.title |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Entreprise" (exp.companyName |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Description" (exp.description |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Site internet" (exp.website |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Contact" (exp.contact |> Maybe.withDefault "-" |> text)
         ]
 
 

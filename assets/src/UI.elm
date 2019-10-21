@@ -276,3 +276,11 @@ spinner =
     el [ centerX, Font.color UI.Color.grey ] <|
         html <|
             Html.i [ HA.class "zmdi zmdi-spinner zmdi-hc-lg zmdi-hc-spin" ] []
+
+
+smallButton : Maybe msg -> Element msg -> Button.ButtonTemplate msg
+smallButton maybeMsg elem =
+    Button.makeButton maybeMsg elem
+        |> Button.withAttrs [ Font.regular ]
+        |> Button.withFontSize smallFont
+        |> Button.withPadding (padding 5)

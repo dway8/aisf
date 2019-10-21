@@ -5,7 +5,6 @@ import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Dropdown
-import Editable exposing (Editable)
 import File exposing (File)
 import Graphql.Http
 import Menu
@@ -172,12 +171,12 @@ type alias ChampionForm =
     , phoneNumber : Maybe String
     , website : Maybe String
     , sport : Maybe Sport
-    , proExperiences : Dict Int (Editable ProExperience)
-    , yearsInFrenchTeam : Dict Int (Editable Year)
-    , medals : Dict Int (Editable Medal)
+    , proExperiences : Dict Int ProExperience
+    , yearsInFrenchTeam : Dict Int Year
+    , medals : Dict Int Medal
     , isMember : Bool
     , intro : Maybe String
-    , highlights : Dict Int (Editable String)
+    , highlights : Dict Int String
     , profilePicture : Maybe Attachment
     , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
@@ -187,7 +186,7 @@ type alias ChampionForm =
     , decoration : Maybe String
     , background : Maybe String
     , volunteering : Maybe String
-    , pictures : List Picture
+    , pictures : Dict Int Picture
     }
 
 
@@ -881,7 +880,6 @@ type Msg
     | PressedDeleteProExperienceButton Int
     | UpdatedProExperienceField Int FormField String
     | PressedAddYearInFrenchTeamButton
-    | SelectedAYearInFrenchTeam Int String
     | PressedDeleteYearInFrenchTeamButton Int
     | PressedAddMedalButton
     | PressedDeleteMedalButton Int
@@ -893,12 +891,12 @@ type Msg
     | TableMsg Table.State
     | ChampionSelected Id
     | SelectedAYear String
-    | PressedEditProExperienceButton Int
-    | PressedEditMedalButton Int
-    | BeganFileSelection Id
+    | BeganProfilePictureSelection
     | CancelledFileSelection
-    | FileSelectionDone Id File
-    | GotFileUrl Id String
+    | ProfilePictureSelectionDone File
+    | PictureSelectionDone File
+    | GotProfilePictureFileUrl String
+    | GotPictureFileUrl Int String
     | UpdatedSearchQuery String
     | GotSectors (RemoteData (Graphql.Http.Error Sectors) Sectors)
     | SelectedASector String
@@ -911,11 +909,8 @@ type Msg
     | RemovedItemFromDropdown String
     | CreatedASectorFromQuery
     | PressedAddHighlightButton
-    | PressedEditHighlightButton Int
     | PressedDeleteHighlightButton Int
-    | CancelledHighlightEdition Int
     | UpdatedHighlight Int String
-    | PressedConfirmHighlightButton Int
     | GoBack
     | PressedEditChampionButton Id
     | PressedAddPictureButton
@@ -938,6 +933,7 @@ type Msg
     | UpdatedRecordWinnerLastName Int String
     | UpdatedRecordWinnerFirstName Int String
     | SelectedAMedalType Int String
+    | PressedDeletePictureButton Int
 
 
 type FormField
@@ -1157,10 +1153,10 @@ getIsMemberIcon isMember =
         "logo_aisf_nb.png"
 
 
-initPicture : Picture
-initPicture =
+initPicture : String -> Picture
+initPicture filename =
     { id = Id "new"
-    , attachment = Attachment "" Nothing
+    , attachment = Attachment filename Nothing
     }
 
 

@@ -75,8 +75,13 @@ defmodule Aisf.Pictures.Pictures do
 
 
   """
-  def delete_picture(%Picture{} = picture) do
+  def delete_picture(champion, %Picture{} = picture) do
+    Logger.info("Removing picture #{picture.id} of champion #{champion.id}")
+
     Repo.delete(picture)
+
+    upload_dir = "#{@upload_dir}/#{champion.id}"
+    UploadUtils.remove_file_at_dest(picture.filename, upload_dir)
   end
 
   @doc """

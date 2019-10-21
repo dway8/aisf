@@ -5,7 +5,6 @@ import Api
 import Common
 import Dict exposing (Dict)
 import Dropdown
-import Editable exposing (Editable(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -73,15 +72,15 @@ initChampionForm =
     , decoration = Nothing
     , background = Nothing
     , volunteering = Nothing
-    , pictures = []
+    , pictures = Dict.empty
     }
 
 
 championToForm : Champion -> ChampionForm
 championToForm champion =
     let
-        toEditableDict =
-            List.map Editable.ReadOnly >> List.indexedMap Tuple.pair >> Dict.fromList
+        toDict =
+            List.indexedMap Tuple.pair >> Dict.fromList
     in
     { id = champion.id
     , lastName = champion.lastName
@@ -92,12 +91,12 @@ championToForm champion =
     , phoneNumber = champion.phoneNumber
     , website = champion.website
     , sport = Just champion.sport
-    , proExperiences = champion.proExperiences |> toEditableDict
-    , yearsInFrenchTeam = champion.yearsInFrenchTeam |> toEditableDict
-    , medals = champion.medals |> toEditableDict
+    , proExperiences = champion.proExperiences |> toDict
+    , yearsInFrenchTeam = champion.yearsInFrenchTeam |> toDict
+    , medals = champion.medals |> toDict
     , isMember = champion.isMember
     , intro = champion.intro
-    , highlights = champion.highlights |> toEditableDict
+    , highlights = champion.highlights |> toDict
     , profilePicture = champion.profilePicture
     , frenchTeamParticipation = champion.frenchTeamParticipation
     , olympicGamesParticipation = champion.olympicGamesParticipation
@@ -107,7 +106,7 @@ championToForm champion =
     , decoration = champion.decoration
     , background = champion.background
     , volunteering = champion.volunteering
-    , pictures = champion.pictures
+    , pictures = champion.pictures |> toDict
     }
 
 
@@ -128,14 +127,14 @@ view rdSectors currentYear model =
             ( Success champion, Success sectors ) ->
                 column [ UI.largeSpacing, width fill ]
                     [ viewButtons
-                    , row [ UI.largeSpacing ]
+                    , row [ UI.largeSpacing, width <| px 600 ]
                         [ viewProfilePicture champion.profilePicture
                         , column [ UI.defaultSpacing, width fill ]
                             [ viewChampionTextInput FirstName champion
                             , viewChampionTextInput LastName champion
                             ]
                         ]
-                    , Common.sportSelector False champion.sport
+                    , row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False champion.sport ]
                     , let
                         ( label, value ) =
                             getChampionFormFieldData Intro champion
@@ -185,15 +184,12 @@ editProfessionalCareer sectors sectorDropdown champion =
     Common.viewBlock "Carrière professionnelle"
         [ viewChampionTextInput Background champion
         , viewChampionTextInput Volunteering champion
-        , column [ UI.defaultSpacing, width fill ]
+        , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, right = 0, left = 0 } ]
             [ row [ UI.defaultSpacing ]
                 [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
-                , (el [ htmlAttribute <| HA.title "Ajouter une expérience", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
-                    |> Button.makeButton (Just PressedAddProExperienceButton)
-                    |> Button.withPadding (padding 0)
-                    |> Button.viewButton
                 ]
             , editProExperiences sectors sectorDropdown champion
+            , viewAddButton "Ajouter une expérience" PressedAddProExperienceButton
             ]
         ]
 
@@ -204,15 +200,19 @@ editProExperiences sectors sectorDropdown { proExperiences } =
         (proExperiences
             |> Dict.map
                 (\id exp ->
-                    case exp of
-                        ReadOnly e ->
-                            column [ spacing 5 ]
-                                [ Input.button [ Font.bold ] { onPress = Just <| PressedEditProExperienceButton id, label = text "Éditer" }
-                                , Common.viewProExperience e
-                                ]
-
-                        Editable oldE newE ->
-                            viewProExperienceForm sectors sectorDropdown id newE
+                    column [ UI.defaultSpacing, width fill, Background.color Color.lightestGrey, UI.largePadding ]
+                        [ viewSectorDropdown sectors sectorDropdown exp
+                        , row [ UI.defaultSpacing, width fill ]
+                            [ viewProExperienceTextInput id Title exp
+                            , viewProExperienceTextInput id CompanyName exp
+                            ]
+                        , viewProExperienceTextInput id Description exp
+                        , row [ UI.defaultSpacing, width fill ]
+                            [ viewProExperienceTextInput id Website exp
+                            , viewProExperienceTextInput id Contact exp
+                            ]
+                        , el [ alignRight ] <| viewDeleteButton (PressedDeleteProExperienceButton id)
+                        ]
                 )
             |> Dict.values
         )
@@ -226,70 +226,52 @@ editPictures champion =
     in
     Common.viewBlock "Photos"
         [ row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
-            (champion.pictures |> List.map (editPicture id))
-        , text "Ajouter une photo"
-            |> Button.makeButton (Just PressedAddPictureButton)
-            |> Button.withBackgroundColor Color.grey
-            |> Button.viewButton
+            (champion.pictures
+                |> Dict.map (editPicture id)
+                |> Dict.values
+            )
+        , viewAddButton "Ajouter une photo" PressedAddPictureButton
         ]
 
 
-editPicture : String -> Picture -> Element Msg
-editPicture championId { id, attachment } =
+editPicture : String -> Int -> Picture -> Element Msg
+editPicture championId id { attachment } =
     let
         { filename, base64 } =
             attachment
     in
-    if filename == "" then
-        el [] <|
-            column [ spacing 10, padding 10, centerX ]
-                [ text "Uploader une photo"
-                    |> Button.makeButton (Just <| BeganFileSelection id)
-                    |> Button.withBackgroundColor Color.green
-                    |> Button.viewButton
-                ]
-
-    else
-        column [ UI.defaultSpacing ]
-            [ let
-                src =
-                    base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ filename)
-              in
-              image [ width <| px 200 ] { src = src, description = "Photo de profil" }
-            , el [ centerX ]
-                (text "Changer la photo"
-                    |> Button.makeButton (Just <| BeganFileSelection id)
-                    |> Button.withBackgroundColor Color.green
-                    |> Button.viewButton
-                )
-            ]
+    column [ UI.defaultSpacing ]
+        [ let
+            src =
+                base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ filename)
+          in
+          image [ width <| px 200 ] { src = src, description = "Photo de profil" }
+        , el [ centerX ] (viewDeleteButton (PressedDeletePictureButton id))
+        ]
 
 
 editMedals : Year -> Table.State -> ChampionForm -> Element Msg
 editMedals currentYear tableState { medals, sport } =
     Common.viewBlock "Palmarès"
         [ column [ width fill ]
-            [ (el [ htmlAttribute <| HA.title "Ajouter une médaille", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
-                |> Button.makeButton (Just PressedAddMedalButton)
-                |> Button.withPadding (padding 0)
-                |> Button.viewButton
-            , medals
+            [ medals
                 |> Dict.toList
                 |> Table.view (tableConfig sport currentYear) tableState
                 |> html
                 |> el [ htmlAttribute <| HA.id "edit-champion-medals-list", width fill ]
+            , viewAddButton "Ajouter une médaille" PressedAddMedalButton
             ]
         ]
 
 
-tableConfig : Maybe Sport -> Year -> Table.Config ( Int, Editable Medal ) Msg
+tableConfig : Maybe Sport -> Year -> Table.Config ( Int, Medal ) Msg
 tableConfig sport currentYear =
     let
         tableCustomizations =
             Common.tableCustomizations attrsForHeaders
     in
     Table.customConfig
-        { toId = Tuple.second >> Editable.value >> Model.getId
+        { toId = Tuple.second >> Model.getId
         , toMsg = TableMsg
         , columns = tableColumns sport currentYear
         , customizations = { tableCustomizations | rowAttrs = always [] }
@@ -304,91 +286,47 @@ attrsForHeaders =
         ]
 
 
-tableColumns : Maybe Sport -> Year -> List (Table.Column ( Int, Editable Medal ) Msg)
+tableColumns : Maybe Sport -> Year -> List (Table.Column ( Int, Medal ) Msg)
 tableColumns sport currentYear =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
-        , viewData =
-            \( id, editableMedal ) ->
-                let
-                    medal =
-                        Editable.value editableMedal
-                in
-                Common.centeredCell [] (Common.medalIconHtml medal)
+        , viewData = \( id, medal ) -> Common.centeredCell [] (Common.medalIconHtml medal)
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn
         { name = "TYPE"
-        , viewData =
-            \( id, editableMedal ) ->
-                Common.defaultCell []
-                    (case editableMedal of
-                        ReadOnly medal ->
-                            Html.text <| Model.medalTypeToDisplay medal.medalType
-
-                        Editable _ newM ->
-                            UI.defaultLayoutForTable <| medalTypeSelector id newM.medalType
-                    )
+        , viewData = \( id, medal ) -> Common.defaultCell [] (UI.defaultLayoutForTable <| el [ centerY ] <| medalTypeSelector id medal.medalType)
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn
         { name = "COMPÉTITION"
         , viewData =
-            \( id, editableMedal ) ->
+            \( id, medal ) ->
                 Common.defaultCell []
-                    (case editableMedal of
-                        ReadOnly medal ->
-                            Html.text <| Model.competitionToDisplay medal.competition
-
-                        Editable _ newM ->
-                            UI.defaultLayoutForTable <| Common.competitionSelector False (SelectedAMedalCompetition id) (Just newM.competition)
-                    )
+                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.competitionSelector False (SelectedAMedalCompetition id) (Just medal.competition))
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn
         { name = "DISCIPLINE"
         , viewData =
-            \( id, editableMedal ) ->
+            \( id, medal ) ->
                 Common.defaultCell []
-                    (case editableMedal of
-                        ReadOnly medal ->
-                            Html.text <| Model.specialtyToDisplay medal.specialty
-
-                        Editable _ newM ->
-                            UI.defaultLayoutForTable <| Common.specialtySelector False sport (SelectedAMedalSpecialty id) (Just newM.specialty)
-                    )
+                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.specialtySelector False sport (SelectedAMedalSpecialty id) (Just medal.specialty))
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn
         { name = "ANNÉE"
         , viewData =
-            \( id, editableMedal ) ->
+            \( id, medal ) ->
                 Common.centeredCell []
-                    (case editableMedal of
-                        ReadOnly medal ->
-                            Html.text <| String.fromInt <| Model.getYear medal.year
-
-                        Editable _ newM ->
-                            UI.defaultLayoutForTable <| Common.yearSelector False currentYear (SelectedAMedalYear id) (Just newM.year)
-                    )
-        , sorter = Table.decreasingOrIncreasingBy (\( _, editableMedal ) -> editableMedal |> Editable.value |> .year |> Model.getYear)
+                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.yearSelector False currentYear (SelectedAMedalYear id) (Just medal.year))
+        , sorter = Table.decreasingOrIncreasingBy (\( _, medal ) -> medal.year |> Model.getYear)
         }
     , Table.veryCustomColumn
         { name = ""
         , viewData =
             \( id, _ ) ->
-                Common.centeredCell
-                    [ HA.style "color" <| Color.colorToString Color.green ]
-                    (Html.i [ HA.class <| "zmdi zmdi-edit", HA.style "cursor" "pointer", HA.title "Modifier", HE.onClick <| PressedEditMedalButton id ] [])
-        , sorter = Table.unsortable
-        }
-    , Table.veryCustomColumn
-        { name = ""
-        , viewData =
-            \( id, _ ) ->
-                Common.centeredCell
-                    [ HA.style "color" <| Color.colorToString Color.red ]
-                    (Html.i [ HA.class <| "zmdi zmdi-close", HA.style "cursor" "pointer", HA.title "Supprimer", HE.onClick <| PressedDeleteMedalButton id ] [])
+                Common.centeredCell [] (UI.defaultLayoutForTable <| el [ centerY ] <| viewDeleteButton (PressedDeleteMedalButton id))
         , sorter = Table.unsortable
         }
     ]
@@ -402,50 +340,14 @@ editYearsInFrenchTeam currentYear champion =
                 (champion.yearsInFrenchTeam
                     |> Dict.map
                         (\id year ->
-                            row [ UI.defaultSpacing ]
-                                [ case year of
-                                    ReadOnly y ->
-                                        text <| String.fromInt (Model.getYear y)
-
-                                    Editable _ newY ->
-                                        Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id) (Just newY)
-                                , (el [ htmlAttribute <| HA.title "Supprimer", Font.color Color.red, UI.largeFont ] <| UI.viewIcon "close")
-                                    |> Button.makeButton (Just <| PressedDeleteYearInFrenchTeamButton id)
-                                    |> Button.withPadding (padding 0)
-                                    |> Button.viewButton
+                            row [ UI.largeSpacing ]
+                                [ text <| String.fromInt (Model.getYear year)
+                                , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
                                 ]
                         )
                     |> Dict.values
                 )
-            , (el [ htmlAttribute <| HA.title "Ajouter une année", Font.color Color.green, UI.largestFont ] <| UI.viewIcon "plus-circle")
-                |> Button.makeButton (Just PressedAddYearInFrenchTeamButton)
-                |> Button.withPadding (padding 0)
-                |> Button.viewButton
-            ]
-        ]
-
-
-viewProExperienceForm : Sectors -> Dropdown.Model -> Int -> ProExperience -> Element Msg
-viewProExperienceForm sectors sectorDropdown id newE =
-    column [ width fill ]
-        [ row [ UI.defaultSpacing ]
-            [ el [] <| text "Expérience professionnelle"
-            , Input.button []
-                { onPress = Just <| PressedDeleteProExperienceButton id
-                , label = el [ htmlAttribute <| HA.title "Supprimer", Font.color Color.red, UI.largeFont ] <| UI.viewIcon "close"
-                }
-            ]
-        , column [ UI.defaultSpacing, width fill ]
-            [ viewSectorDropdown sectors sectorDropdown newE
-            , row [ UI.defaultSpacing, width fill ]
-                [ viewProExperienceTextInput id Title newE
-                , viewProExperienceTextInput id CompanyName newE
-                ]
-            , viewProExperienceTextInput id Description newE
-            , row [ UI.defaultSpacing, width fill ]
-                [ viewProExperienceTextInput id Website newE
-                , viewProExperienceTextInput id Contact newE
-                ]
+            , viewAddButton "Ajouter une année" PressedAddYearInFrenchTeamButton
             ]
         ]
 
@@ -496,7 +398,7 @@ viewChampionTextInput field champion =
         ( label, value ) =
             getChampionFormFieldData field champion
     in
-    UI.textInput []
+    UI.textInput [ width fill ]
         { onChange = UpdatedChampionField field
         , text = value
         , placeholder = Nothing
@@ -606,7 +508,7 @@ viewProfilePicture profilePicture =
                 el [ width fill ] <|
                     column [ spacing 10, padding 10, centerX ]
                         [ text "Uploader une photo"
-                            |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
+                            |> Button.makeButton (Just BeganProfilePictureSelection)
                             |> Button.withBackgroundColor Color.green
                             |> Button.viewButton
                         ]
@@ -620,7 +522,7 @@ viewProfilePicture profilePicture =
                       image [ width <| px 200 ] { src = src, description = "Photo de profil" }
                     , el [ centerX ]
                         (text "Changer la photo"
-                            |> Button.makeButton (Just <| BeganFileSelection (Id "0"))
+                            |> UI.smallButton (Just BeganProfilePictureSelection)
                             |> Button.withBackgroundColor Color.green
                             |> Button.viewButton
                         )
@@ -629,60 +531,34 @@ viewProfilePicture profilePicture =
 
 editHighlights : ChampionForm -> Element Msg
 editHighlights { highlights } =
-    column [ UI.largeSpacing ]
+    column [ UI.largeSpacing, width fill ]
         [ el [ Font.bold ] <| text "Faits marquants"
-        , column [ UI.defaultSpacing ]
+        , column [ UI.defaultSpacing, width fill ]
             (highlights
                 |> Dict.map
                     (\id highlight ->
-                        row [ UI.defaultSpacing ]
-                            (case highlight of
-                                ReadOnly h ->
-                                    [ text h
-                                    , text "Éditer"
-                                        |> Button.makeButton
-                                            (Just <| PressedEditHighlightButton id)
-                                        |> Button.withBackgroundColor Color.grey
-                                        |> Button.viewButton
-                                    , text "Supprimer"
-                                        |> Button.makeButton (Just <| PressedDeleteHighlightButton id)
-                                        |> Button.withBackgroundColor Color.red
-                                        |> Button.viewButton
-                                    ]
-
-                                Editable _ newH ->
-                                    [ UI.textInput []
-                                        { onChange = UpdatedHighlight id
-                                        , text = newH
-                                        , placeholder = Nothing
-                                        , label = Nothing
-                                        }
-                                    , text "OK"
-                                        |> Button.makeButton (Just <| PressedConfirmHighlightButton id)
-                                        |> Button.withBackgroundColor Color.green
-                                        |> Button.viewButton
-                                    , text "Annuler"
-                                        |> Button.makeButton (Just <| CancelledHighlightEdition id)
-                                        |> Button.withBackgroundColor Color.grey
-                                        |> Button.viewButton
-                                    ]
-                            )
+                        row [ UI.defaultSpacing, width fill ]
+                            [ UI.textInput [ width fill ]
+                                { onChange = UpdatedHighlight id
+                                , text = highlight
+                                , placeholder = Nothing
+                                , label = Nothing
+                                }
+                            , viewDeleteButton (PressedDeleteHighlightButton id)
+                            ]
                     )
                 |> Dict.values
             )
-        , text "Ajouter un fait marquant"
-            |> Button.makeButton (Just PressedAddHighlightButton)
-            |> Button.withBackgroundColor Color.grey
-            |> Button.viewButton
+        , viewAddButton "Ajouter un fait marquant" PressedAddHighlightButton
         ]
 
 
 viewButtons : Element Msg
 viewButtons =
-    row [ width fill, spaceEvenly ]
+    row [ UI.defaultSpacing, alignRight ]
         [ text "Annuler"
             |> Button.makeButton (Just GoBack)
-            |> Button.withBackgroundColor Color.lighterGrey
+            |> Button.withBackgroundColor Color.lightGrey
             |> Button.viewButton
         , text "Enregistrer les modifications"
             |> Button.makeButton (Just PressedSaveChampionButton)
@@ -711,3 +587,19 @@ medalTypeSelector index currentMedalType =
                                 [ Html.text <| Model.medalTypeToDisplay medalType ]
                         )
                 )
+
+
+viewAddButton : String -> Msg -> Element Msg
+viewAddButton label msg =
+    row [ Font.color Color.green, UI.defaultSpacing, mouseOver [ Font.color <| Color.makeDarker Color.green ] ] [ el [ UI.largestFont ] <| UI.viewIcon "plus-circle", text label ]
+        |> UI.smallButton (Just msg)
+        |> Button.withPadding (padding 0)
+        |> Button.viewButton
+
+
+viewDeleteButton : Msg -> Element Msg
+viewDeleteButton msg =
+    text "Supprimer"
+        |> UI.smallButton (Just msg)
+        |> Button.withBackgroundColor Color.red
+        |> Button.viewButton

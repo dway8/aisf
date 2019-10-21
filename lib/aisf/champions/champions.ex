@@ -126,7 +126,7 @@ defmodule Aisf.Champions do
   end
 
   defp update_pro_experiences(champion, attrs) do
-    received_pro_experience_ids = attrs |> Enum.map(&(&1.id |> String.to_integer()))
+    received_pro_experience_ids = get_received_ids(attrs)
 
     # delete removed pro_experiences
     champion.pro_experiences
@@ -150,8 +150,7 @@ defmodule Aisf.Champions do
   end
 
   defp update_medals(champion, attrs) do
-    received_medal_ids = attrs |> Enum.map(&(&1.id |> String.to_integer()))
-
+    received_medal_ids = get_received_ids(attrs)
     # delete removed medals
     champion.medals
     |> Enum.map(fn m ->
@@ -173,7 +172,31 @@ defmodule Aisf.Champions do
     end)
   end
 
+  defp get_received_ids(attrs) do
+    attrs
+    |> Enum.reduce([], fn item, acc ->
+      case Integer.parse(item.id) do
+        {intId, _} ->
+          [intId] ++ acc
+
+        :error ->
+          acc
+      end
+    end)
+  end
+
   defp update_pictures(champion, attrs) do
+    received_picture_ids = get_received_ids(attrs)
+
+    # delete removed pictures
+    champion.pictures
+    |> Enum.map(fn p ->
+      if !Enum.member?(received_picture_ids, p.id) do
+        Pictures.delete_picture(champion, p)
+      end
+    end)
+
+    # add or update other medals
     attrs
     |> Enum.map(fn p ->
       if p.id == "new" do

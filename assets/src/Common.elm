@@ -4,6 +4,7 @@ import Aisf.Scalar exposing (Id(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
@@ -48,28 +49,6 @@ viewSportOption currentSport sport =
         , HA.selected <| currentSport == Model.sportFromString sport
         ]
         [ Html.text sport ]
-
-
-viewProExperience : ProExperience -> Element Msg
-viewProExperience exp =
-    column [ UI.smallSpacing, width fill ]
-        [ viewInfoRow "Secteurs" (exp.sectors |> String.join ", " |> text)
-        , viewInfoRow "Titre" (exp.title |> Maybe.withDefault "-" |> text)
-        , viewInfoRow "Entreprise" (exp.companyName |> Maybe.withDefault "-" |> text)
-        , viewInfoRow "Description" (exp.description |> Maybe.withDefault "-" |> text)
-        , viewInfoRow "Site internet" (exp.website |> Maybe.withDefault "-" |> text)
-        , viewInfoRow "Contact" (exp.contact |> Maybe.withDefault "-" |> text)
-        ]
-
-
-viewMedal : Medal -> Element Msg
-viewMedal { competition, year, specialty, medalType } =
-    column [ spacing 4 ]
-        [ UI.viewField "Compétition" (competition |> Model.competitionToDisplay)
-        , UI.viewField "Année" (year |> Model.getYear |> String.fromInt)
-        , UI.viewField "Spécialité" (specialty |> Model.specialtyToDisplay)
-        , UI.viewField "Médaille" (medalType |> Model.medalTypeToDisplay)
-        ]
 
 
 specialtySelector : Bool -> Maybe Sport -> (String -> Msg) -> Maybe Specialty -> Element Msg

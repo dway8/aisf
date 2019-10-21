@@ -1,4 +1,4 @@
-module UI.Button exposing (makeButton, viewButton, withAlpha, withAttrs, withBackgroundColor, withBorderColor, withBorderWidth, withCursor, withDisabled, withFontColor, withPadding, withRounded)
+module UI.Button exposing (ButtonTemplate, makeButton, viewButton, withAlpha, withAttrs, withBackgroundColor, withBorderColor, withBorderWidth, withCursor, withDisabled, withFontColor, withFontSize, withPadding, withRounded)
 
 import Element exposing (..)
 import Element.Background as Background
@@ -21,6 +21,7 @@ type alias ButtonInternal msg =
     , cursor : Attribute msg
     , disabled : Bool
     , fontColor : Color
+    , fontSize : Attribute msg
     , backgroundColor : Color
     , borderColor : Color
     , borderWidth : Attribute msg
@@ -39,6 +40,7 @@ makeButton maybeMsg elem =
         , cursor = pointer
         , disabled = False
         , fontColor = UI.Color.white
+        , fontSize = Font.size 16
         , backgroundColor = rgba 0 0 0 0
         , borderColor = rgba 0 0 0 0
         , borderWidth = Border.width 1
@@ -77,6 +79,11 @@ withDisabled disabled template =
 withFontColor : Color -> ButtonTemplate msg -> ButtonTemplate msg
 withFontColor color template =
     template |> map (\bi -> { bi | fontColor = color })
+
+
+withFontSize : Attribute msg -> ButtonTemplate msg -> ButtonTemplate msg
+withFontSize fontSize template =
+    template |> map (\bi -> { bi | fontSize = fontSize })
 
 
 withBackgroundColor : Color -> ButtonTemplate msg -> ButtonTemplate msg
@@ -120,6 +127,7 @@ viewButton buttonTemplate =
                  , alpha button.alpha
                  , Font.bold
                  , mouseOver [ Background.color <| UI.Color.makeDarker button.backgroundColor ]
+                 , button.fontSize
                  ]
                     ++ button.attrs
                 )

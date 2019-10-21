@@ -165,6 +165,7 @@ viewDropdownInput config dropdownModel itemsList =
                 , Border.rounded 8
                 , width fill
                 , Border.color Color.lightGrey
+                , Background.color Color.white
                 , UI.smallSpacing
                 , htmlAttribute <| HA.class "focus-within"
                 , UI.mediumFont

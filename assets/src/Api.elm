@@ -14,7 +14,6 @@ import Aisf.Object.Winner as Winner
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Dict
-import Editable
 import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA

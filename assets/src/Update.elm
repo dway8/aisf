@@ -6,7 +6,6 @@ import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Dropdown
-import Editable exposing (Editable(..))
 import File exposing (File)
 import File.Select as Select
 import Graphql.Http
@@ -103,9 +102,6 @@ update msg model =
         PressedAddYearInFrenchTeamButton ->
             addYearInFrenchTeam model
 
-        SelectedAYearInFrenchTeam id str ->
-            updateYearInFrenchTeam id str model
-
         PressedDeleteYearInFrenchTeamButton id ->
             deleteYearInFrenchTeam id model
 
@@ -133,23 +129,23 @@ update msg model =
         SelectedAYear str ->
             updateCurrentYear str model
 
-        PressedEditProExperienceButton id ->
-            editProExperience id model
-
-        PressedEditMedalButton id ->
-            editMedal id model
-
-        BeganFileSelection id ->
-            beginFileSelection id model
+        BeganProfilePictureSelection ->
+            beginFileSelection ProfilePictureSelectionDone model
 
         CancelledFileSelection ->
             cancelFileSelection model
 
-        FileSelectionDone id file ->
-            handleFileSelectionDone id file model
+        ProfilePictureSelectionDone file ->
+            handleFileSelectionDone True file model
 
-        GotFileUrl id base64file ->
-            handleFileUrlReceived id base64file model
+        PictureSelectionDone file ->
+            handleFileSelectionDone False file model
+
+        GotProfilePictureFileUrl base64file ->
+            handleProfilePictureFileUrlReceived base64file model
+
+        GotPictureFileUrl id base64file ->
+            handlePictureFileUrlReceived id base64file model
 
         UpdatedSearchQuery query ->
             updateSearchQuery query model
@@ -187,29 +183,23 @@ update msg model =
         PressedAddHighlightButton ->
             addHighlight model
 
-        PressedEditHighlightButton id ->
-            editHighlight id model
-
         PressedDeleteHighlightButton id ->
             deleteHighlight id model
 
-        CancelledHighlightEdition id ->
-            cancelHighlightEdition id model
-
         UpdatedHighlight id str ->
             updateHighlight id str model
-
-        PressedConfirmHighlightButton id ->
-            confirmHighlight id model
 
         PressedEditChampionButton id ->
             editChampion id model
 
         PressedAddPictureButton ->
-            addPicture model
+            beginFileSelection PictureSelectionDone model
 
-        ClickedOnPicture idx ->
-            displayLargePicture idx model
+        PressedDeletePictureButton id ->
+            deletePicture id model
+
+        ClickedOnPicture id ->
+            displayLargePicture id model
 
         ClickedOnPictureDialogBackground ->
             closePictureDialog model
@@ -455,7 +445,7 @@ addProExperience model =
 
                             newProExperiences =
                                 champion.proExperiences
-                                    |> Dict.insert newKey (ReadOnly Model.initProExperience |> Editable.edit)
+                                    |> Dict.insert newKey Model.initProExperience
 
                             newChampion =
                                 { champion | proExperiences = newProExperiences }
@@ -499,27 +489,25 @@ updateProExperience id field val model =
                                 champion.proExperiences
                                     |> Dict.update id
                                         (Maybe.map
-                                            (Editable.map
-                                                (\proExperience ->
-                                                    case field of
-                                                        Title ->
-                                                            { proExperience | title = Just val }
+                                            (\proExperience ->
+                                                case field of
+                                                    Title ->
+                                                        { proExperience | title = Just val }
 
-                                                        CompanyName ->
-                                                            { proExperience | companyName = Just val }
+                                                    CompanyName ->
+                                                        { proExperience | companyName = Just val }
 
-                                                        Description ->
-                                                            { proExperience | description = Just val }
+                                                    Description ->
+                                                        { proExperience | description = Just val }
 
-                                                        Website ->
-                                                            { proExperience | website = Just val }
+                                                    Website ->
+                                                        { proExperience | website = Just val }
 
-                                                        Contact ->
-                                                            { proExperience | contact = Just val }
+                                                    Contact ->
+                                                        { proExperience | contact = Just val }
 
-                                                        _ ->
-                                                            proExperience
-                                                )
+                                                    _ ->
+                                                        proExperience
                                             )
                                         )
 
@@ -547,42 +535,12 @@ addYearInFrenchTeam model =
 
                             newYears =
                                 champion.yearsInFrenchTeam
-                                    |> Dict.map (\_ v -> Editable.save v)
-                                    |> Dict.insert newKey (ReadOnly model.currentYear |> Editable.edit)
+                                    |> Dict.insert newKey model.currentYear
 
                             newChampion =
                                 { champion | yearsInFrenchTeam = newYears }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-updateYearInFrenchTeam : Int -> String -> Model -> ( Model, Cmd Msg )
-updateYearInFrenchTeam id str model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        case String.toInt str of
-                            Just year ->
-                                let
-                                    newYears =
-                                        champion.yearsInFrenchTeam
-                                            |> Dict.update id (Maybe.map (Editable.map (\y -> Year year)))
-                                            |> Dict.map (\_ v -> Editable.save v)
-
-                                    newChampion =
-                                        { champion | yearsInFrenchTeam = newYears }
-                                in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-
-                            Nothing ->
-                                ( model, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -628,7 +586,7 @@ addMedal model =
                                 case champion.sport of
                                     Just sport ->
                                         champion.medals
-                                            |> Dict.insert newKey (ReadOnly (Model.initMedal sport model.currentYear) |> Editable.edit)
+                                            |> Dict.insert newKey (Model.initMedal sport model.currentYear)
 
                                     Nothing ->
                                         champion.medals
@@ -678,7 +636,7 @@ updateMedalCompetition id str model =
                                 let
                                     newMedals =
                                         champion.medals
-                                            |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | competition = competition })))
+                                            |> Dict.update id (Maybe.map (\medal -> { medal | competition = competition }))
 
                                     newChampion =
                                         { champion | medals = newMedals }
@@ -706,7 +664,7 @@ updateMedalYear id str model =
                                 let
                                     newMedals =
                                         champion.medals
-                                            |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | year = Year year })))
+                                            |> Dict.update id (Maybe.map (\medal -> { medal | year = Year year }))
 
                                     newChampion =
                                         { champion | medals = newMedals }
@@ -734,7 +692,7 @@ updateMedalSpecialty id str model =
                                 let
                                     newMedals =
                                         champion.medals
-                                            |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | specialty = specialty })))
+                                            |> Dict.update id (Maybe.map (\medal -> { medal | specialty = specialty }))
 
                                     newChampion =
                                         { champion | medals = newMedals }
@@ -777,12 +735,12 @@ validateChampionForm c =
                 , phoneNumber = c.phoneNumber
                 , website = c.website
                 , sport = sport
-                , proExperiences = c.proExperiences |> Dict.values |> List.map Editable.value
-                , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values |> List.map Editable.value
-                , medals = c.medals |> Dict.values |> List.map Editable.value
+                , proExperiences = c.proExperiences |> Dict.values
+                , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values
+                , medals = c.medals |> Dict.values
                 , isMember = c.isMember
                 , intro = c.intro
-                , highlights = c.highlights |> Dict.values |> List.map Editable.value
+                , highlights = c.highlights |> Dict.values
                 , profilePicture = c.profilePicture
                 , frenchTeamParticipation = c.frenchTeamParticipation
                 , olympicGamesParticipation = c.olympicGamesParticipation
@@ -793,7 +751,7 @@ validateChampionForm c =
                 , background = c.background
                 , volunteering = c.volunteering
                 , oldId = Nothing
-                , pictures = c.pictures
+                , pictures = c.pictures |> Dict.values
                 }
 
 
@@ -929,75 +887,9 @@ handleChampionResponse resp model =
             ( model, Cmd.none )
 
 
-editProExperience : Int -> Model -> ( Model, Cmd Msg )
-editProExperience id model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            experienceToEdit =
-                                Dict.get id champion.proExperiences
-
-                            newProExp =
-                                champion.proExperiences
-                                    |> Dict.map (\_ exp -> Editable.cancel exp)
-                                    |> Dict.update id (Maybe.map Editable.edit)
-
-                            newChampion =
-                                { champion | proExperiences = newProExp }
-
-                            newDropdown =
-                                experienceToEdit
-                                    |> Maybe.map Editable.value
-                                    |> Maybe.map (\exp -> Dropdown.setSelected exp.sectors eModel.sectorDropdown)
-                                    |> Maybe.withDefault eModel.sectorDropdown
-                        in
-                        ( { model
-                            | currentPage =
-                                EditChampionPage
-                                    { eModel
-                                        | champion = Success newChampion
-                                        , sectorDropdown = newDropdown
-                                    }
-                          }
-                        , Cmd.none
-                        )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-editMedal : Int -> Model -> ( Model, Cmd Msg )
-editMedal id model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newMedals =
-                                champion.medals
-                                    |> Dict.map (\_ medal -> Editable.save medal)
-                                    |> Dict.update id (Maybe.map Editable.edit)
-
-                            newChampion =
-                                { champion | medals = newMedals }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-beginFileSelection : Id -> Model -> ( Model, Cmd Msg )
-beginFileSelection id model =
-    ( model, Select.file [ "image/*" ] (FileSelectionDone id) )
+beginFileSelection : (File -> Msg) -> Model -> ( Model, Cmd Msg )
+beginFileSelection doneMsg model =
+    ( model, Select.file [ "image/*" ] doneMsg )
 
 
 cancelFileSelection : Model -> ( Model, Cmd Msg )
@@ -1005,24 +897,33 @@ cancelFileSelection model =
     ( model, Cmd.none )
 
 
-handleFileSelectionDone : Id -> File -> Model -> ( Model, Cmd Msg )
-handleFileSelectionDone id file model =
+handleFileSelectionDone : Bool -> File -> Model -> ( Model, Cmd Msg )
+handleFileSelectionDone isProfilePicture file model =
     case model.currentPage of
         EditChampionPage eModel ->
             eModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newChampion =
-                                case id of
-                                    Id "0" ->
-                                        { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
+                            ( newChampion, gotFileUrlMsg ) =
+                                if isProfilePicture then
+                                    ( { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
+                                    , GotProfilePictureFileUrl
+                                    )
 
-                                    _ ->
-                                        updateChampionPicturesWithFile id file champion
+                                else
+                                    let
+                                        newKey =
+                                            getDictNextKey champion.highlights
+
+                                        newPictures =
+                                            champion.pictures
+                                                |> Dict.insert newKey (Model.initPicture (File.name file))
+                                    in
+                                    ( { champion | pictures = newPictures }, GotPictureFileUrl newKey )
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
-                        , Task.perform (GotFileUrl id) <| File.toUrl file
+                        , Task.perform gotFileUrlMsg <| File.toUrl file
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
@@ -1031,25 +932,8 @@ handleFileSelectionDone id file model =
             ( model, Cmd.none )
 
 
-updateChampionPicturesWithFile : Id -> File -> ChampionForm -> ChampionForm
-updateChampionPicturesWithFile id file champion =
-    let
-        newPictures =
-            champion.pictures
-                |> List.map
-                    (\pic ->
-                        if pic.id == id then
-                            { pic | attachment = Attachment (File.name file) Nothing }
-
-                        else
-                            pic
-                    )
-    in
-    { champion | pictures = newPictures }
-
-
-handleFileUrlReceived : Id -> String -> Model -> ( Model, Cmd Msg )
-handleFileUrlReceived id base64file model =
+handleProfilePictureFileUrlReceived : String -> Model -> ( Model, Cmd Msg )
+handleProfilePictureFileUrlReceived base64file model =
     case model.currentPage of
         EditChampionPage eModel ->
             eModel.champion
@@ -1057,21 +941,16 @@ handleFileUrlReceived id base64file model =
                     (\champion ->
                         let
                             newChampion =
-                                case id of
-                                    Id "0" ->
-                                        case champion.profilePicture of
-                                            Nothing ->
-                                                champion
+                                case champion.profilePicture of
+                                    Nothing ->
+                                        champion
 
-                                            Just oldFile ->
-                                                let
-                                                    newFile =
-                                                        { oldFile | base64 = Just base64file }
-                                                in
-                                                { champion | profilePicture = Just newFile }
-
-                                    _ ->
-                                        updateChampionPicturesWithFileUrl id base64file champion
+                                    Just oldFile ->
+                                        let
+                                            newFile =
+                                                { oldFile | base64 = Just base64file }
+                                        in
+                                        { champion | profilePicture = Just newFile }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
                         , Cmd.none
@@ -1083,21 +962,34 @@ handleFileUrlReceived id base64file model =
             ( model, Cmd.none )
 
 
-updateChampionPicturesWithFileUrl : Id -> String -> ChampionForm -> ChampionForm
-updateChampionPicturesWithFileUrl idToUpdate base64file champion =
-    let
-        newPictures =
-            champion.pictures
-                |> List.map
-                    (\({ id, attachment } as pic) ->
-                        if pic.id == idToUpdate then
-                            { pic | attachment = { attachment | base64 = Just base64file } }
+handlePictureFileUrlReceived : Int -> String -> Model -> ( Model, Cmd Msg )
+handlePictureFileUrlReceived id base64file model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newPictures =
+                                champion.pictures
+                                    |> Dict.update id
+                                        (Maybe.map
+                                            (\({ attachment } as pic) ->
+                                                { pic | attachment = { attachment | base64 = Just base64file } }
+                                            )
+                                        )
 
-                        else
-                            pic
+                            newChampion =
+                                { champion | pictures = newPictures }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        , Cmd.none
+                        )
                     )
-    in
-    { champion | pictures = newPictures }
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 updateSearchQuery : String -> Model -> ( Model, Cmd Msg )
@@ -1145,11 +1037,7 @@ updateChampionWithProExperienceSector sectorName eModel =
                     { champion
                         | proExperiences =
                             champion.proExperiences
-                                |> Dict.map
-                                    (\id exp ->
-                                        exp
-                                            |> Editable.map (\editingExp -> { editingExp | sectors = editingExp.sectors ++ [ sectorName ] })
-                                    )
+                                |> Dict.map (\id exp -> { exp | sectors = exp.sectors ++ [ sectorName ] })
                     }
             in
             { eModel
@@ -1323,7 +1211,7 @@ addHighlight model =
                                 case champion.sport of
                                     Just sport ->
                                         champion.highlights
-                                            |> Dict.insert newKey (ReadOnly "" |> Editable.edit)
+                                            |> Dict.insert newKey ""
 
                                     Nothing ->
                                         champion.highlights
@@ -1332,35 +1220,6 @@ addHighlight model =
                                 { champion | highlights = newHighlights }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-editHighlight : Int -> Model -> ( Model, Cmd Msg )
-editHighlight id model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            highlightToEdit =
-                                Dict.get id champion.highlights
-
-                            newHighlights =
-                                champion.highlights
-                                    |> Dict.map (\_ exp -> Editable.cancel exp)
-                                    |> Dict.update id (Maybe.map Editable.edit)
-
-                            newChampion =
-                                { champion | highlights = newHighlights }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
-                        , Cmd.none
-                        )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -1387,44 +1246,6 @@ deleteHighlight id model =
             ( model, Cmd.none )
 
 
-cancelHighlightEdition : Int -> Model -> ( Model, Cmd Msg )
-cancelHighlightEdition id model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newHighlights =
-                                champion.highlights
-                                    |> Dict.update id
-                                        (Maybe.andThen
-                                            (\highlight ->
-                                                case highlight of
-                                                    ReadOnly _ ->
-                                                        Just highlight
-
-                                                    Editable old new ->
-                                                        case new of
-                                                            "" ->
-                                                                Nothing
-
-                                                            _ ->
-                                                                Just <| ReadOnly old
-                                            )
-                                        )
-
-                            newChampion =
-                                { champion | highlights = newHighlights }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
 updateHighlight : Int -> String -> Model -> ( Model, Cmd Msg )
 updateHighlight id val model =
     case model.currentPage of
@@ -1435,31 +1256,7 @@ updateHighlight id val model =
                         let
                             newHighlights =
                                 champion.highlights
-                                    |> Dict.update id
-                                        (Maybe.map (Editable.map (always val)))
-
-                            newChampion =
-                                { champion | highlights = newHighlights }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
-                |> RD.withDefault ( model, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-confirmHighlight : Int -> Model -> ( Model, Cmd Msg )
-confirmHighlight id model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newHighlights =
-                                champion.highlights
-                                    |> Dict.update id (Maybe.map Editable.save)
+                                    |> Dict.update id (Maybe.map (always val))
 
                             newChampion =
                                 { champion | highlights = newHighlights }
@@ -1481,19 +1278,16 @@ editChampion id model =
         ( model, Cmd.none )
 
 
-addPicture : Model -> ( Model, Cmd Msg )
-addPicture model =
+deletePicture : Int -> Model -> ( Model, Cmd Msg )
+deletePicture id model =
     case model.currentPage of
         EditChampionPage eModel ->
             eModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newPictures =
-                                champion.pictures ++ [ Model.initPicture ]
-
                             newChampion =
-                                { champion | pictures = newPictures }
+                                { champion | pictures = champion.pictures |> Dict.remove id }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
                     )
@@ -1841,7 +1635,7 @@ updateMedalType id str model =
                                 let
                                     newMedals =
                                         champion.medals
-                                            |> Dict.update id (Maybe.map (Editable.map (\medal -> { medal | medalType = medalType })))
+                                            |> Dict.update id (Maybe.map (\medal -> { medal | medalType = medalType }))
 
                                     newChampion =
                                         { champion | medals = newMedals }
