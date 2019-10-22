@@ -33,7 +33,7 @@ view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
     column [ UI.largeSpacing, width fill ]
         [ Common.competitionSelector True SelectedACompetition model.competition
-        , Utils.viewIf isAdmin <|
+        , Utils.viewIf (isAdmin && model.newEvent == Nothing) <|
             (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
                 |> Button.makeButton (Just PressedAddEventButton)
                 |> Button.withBackgroundColor Color.green
@@ -131,12 +131,14 @@ editNewEvent currentYear newEvent =
             , text = newEvent.place
             , placeholder = Just <| Input.placeholder [ Font.italic ] <| text "Lieu"
             }
-        , text "Valider"
-            |> Button.makeButton (Just SaveNewEvent)
-            |> Button.withFontColor Color.green
-            |> Button.viewButton
-        , text "Annuler"
-            |> Button.makeButton (Just CancelledNewEvent)
-            |> Button.withFontColor Color.red
-            |> Button.viewButton
+        , row [ UI.defaultSpacing ]
+            [ text "Annuler"
+                |> UI.smallButton (Just CancelledNewEvent)
+                |> Button.withBackgroundColor Color.grey
+                |> Button.viewButton
+            , text "Valider"
+                |> UI.smallButton (Just SaveNewEvent)
+                |> Button.withBackgroundColor Color.green
+                |> Button.viewButton
+            ]
         ]

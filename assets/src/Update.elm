@@ -1434,7 +1434,11 @@ saveNewEvent model =
         EventsPage eModel ->
             case eModel.newEvent of
                 Just event ->
-                    ( { model | currentPage = EventsPage { eModel | newEvent = Nothing } }, Api.createEvent event )
+                    if String.isEmpty event.place then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model | currentPage = EventsPage { eModel | newEvent = Nothing } }, Api.createEvent event )
 
                 _ ->
                     ( model, Cmd.none )

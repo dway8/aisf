@@ -32,7 +32,7 @@ init currentYear =
 view : Bool -> RecordsPageModel -> Element Msg
 view isAdmin model =
     column [ UI.largeSpacing, width fill ]
-        [ Utils.viewIf isAdmin <|
+        [ Utils.viewIf (isAdmin && model.newRecord == Nothing) <|
             (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un record" ]
                 |> Button.makeButton (Just PressedAddRecordButton)
                 |> Button.withBackgroundColor Color.green
@@ -92,8 +92,8 @@ viewRecord record =
 
 editNewRecord : Year -> Record -> Element Msg
 editNewRecord currentYear newRecord =
-    column [ UI.largeSpacing ]
-        [ row [ UI.largeSpacing ]
+    column [ UI.largeSpacing, width fill ]
+        [ row [ UI.largeSpacing, width fill ]
             [ Common.yearSelector False currentYear SelectedAYear Nothing
             , specialtySelector
             , UI.textInput []
@@ -105,14 +105,14 @@ editNewRecord currentYear newRecord =
             , recordTypeSelector
             ]
         , editWinners newRecord.winners
-        , row [ UI.largeSpacing ]
-            [ text "Valider"
-                |> Button.makeButton (Just SaveNewRecord)
-                |> Button.withFontColor Color.green
+        , row [ UI.defaultSpacing, alignRight ]
+            [ text "Annuler"
+                |> UI.smallButton (Just CancelledNewRecord)
+                |> Button.withBackgroundColor Color.grey
                 |> Button.viewButton
-            , text "Annuler"
-                |> Button.makeButton (Just CancelledNewRecord)
-                |> Button.withFontColor Color.red
+            , text "Valider"
+                |> UI.smallButton (Just SaveNewRecord)
+                |> Button.withBackgroundColor Color.green
                 |> Button.viewButton
             ]
         ]
@@ -160,12 +160,12 @@ recordTypeSelector =
 
 editWinners : Dict Int Winner -> Element Msg
 editWinners winners =
-    column [ UI.defaultSpacing ] (winners |> Dict.map editWinner |> Dict.values)
+    column [ UI.defaultSpacing, width fill ] (winners |> Dict.map editWinner |> Dict.values)
 
 
 editWinner : Int -> Winner -> Element Msg
 editWinner index winner =
-    row [ UI.defaultSpacing ]
+    row [ width fill, UI.defaultSpacing, paddingEach { top = 0, bottom = 0, left = 50, right = 0 } ]
         [ el [ Font.bold ] <| text <| String.fromInt index ++ "."
         , UI.textInput []
             { onChange = UpdatedRecordWinnerLastName index
