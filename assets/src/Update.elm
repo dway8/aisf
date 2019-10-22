@@ -16,6 +16,7 @@ import Page.Champion
 import Page.Champions
 import Page.EditChampion
 import Page.Events
+import Page.Login
 import Page.Medals
 import Page.Records
 import Page.Teams
@@ -73,8 +74,11 @@ update msg model =
                                             , if champ.id == Id "new" then
                                                 Api.createChampion champ
 
-                                              else
+                                              else if model.isAdmin || (model.championLoggedIn == Just champ.id) then
                                                 Api.updateChampion champ
+
+                                              else
+                                                Cmd.none
                                             )
                                         )
                                     |> Maybe.withDefault ( model, Cmd.none )
@@ -261,6 +265,18 @@ update msg model =
         CheckedIsMember bool ->
             updateIsMember bool model
 
+        UpdatedLoginNameField str ->
+            updateLoginNameField str model
+
+        UpdatedLoginIdField str ->
+            updateLoginIdField str model
+
+        PressedLoginButton ->
+            login model
+
+        GotLoginResponse resp ->
+            handleLoginResponse resp model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -307,6 +323,10 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
         RecordsRoute ->
             Page.Records.init currentYear
                 |> Tuple.mapFirst RecordsPage
+
+        LoginRoute ->
+            Page.Login.init
+                |> Tuple.mapFirst LoginPage
 
 
 updateChampionForm : FormField -> String -> Model -> ( Model, Cmd Msg )
@@ -908,7 +928,7 @@ handleFileSelectionDone isProfilePicture file model =
                                 else
                                     let
                                         newKey =
-                                            getDictNextKey champion.highlights
+                                            getDictNextKey champion.pictures
 
                                         newPictures =
                                             champion.pictures
@@ -1260,7 +1280,7 @@ updateHighlight id val model =
 
 editChampion : Id -> Model -> ( Model, Cmd Msg )
 editChampion id model =
-    if model.isAdmin then
+    if model.isAdmin || (model.championLoggedIn == Just id) then
         ( model, Nav.pushUrl model.key (Route.routeToString <| EditChampionRoute (Just id)) )
 
     else
@@ -1658,6 +1678,57 @@ updateIsMember bool model =
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateLoginNameField : String -> Model -> ( Model, Cmd Msg )
+updateLoginNameField str model =
+    case model.currentPage of
+        LoginPage lModel ->
+            ( { model | currentPage = LoginPage { lModel | lastName = str } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateLoginIdField : String -> Model -> ( Model, Cmd Msg )
+updateLoginIdField str model =
+    case model.currentPage of
+        LoginPage lModel ->
+            ( { model | currentPage = LoginPage { lModel | loginId = str } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+login : Model -> ( Model, Cmd Msg )
+login model =
+    case model.currentPage of
+        LoginPage ({ lastName, loginId } as lModel) ->
+            if List.any String.isEmpty [ lastName, loginId ] then
+                ( model, Cmd.none )
+
+            else
+                ( { model | currentPage = LoginPage { lModel | loginRequest = Loading } }
+                , Api.login lastName loginId
+                )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleLoginResponse : RemoteData (Graphql.Http.Error LoginResponse) LoginResponse -> Model -> ( Model, Cmd Msg )
+handleLoginResponse resp model =
+    case model.currentPage of
+        LoginPage lModel ->
+            case resp of
+                Success (Authorized id) ->
+                    ( { model | championLoggedIn = Just id }, Nav.pushUrl model.key (Route.routeToString (ChampionRoute id)) )
+
+                _ ->
+                    ( { model | currentPage = LoginPage { lModel | loginRequest = resp } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

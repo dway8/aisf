@@ -20,6 +20,7 @@ type alias Model =
     , isAdmin : Bool
     , currentYear : Year
     , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
+    , championLoggedIn : Maybe Id
     }
 
 
@@ -31,6 +32,7 @@ type Page
     | EditChampionPage EditChampionPageModel
     | EventsPage EventsPageModel
     | RecordsPage RecordsPageModel
+    | LoginPage LoginPageModel
 
 
 type alias ChampionsPageModel =
@@ -93,6 +95,18 @@ type alias RecordsPageModel =
     , newRecord : Maybe Record
     , currentYear : Year
     }
+
+
+type alias LoginPageModel =
+    { loginId : String
+    , lastName : String
+    , loginRequest : RemoteData (Graphql.Http.Error LoginResponse) LoginResponse
+    }
+
+
+type LoginResponse
+    = Authorized Id
+    | Denied
 
 
 type alias Records =
@@ -935,6 +949,10 @@ type Msg
     | SelectedAMedalType Int String
     | PressedDeletePictureButton Int
     | CheckedIsMember Bool
+    | UpdatedLoginNameField String
+    | UpdatedLoginIdField String
+    | PressedLoginButton
+    | GotLoginResponse (RemoteData (Graphql.Http.Error LoginResponse) LoginResponse)
 
 
 type FormField

@@ -71,6 +71,10 @@ defmodule Aisf.Champions do
   def create_champion(attrs \\ %{}) do
     Logger.info("Creating new champion")
 
+    attrs =
+      attrs
+      |> Map.put(:login, generate_next_login())
+
     %Champion{}
     |> Champion.changeset(attrs)
     |> Repo.insert()
@@ -238,5 +242,28 @@ defmodule Aisf.Champions do
   """
   def change_champion(%Champion{} = champion) do
     Champion.changeset(champion, %{})
+  end
+
+  defp generate_next_login() do
+    next_login =
+      Repo.one(from(c in Champion, select: max(c.login)))
+      |> (&(&1 + 1)).()
+
+    Logger.info("Generated next login: #{next_login}")
+
+    next_login
+  end
+
+  def get_champion_with_login(%{last_name: last_name, login_id: login_id}) do
+    Logger.info("Checking if login info matches a champion")
+
+    # last_name_formatted =
+    Repo.one(
+      from(c in Champion,
+        where:
+          c.login == ^login_id and
+            fragment("lower(?)", c.last_name) == ^String.downcase(last_name)
+      )
+    )
   end
 end

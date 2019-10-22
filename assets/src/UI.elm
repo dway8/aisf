@@ -83,6 +83,11 @@ largePadding =
     padding 20
 
 
+largerPadding : Attribute msg
+largerPadding =
+    padding 30
+
+
 clickable : Attribute msg
 clickable =
     htmlAttribute <| HA.style "cursor" "pointer"

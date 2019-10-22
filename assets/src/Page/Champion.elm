@@ -31,17 +31,19 @@ init isAdmin id =
     )
 
 
-view : Bool -> ChampionPageModel -> Element Msg
-view isAdmin { id, champion, medalsTableState } =
+view : Bool -> Maybe Id -> ChampionPageModel -> Element Msg
+view isAdmin championLoggedIn { id, champion, medalsTableState } =
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
-            [ row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
-                |> Button.makeButton (Just GoBack)
-                |> Button.withBackgroundColor Color.lightGrey
-                |> Button.withAttrs []
-                |> Button.viewButton
+            [ Utils.viewIf (championLoggedIn == Nothing)
+                (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
+                    |> Button.makeButton (Just GoBack)
+                    |> Button.withBackgroundColor Color.lightGrey
+                    |> Button.withAttrs []
+                    |> Button.viewButton
+                )
             , Utils.viewIf
-                isAdmin
+                (isAdmin || (championLoggedIn |> Maybe.map ((==) id) |> Maybe.withDefault False))
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "edit", text <| "Éditer la fiche" ]
                     |> Button.makeButton (Just <| PressedEditChampionButton id)
                     |> Button.withBackgroundColor Color.orange

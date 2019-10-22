@@ -29,7 +29,7 @@ defmodule Aisf.Champions.Champion do
     field(:decoration, :string)
     field(:background, :string)
     field(:volunteering, :string)
-    field(:old_id, :integer)
+    field(:login, :integer)
     has_many(:pictures, Picture)
 
     timestamps()
@@ -58,7 +58,8 @@ defmodule Aisf.Champions.Champion do
       :decoration,
       :background,
       :volunteering,
-      :highlights
+      :highlights,
+      :login
     ])
     |> validate_required([
       :first_name,
@@ -66,7 +67,8 @@ defmodule Aisf.Champions.Champion do
       :sport,
       :years_in_french_team,
       :is_member,
-      :highlights
+      :highlights,
+      :login
     ])
   end
 

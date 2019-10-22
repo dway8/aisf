@@ -82,6 +82,11 @@ defmodule AisfWeb.Schema do
     field(:position, non_null(:integer))
   end
 
+  object :login_response do
+    field(:result, non_null(:boolean))
+    field(:id, :id)
+  end
+
   query do
     field :champions, non_null(list_of(non_null(:champion))) do
       resolve(&ChampionsResolver.all/3)
@@ -106,6 +111,12 @@ defmodule AisfWeb.Schema do
 
     field :records, non_null(list_of(non_null(:record))) do
       resolve(&RecordsResolver.all/3)
+    end
+
+    field :login, non_null(:login_response) do
+      arg(:last_name, non_null(:string))
+      arg(:login_id, non_null(:string))
+      resolve(&ChampionsResolver.login/2)
     end
   end
 

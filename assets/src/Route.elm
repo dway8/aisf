@@ -14,6 +14,7 @@ type Route
     | EditChampionRoute (Maybe Id)
     | EventsRoute
     | RecordsRoute
+    | LoginRoute
 
 
 parseUrl : Url -> Route
@@ -31,6 +32,7 @@ parseUrl url =
                         , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                         , map EventsRoute (s "events")
                         , map RecordsRoute (s "records")
+                        , map LoginRoute (s "login")
                         ]
             )
         |> Maybe.withDefault ChampionsRoute
@@ -63,4 +65,7 @@ routeToString route =
 
                 RecordsRoute ->
                     "/records"
+
+                LoginRoute ->
+                    "/login"
            )

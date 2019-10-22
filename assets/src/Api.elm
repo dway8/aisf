@@ -1,10 +1,11 @@
-module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getRecords, getSectors, updateChampion)
+module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getRecords, getSectors, login, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
 import Aisf.Object.Event as Event
+import Aisf.Object.LoginResponse as LoginResponse
 import Aisf.Object.Medal as Medal
 import Aisf.Object.Picture as Picture
 import Aisf.Object.ProExperience as ProExperience
@@ -19,7 +20,7 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, Medal, MedalType(..), Msg(..), Picture, ProExperience, Record, RecordType(..), Sector, Specialty(..), Sport(..), Winner, Year(..))
+import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, LoginResponse(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Record, RecordType(..), Sector, Specialty(..), Sport(..), Winner, Year(..))
 import RemoteData
 
 
@@ -322,3 +323,26 @@ winnerToParams ( index, winner ) =
     , firstName = winner.firstName
     , position = index
     }
+
+
+login : String -> String -> Cmd Msg
+login lastName loginId =
+    Query.login { lastName = lastName, loginId = loginId } loginResponseSelection
+        |> Graphql.Http.queryRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send (RemoteData.fromResult >> GotLoginResponse)
+
+
+loginResponseSelection : SelectionSet LoginResponse Aisf.Object.LoginResponse
+loginResponseSelection =
+    SelectionSet.succeed
+        (\result maybeId ->
+            case ( result, maybeId ) of
+                ( True, Just id ) ->
+                    Authorized id
+
+                _ ->
+                    Denied
+        )
+        |> with LoginResponse.result
+        |> with LoginResponse.id
