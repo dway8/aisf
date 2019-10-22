@@ -258,6 +258,9 @@ update msg model =
         SelectedAMedalType index str ->
             updateMedalType index str model
 
+        CheckedIsMember bool ->
+            updateIsMember bool model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -1644,6 +1647,25 @@ updateMedalType id str model =
 
                             Nothing ->
                                 ( model, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateIsMember : Bool -> Model -> ( Model, Cmd Msg )
+updateIsMember bool model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                { champion | isMember = bool }
+                        in
+                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 

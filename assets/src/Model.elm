@@ -934,6 +934,7 @@ type Msg
     | UpdatedRecordWinnerFirstName Int String
     | SelectedAMedalType Int String
     | PressedDeletePictureButton Int
+    | CheckedIsMember Bool
 
 
 type FormField

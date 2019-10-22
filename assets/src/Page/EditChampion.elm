@@ -22,6 +22,7 @@ import Table
 import UI
 import UI.Button as Button
 import UI.Color as Color
+import Utils
 
 
 init : Maybe Id -> ( EditChampionPageModel, Cmd Msg )
@@ -134,7 +135,10 @@ view rdSectors currentYear model =
                             , viewChampionTextInput LastName champion
                             ]
                         ]
-                    , row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False champion.sport ]
+                    , row [ UI.largerSpacing ]
+                        [ row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False champion.sport ]
+                        , memberCheckbox champion.isMember
+                        ]
                     , let
                         ( label, value ) =
                             getChampionFormFieldData Intro champion
@@ -153,6 +157,19 @@ view rdSectors currentYear model =
             _ ->
                 text "..."
         ]
+
+
+memberCheckbox : Bool -> Element Msg
+memberCheckbox isMember =
+    el [] <|
+        Input.checkbox []
+            { onChange = CheckedIsMember
+            , icon = Input.defaultCheckbox
+            , checked = isMember
+            , label =
+                Input.labelRight []
+                    (text "Membre AISF")
+            }
 
 
 editPrivateInfo : ChampionForm -> Element Msg
@@ -225,11 +242,12 @@ editPictures champion =
             Model.getId champion
     in
     Common.viewBlock "Photos"
-        [ row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
-            (champion.pictures
-                |> Dict.map (editPicture id)
-                |> Dict.values
-            )
+        [ Utils.viewIf (Dict.size champion.pictures > 0) <|
+            row [ width fill, clipX, scrollbarX, UI.defaultSpacing ]
+                (champion.pictures
+                    |> Dict.map (editPicture id)
+                    |> Dict.values
+                )
         , viewAddButton "Ajouter une photo" PressedAddPictureButton
         ]
 
@@ -336,17 +354,18 @@ editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
 editYearsInFrenchTeam currentYear champion =
     Common.viewBlock "Années en équipe de France"
         [ column [ UI.largeSpacing ]
-            [ column [ UI.defaultSpacing ]
-                (champion.yearsInFrenchTeam
-                    |> Dict.map
-                        (\id year ->
-                            row [ UI.largeSpacing ]
-                                [ text <| String.fromInt (Model.getYear year)
-                                , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
-                                ]
-                        )
-                    |> Dict.values
-                )
+            [ Utils.viewIf (Dict.size champion.yearsInFrenchTeam > 0) <|
+                column [ UI.defaultSpacing ]
+                    (champion.yearsInFrenchTeam
+                        |> Dict.map
+                            (\id year ->
+                                row [ UI.largeSpacing ]
+                                    [ text <| String.fromInt (Model.getYear year)
+                                    , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
+                                    ]
+                            )
+                        |> Dict.values
+                    )
             , viewAddButton "Ajouter une année" PressedAddYearInFrenchTeamButton
             ]
         ]
@@ -507,8 +526,8 @@ viewProfilePicture profilePicture =
             Nothing ->
                 el [ width fill ] <|
                     column [ spacing 10, padding 10, centerX ]
-                        [ text "Uploader une photo"
-                            |> Button.makeButton (Just BeganProfilePictureSelection)
+                        [ text "Choisir une photo"
+                            |> UI.smallButton (Just BeganProfilePictureSelection)
                             |> Button.withBackgroundColor Color.green
                             |> Button.viewButton
                         ]
@@ -533,22 +552,23 @@ editHighlights : ChampionForm -> Element Msg
 editHighlights { highlights } =
     column [ UI.largeSpacing, width fill ]
         [ el [ Font.bold ] <| text "Faits marquants"
-        , column [ UI.defaultSpacing, width fill ]
-            (highlights
-                |> Dict.map
-                    (\id highlight ->
-                        row [ UI.defaultSpacing, width fill ]
-                            [ UI.textInput [ width fill ]
-                                { onChange = UpdatedHighlight id
-                                , text = highlight
-                                , placeholder = Nothing
-                                , label = Nothing
-                                }
-                            , viewDeleteButton (PressedDeleteHighlightButton id)
-                            ]
-                    )
-                |> Dict.values
-            )
+        , Utils.viewIf (Dict.size highlights > 0) <|
+            column [ UI.defaultSpacing, width fill ]
+                (highlights
+                    |> Dict.map
+                        (\id highlight ->
+                            row [ UI.defaultSpacing, width fill ]
+                                [ UI.textInput [ width fill ]
+                                    { onChange = UpdatedHighlight id
+                                    , text = highlight
+                                    , placeholder = Nothing
+                                    , label = Nothing
+                                    }
+                                , viewDeleteButton (PressedDeleteHighlightButton id)
+                                ]
+                        )
+                    |> Dict.values
+                )
         , viewAddButton "Ajouter un fait marquant" PressedAddHighlightButton
         ]
 
