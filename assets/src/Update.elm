@@ -398,7 +398,7 @@ updateCurrentSport sportStr model =
                     (\champion ->
                         let
                             newChamp =
-                                updateFn champion
+                                { champion | sport = Model.sportFromString sportStr |> Maybe.withDefault champion.sport }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChamp } }, Cmd.none )
                     )
@@ -586,13 +586,8 @@ addMedal model =
                                 getDictNextKey champion.medals
 
                             newMedals =
-                                case champion.sport of
-                                    Just sport ->
-                                        champion.medals
-                                            |> Dict.insert newKey (Model.initMedal sport model.currentYear)
-
-                                    Nothing ->
-                                        champion.medals
+                                champion.medals
+                                    |> Dict.insert newKey (Model.initMedal champion.sport model.currentYear)
 
                             newChampion =
                                 { champion | medals = newMedals }
@@ -723,39 +718,35 @@ getDictNextKey =
 
 validateChampionForm : ChampionForm -> Maybe Champion
 validateChampionForm c =
-    case c.sport of
-        Nothing ->
-            Nothing
-
-        Just sport ->
-            Just
-                { id = c.id
-                , email = c.email
-                , firstName = c.firstName
-                , lastName = c.lastName
-                , birthDate = c.birthDate
-                , address = c.address
-                , phoneNumber = c.phoneNumber
-                , website = c.website
-                , sport = sport
-                , proExperiences = c.proExperiences |> Dict.values
-                , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values
-                , medals = c.medals |> Dict.values
-                , isMember = c.isMember
-                , intro = c.intro
-                , highlights = c.highlights |> Dict.values
-                , profilePicture = c.profilePicture
-                , frenchTeamParticipation = c.frenchTeamParticipation
-                , olympicGamesParticipation = c.olympicGamesParticipation
-                , worldCupParticipation = c.worldCupParticipation
-                , trackRecord = c.trackRecord
-                , bestMemory = c.bestMemory
-                , decoration = c.decoration
-                , background = c.background
-                , volunteering = c.volunteering
-                , oldId = Nothing
-                , pictures = c.pictures |> Dict.values
-                }
+    --TODO validation
+    Just
+        { id = c.id
+        , email = c.email
+        , firstName = c.firstName
+        , lastName = c.lastName
+        , birthDate = c.birthDate
+        , address = c.address
+        , phoneNumber = c.phoneNumber
+        , website = c.website
+        , sport = c.sport
+        , proExperiences = c.proExperiences |> Dict.values
+        , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values
+        , medals = c.medals |> Dict.values
+        , isMember = c.isMember
+        , intro = c.intro
+        , highlights = c.highlights |> Dict.values
+        , profilePicture = c.profilePicture
+        , frenchTeamParticipation = c.frenchTeamParticipation
+        , olympicGamesParticipation = c.olympicGamesParticipation
+        , worldCupParticipation = c.worldCupParticipation
+        , trackRecord = c.trackRecord
+        , bestMemory = c.bestMemory
+        , decoration = c.decoration
+        , background = c.background
+        , volunteering = c.volunteering
+        , oldId = Nothing
+        , pictures = c.pictures |> Dict.values
+        }
 
 
 updateCurrentSpecialty : String -> Model -> ( Model, Cmd Msg )
@@ -1211,13 +1202,8 @@ addHighlight model =
                                 getDictNextKey champion.highlights
 
                             newHighlights =
-                                case champion.sport of
-                                    Just sport ->
-                                        champion.highlights
-                                            |> Dict.insert newKey ""
-
-                                    Nothing ->
-                                        champion.highlights
+                                champion.highlights
+                                    |> Dict.insert newKey ""
 
                             newChampion =
                                 { champion | highlights = newHighlights }

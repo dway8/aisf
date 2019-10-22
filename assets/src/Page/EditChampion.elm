@@ -16,7 +16,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sectors, Sport, Year)
+import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sectors, Sport(..), Year)
 import RemoteData exposing (RemoteData(..), WebData)
 import Table
 import UI
@@ -57,7 +57,7 @@ initChampionForm =
     , address = Nothing
     , phoneNumber = Nothing
     , website = Nothing
-    , sport = Nothing
+    , sport = SkiAlpin
     , proExperiences = Dict.empty
     , yearsInFrenchTeam = Dict.empty
     , medals = Dict.empty
@@ -91,7 +91,7 @@ championToForm champion =
     , address = champion.address
     , phoneNumber = champion.phoneNumber
     , website = champion.website
-    , sport = Just champion.sport
+    , sport = champion.sport
     , proExperiences = champion.proExperiences |> toDict
     , yearsInFrenchTeam = champion.yearsInFrenchTeam |> toDict
     , medals = champion.medals |> toDict
@@ -136,7 +136,7 @@ view rdSectors currentYear model =
                             ]
                         ]
                     , row [ UI.largerSpacing ]
-                        [ row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False champion.sport ]
+                        [ row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False (Just champion.sport) ]
                         , memberCheckbox champion.isMember
                         ]
                     , let
@@ -282,7 +282,7 @@ editMedals currentYear tableState { medals, sport } =
         ]
 
 
-tableConfig : Maybe Sport -> Year -> Table.Config ( Int, Medal ) Msg
+tableConfig : Sport -> Year -> Table.Config ( Int, Medal ) Msg
 tableConfig sport currentYear =
     let
         tableCustomizations =
@@ -304,7 +304,7 @@ attrsForHeaders =
         ]
 
 
-tableColumns : Maybe Sport -> Year -> List (Table.Column ( Int, Medal ) Msg)
+tableColumns : Sport -> Year -> List (Table.Column ( Int, Medal ) Msg)
 tableColumns sport currentYear =
     [ Table.veryCustomColumn
         { name = "MÉDAILLE"
@@ -329,7 +329,7 @@ tableColumns sport currentYear =
         , viewData =
             \( id, medal ) ->
                 Common.defaultCell []
-                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.specialtySelector False sport (SelectedAMedalSpecialty id) (Just medal.specialty))
+                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.specialtySelector False (Just sport) (SelectedAMedalSpecialty id) (Just medal.specialty))
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn

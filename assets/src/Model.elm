@@ -170,7 +170,7 @@ type alias ChampionForm =
     , address : Maybe String
     , phoneNumber : Maybe String
     , website : Maybe String
-    , sport : Maybe Sport
+    , sport : Sport
     , proExperiences : Dict Int ProExperience
     , yearsInFrenchTeam : Dict Int Year
     , medals : Dict Int Medal
