@@ -321,7 +321,7 @@ tableColumns sport currentYear =
         , viewData =
             \( id, medal ) ->
                 Common.defaultCell []
-                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.competitionSelector False (SelectedAMedalCompetition id) (Just medal.competition))
+                    (UI.defaultLayoutForTable <| el [ centerY ] <| Common.competitionSelector False Model.competitionsList (SelectedAMedalCompetition id) (Just medal.competition))
         , sorter = Table.unsortable
         }
     , Table.veryCustomColumn

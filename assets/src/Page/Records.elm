@@ -4,6 +4,8 @@ import Api
 import Common
 import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html
@@ -81,9 +83,25 @@ viewRecord record =
             , el [ Font.italic ] <| text " en "
             , el [ Font.italic ] <| text <| String.toLower <| Model.specialtyToDisplay record.specialty
             ]
-        , row [ UI.defaultSpacing ]
+        , wrappedRow [ UI.defaultSpacing ]
             (record.winners
-                |> Dict.map (\i w -> text <| String.fromInt i ++ ". " ++ w.firstName ++ " " ++ String.toUpper w.lastName)
+                |> Dict.map
+                    (\i w ->
+                        row [ UI.smallSpacing ]
+                            [ el
+                                [ Background.color Color.blue
+                                , Font.color Color.white
+                                , Border.rounded 12
+                                , width <| px 18
+                                , height <| px 18
+                                ]
+                              <|
+                                el [ centerX, centerY, UI.smallFont ] <|
+                                    text <|
+                                        String.fromInt i
+                            , text <| w.firstName ++ " " ++ String.toUpper w.lastName
+                            ]
+                    )
                 |> Dict.values
                 |> List.intersperse (text "-")
             )

@@ -416,8 +416,8 @@ viewBlockTitle title =
             String.toUpper title
 
 
-competitionSelector : Bool -> (String -> Msg) -> Maybe Competition -> Element Msg
-competitionSelector showOptionAll msg currentCompetition =
+competitionSelector : Bool ->List Competition ->  (String -> Msg) -> Maybe Competition -> Element Msg
+competitionSelector showOptionAll competitionsList msg currentCompetition =
     el [] <|
         html <|
             Html.select
@@ -434,7 +434,7 @@ competitionSelector showOptionAll msg currentCompetition =
                   else
                     []
                  )
-                    ++ (Model.competitionsList
+                    ++ (competitionsList
                             |> List.map
                                 (\competition ->
                                     Html.option

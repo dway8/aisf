@@ -29,10 +29,15 @@ init currentYear =
     )
 
 
+competitionsList : List Competition
+competitionsList =
+    [ OlympicGames, WorldChampionships ]
+
+
 view : Bool -> EventsPageModel -> Element Msg
 view isAdmin model =
     column [ UI.largeSpacing, width fill ]
-        [ Common.competitionSelector True SelectedACompetition model.competition
+        [ Common.competitionSelector True competitionsList SelectedACompetition model.competition
         , Utils.viewIf (isAdmin && model.newEvent == Nothing) <|
             (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un lieu" ]
                 |> Button.makeButton (Just PressedAddEventButton)
@@ -123,7 +128,7 @@ editNewEvent : Year -> Event -> Element Msg
 editNewEvent currentYear newEvent =
     row [ UI.largeSpacing ]
         [ Common.yearSelector False currentYear SelectedAYear Nothing
-        , Common.competitionSelector False SelectedACompetition (Just newEvent.competition)
+        , Common.competitionSelector False competitionsList SelectedACompetition (Just newEvent.competition)
         , Utils.viewIf (newEvent.competition == WorldChampionships) <| Common.sportSelector False Nothing
         , UI.textInput []
             { onChange = UpdatedNewEventPlace
