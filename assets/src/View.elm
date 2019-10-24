@@ -11,6 +11,7 @@ import Page.Champion
 import Page.Champions
 import Page.EditChampion
 import Page.Events
+import Page.Login
 import Page.Medals
 import Page.Records
 import Page.Teams
@@ -18,6 +19,7 @@ import RemoteData as RD
 import Route exposing (Route(..))
 import UI
 import UI.Color as Color
+import Utils
 
 
 view : Model -> Document Msg
@@ -42,13 +44,16 @@ viewBody model =
             ++ viewDialogs model
         )
     <|
-        column [ centerX, UI.largerSpacing, width <| px 800 ]
+        column [ centerX, height fill, UI.largerSpacing, width <| px 800 ]
             [ case model.currentPage of
                 EditChampionPage _ ->
                     none
 
+                LoginPage _ ->
+                    none
+
                 _ ->
-                    viewMenu model.currentPage
+                    Utils.viewIf (model.championLoggedIn == Nothing) <| viewMenu model.currentPage
             , case model.currentPage of
                 ChampionsPage championsModel ->
                     Page.Champions.view model.isAdmin model.sectors championsModel
@@ -60,7 +65,7 @@ viewBody model =
                     Page.Teams.view teamsModel
 
                 ChampionPage championModel ->
-                    Page.Champion.view model.isAdmin championModel
+                    Page.Champion.view model.isAdmin model.championLoggedIn championModel
 
                 EditChampionPage editChampionModel ->
                     Page.EditChampion.view model.sectors model.currentYear editChampionModel
@@ -70,6 +75,9 @@ viewBody model =
 
                 RecordsPage recordsModel ->
                     Page.Records.view model.isAdmin recordsModel
+
+                LoginPage loginModel ->
+                    Page.Login.view loginModel
             ]
 
 
