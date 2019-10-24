@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object.Champion exposing (address, background, bestMemory, birthDate, decoration, email, firstName, frenchTeamParticipation, highlights, id, intro, isMember, lastName, medals, oldId, olympicGamesParticipation, phoneNumber, pictures, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, website, worldCupParticipation, yearsInFrenchTeam)
+module Aisf.Object.Champion exposing (address, background, bestMemory, birthDate, decoration, email, firstName, frenchTeamParticipation, highlights, id, intro, isMember, lastName, login, medals, olympicGamesParticipation, phoneNumber, pictures, proExperiences, profilePictureFilename, sport, trackRecord, volunteering, website, worldCupParticipation, yearsInFrenchTeam)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -84,14 +84,14 @@ lastName =
     Object.selectionForField "String" "lastName" [] Decode.string
 
 
+login : SelectionSet (Maybe Int) Aisf.Object.Champion
+login =
+    Object.selectionForField "(Maybe Int)" "login" [] (Decode.int |> Decode.nullable)
+
+
 medals : SelectionSet decodesTo Aisf.Object.Medal -> SelectionSet (List decodesTo) Aisf.Object.Champion
 medals object_ =
     Object.selectionForCompositeField "medals" [] object_ (identity >> Decode.list)
-
-
-oldId : SelectionSet (Maybe Int) Aisf.Object.Champion
-oldId =
-    Object.selectionForField "(Maybe Int)" "oldId" [] (Decode.int |> Decode.nullable)
 
 
 olympicGamesParticipation : SelectionSet (Maybe String) Aisf.Object.Champion

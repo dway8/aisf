@@ -160,12 +160,12 @@ type alias Champion =
     , decoration : Maybe String
     , background : Maybe String
     , volunteering : Maybe String
-    , oldId : Maybe Id
     , pictures : List Picture
     , birthDate : Maybe String
     , email : Maybe String
     , address : Maybe String
     , phoneNumber : Maybe String
+    , login : Maybe Int
     }
 
 

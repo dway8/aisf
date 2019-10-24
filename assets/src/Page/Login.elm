@@ -42,7 +42,7 @@ view model =
                     , text = model.lastName
                     , placeholder = Nothing
                     }
-                , UI.textInput []
+                , UI.textInput [ htmlAttribute <| HA.type_ "password" ]
                     { onChange = UpdatedLoginIdField
                     , label = Just "Mot de passe"
                     , text = model.loginId

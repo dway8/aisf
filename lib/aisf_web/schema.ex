@@ -29,7 +29,7 @@ defmodule AisfWeb.Schema do
     field(:decoration, :string)
     field(:background, :string)
     field(:volunteering, :string)
-    field(:old_id, :integer)
+    field(:login, :integer)
     field(:pictures, non_null(list_of(non_null(:picture))))
   end
 

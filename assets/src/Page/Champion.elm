@@ -20,19 +20,28 @@ import UI.Color as Color
 import Utils
 
 
-init : Bool -> Id -> ( ChampionPageModel, Cmd Msg )
-init isAdmin id =
+init : Bool -> Maybe Id -> Id -> ( ChampionPageModel, Cmd Msg )
+init isAdmin championLoggedIn id =
     ( { id = id
       , champion = Loading
       , medalsTableState = Table.initialSort "ANNÉE"
       , pictureDialog = Nothing
       }
-    , Api.getChampion isAdmin id
+    , Api.getChampion (isAdminOrCurrentChampion isAdmin championLoggedIn id) id
     )
+
+
+isAdminOrCurrentChampion : Bool -> Maybe Id -> Id -> Bool
+isAdminOrCurrentChampion isAdmin championLoggedIn id =
+    isAdmin || (championLoggedIn |> Maybe.map ((==) id) |> Maybe.withDefault False)
 
 
 view : Bool -> Maybe Id -> ChampionPageModel -> Element Msg
 view isAdmin championLoggedIn { id, champion, medalsTableState } =
+    let
+        adminOrCurrentChampion =
+            isAdminOrCurrentChampion isAdmin championLoggedIn id
+    in
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ Utils.viewIf (championLoggedIn == Nothing)
@@ -42,8 +51,7 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
                     |> Button.withAttrs []
                     |> Button.viewButton
                 )
-            , Utils.viewIf
-                (isAdmin || (championLoggedIn |> Maybe.map ((==) id) |> Maybe.withDefault False))
+            , Utils.viewIf adminOrCurrentChampion
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "edit", text <| "Éditer la fiche" ]
                     |> Button.makeButton (Just <| PressedEditChampionButton id)
                     |> Button.withBackgroundColor Color.orange
@@ -70,7 +78,7 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
                         |> Maybe.map (\intro -> paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text intro ])
                         |> Maybe.withDefault none
                     , viewHighlights champ.highlights
-                    , Utils.viewIf isAdmin <| viewPrivateInfo champ
+                    , Utils.viewIf adminOrCurrentChampion <| viewPrivateInfo champ
                     , viewSportCareer champ
                     , viewProfessionalCareer champ
                     , viewPictures champ
@@ -93,14 +101,15 @@ viewHighlights highlights =
     Utils.viewIf (highlights /= []) <|
         column [ UI.defaultSpacing, paddingXY 10 0 ]
             (highlights
-                |> List.map (\h -> row [ UI.defaultSpacing ] [ text "-", text h ])
+                |> List.map (\h -> paragraph [ UI.largeFont, Font.bold, Font.italic ] [ text "-\u{00A0}\u{00A0}", text h ])
             )
 
 
 viewPrivateInfo : Champion -> Element Msg
 viewPrivateInfo champion =
     Common.viewBlock "Informations privées"
-        [ Common.viewInfoRow "Date de naissance" (champion.birthDate |> Maybe.withDefault "-" |> text)
+        [ Common.viewInfoRow "Numéro champion" (champion.login |> Maybe.map String.fromInt |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Date de naissance" (champion.birthDate |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Adresse" (champion.address |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Adresse e-mail" (champion.email |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "N° de téléphone" (champion.phoneNumber |> Maybe.withDefault "-" |> text)
@@ -124,7 +133,7 @@ viewProfessionalCareer champion =
     Common.viewBlock "Carrière professionnelle"
         [ Common.viewInfoRow "Formation" (champion.background |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Bénévolat" (champion.volunteering |> Maybe.withDefault "-" |> text)
-        , column [ UI.defaultSpacing, width fill ]
+        , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, left = 0, right = 0 } ]
             [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
             , if champion.proExperiences == [] then
                 el [ Font.italic ] <| text "Aucune expérience renseignée"

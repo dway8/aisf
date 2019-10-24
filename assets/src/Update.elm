@@ -283,7 +283,7 @@ handleUrlChange newLocation model =
     let
         ( page, cmd ) =
             Route.parseUrl newLocation
-                |> getPageAndCmdFromRoute model.currentYear model.isAdmin model.key
+                |> getPageAndCmdFromRoute model.currentYear model.isAdmin model.championLoggedIn model.key
     in
     ( { model | currentPage = page }, cmd )
 
@@ -293,8 +293,8 @@ goBack model =
     ( model, Nav.back model.key 1 )
 
 
-getPageAndCmdFromRoute : Year -> Bool -> Nav.Key -> Route -> ( Page, Cmd Msg )
-getPageAndCmdFromRoute currentYear isAdmin key route =
+getPageAndCmdFromRoute : Year -> Bool -> Maybe Id -> Nav.Key -> Route -> ( Page, Cmd Msg )
+getPageAndCmdFromRoute currentYear isAdmin championLoggedIn key route =
     case route of
         ChampionsRoute ->
             Page.Champions.init
@@ -309,7 +309,7 @@ getPageAndCmdFromRoute currentYear isAdmin key route =
                 |> Tuple.mapFirst TeamsPage
 
         ChampionRoute id ->
-            Page.Champion.init isAdmin id
+            Page.Champion.init isAdmin championLoggedIn id
                 |> Tuple.mapFirst ChampionPage
 
         EditChampionRoute maybeId ->
@@ -764,8 +764,8 @@ validateChampionForm c =
         , decoration = c.decoration
         , background = c.background
         , volunteering = c.volunteering
-        , oldId = Nothing
         , pictures = c.pictures |> Dict.values
+        , login = Nothing
         }
 
 

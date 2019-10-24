@@ -92,31 +92,20 @@ championSelection isAdmin =
         |> with Champion.decoration
         |> with Champion.background
         |> with Champion.volunteering
-        |> with (SelectionSet.map (Maybe.map (String.fromInt >> Id)) Champion.oldId)
         |> with (Champion.pictures pictureSelection)
         |> (if isAdmin then
                 with Champion.birthDate
+                    >> with Champion.email
+                    >> with Champion.address
+                    >> with Champion.phoneNumber
+                    >> with Champion.login
 
             else
                 SelectionSet.hardcoded Nothing
-           )
-        |> (if isAdmin then
-                with Champion.email
-
-            else
-                SelectionSet.hardcoded Nothing
-           )
-        |> (if isAdmin then
-                with Champion.address
-
-            else
-                SelectionSet.hardcoded Nothing
-           )
-        |> (if isAdmin then
-                with Champion.phoneNumber
-
-            else
-                SelectionSet.hardcoded Nothing
+                    >> SelectionSet.hardcoded Nothing
+                    >> SelectionSet.hardcoded Nothing
+                    >> SelectionSet.hardcoded Nothing
+                    >> SelectionSet.hardcoded Nothing
            )
 
 
