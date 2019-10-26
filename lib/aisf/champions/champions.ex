@@ -28,20 +28,6 @@ defmodule Aisf.Champions do
   end
 
   @doc """
-  Returns the list of champions with medals.
-  """
-  def list_champions_with_medals do
-    Logger.info("Listing all champions with medals")
-
-    Repo.all(
-      from(c in Champion, join: m in Medal, on: m.champion_id == c.id, group_by: c.id, select: c)
-    )
-    |> Repo.preload(pro_experiences: [:sectors])
-    |> Repo.preload([:medals])
-    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
-  end
-
-  @doc """
   Gets a single champion.
 
   Raises `Ecto.NoResultsError` if the Champion does not exist.

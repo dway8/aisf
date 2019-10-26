@@ -18,6 +18,7 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (Attachment, Champion, ChampionForm, EditChampionPageModel, FormField(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Sectors, Sport(..), Year)
 import RemoteData exposing (RemoteData(..), WebData)
+import Route
 import Table
 import UI
 import UI.Button as Button
@@ -261,7 +262,7 @@ editPicture championId id { attachment } =
     column [ UI.defaultSpacing ]
         [ let
             src =
-                base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ filename)
+                base64 |> Maybe.withDefault (Route.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ filename)
           in
           image [ width <| px 200 ] { src = src, description = "Photo de profil" }
         , el [ centerX ] (viewDeleteButton (PressedDeletePictureButton id))
@@ -536,7 +537,7 @@ viewProfilePicture profilePicture =
                 column [ UI.defaultSpacing, width fill ]
                     [ let
                         src =
-                            base64 |> Maybe.withDefault (Model.baseEndpoint ++ "/uploads/" ++ filename)
+                            base64 |> Maybe.withDefault (Route.baseEndpoint ++ "/uploads/" ++ filename)
                       in
                       image [ width <| px 200 ] { src = src, description = "Photo de profil" }
                     , el [ centerX ]
@@ -577,7 +578,7 @@ viewButtons : Element Msg
 viewButtons =
     row [ UI.defaultSpacing, alignRight ]
         [ text "Annuler"
-            |> Button.makeButton (Just GoBack)
+            |> Button.makeButton (Just RequestedPreviousPage)
             |> Button.withBackgroundColor Color.lightGrey
             |> Button.viewButton
         , text "Enregistrer les modifications"

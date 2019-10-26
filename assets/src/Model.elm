@@ -9,6 +9,7 @@ import File exposing (File)
 import Graphql.Http
 import Menu
 import RemoteData exposing (RemoteData(..), WebData)
+import Route exposing (Route(..))
 import Table
 import Url exposing (Url)
 import Utils
@@ -19,8 +20,10 @@ type alias Model =
     , key : Nav.Key
     , isAdmin : Bool
     , currentYear : Year
+    , champions : RemoteData (Graphql.Http.Error Champions) Champions
     , sectors : RemoteData (Graphql.Http.Error Sectors) Sectors
     , championLoggedIn : Maybe Id
+    , previousListing : Maybe Route
     }
 
 
@@ -36,8 +39,7 @@ type Page
 
 
 type alias ChampionsPageModel =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , sport : Maybe Sport
+    { sport : Maybe Sport
     , tableState : Table.State
     , searchQuery : Maybe String
     , sector : Maybe Sector
@@ -45,8 +47,7 @@ type alias ChampionsPageModel =
 
 
 type alias MedalsPageModel =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , sport : Maybe Sport
+    { sport : Maybe Sport
     , specialty : Maybe Specialty
     , tableState : Table.State
     , currentYear : Year
@@ -56,8 +57,7 @@ type alias MedalsPageModel =
 
 
 type alias TeamsPageModel =
-    { champions : RemoteData (Graphql.Http.Error Champions) Champions
-    , sport : Maybe Sport
+    { sport : Maybe Sport
     , tableState : Table.State
     , currentYear : Year
     , selectedYear : Maybe Year
@@ -925,7 +925,8 @@ type Msg
     | PressedAddHighlightButton
     | PressedDeleteHighlightButton Int
     | UpdatedHighlight Int String
-    | GoBack
+    | RequestedPreviousPage
+    | RequestedPreviousListingPage
     | PressedEditChampionButton Id
     | PressedAddPictureButton
     | ClickedOnPicture Int
@@ -1188,14 +1189,9 @@ initEvent currentYear =
     }
 
 
-baseEndpoint : String
-baseEndpoint =
-    "/elixir"
-
-
 resourcesEndpoint : String
 resourcesEndpoint =
-    baseEndpoint ++ "/resources"
+    Route.baseEndpoint ++ "/resources"
 
 
 initRecord : Year -> Record

@@ -1,13 +1,13 @@
 module Page.Medals exposing (init, view)
 
 import Aisf.Scalar exposing (Id(..))
-import Api
 import Common
 import Dict exposing (Dict)
 import Element exposing (..)
+import Graphql.Http
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
+import Model exposing (Champion, Champions, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 import UI
@@ -15,20 +15,19 @@ import UI
 
 init : Year -> ( MedalsPageModel, Cmd Msg )
 init year =
-    ( { champions = Loading
-      , sport = Nothing
+    ( { sport = Nothing
       , specialty = Nothing
       , tableState = Table.initialSort "ANNÉE"
       , currentYear = year
       , selectedYear = Nothing
       , searchQuery = Nothing
       }
-    , Api.getChampionsWithMedals
+    , Cmd.none
     )
 
 
-view : MedalsPageModel -> Element Msg
-view model =
+view : RemoteData (Graphql.Http.Error Champions) Champions -> MedalsPageModel -> Element Msg
+view rdChampions model =
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
@@ -38,7 +37,7 @@ view model =
                 |> Maybe.withDefault none
             , Common.yearSelector True model.currentYear SelectedAYear Nothing
             ]
-        , case model.champions of
+        , case rdChampions of
             Success champions ->
                 champions
                     |> Common.filterBySearchQuery model.searchQuery

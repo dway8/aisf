@@ -13,6 +13,7 @@ import Html
 import Html.Attributes as HA
 import Model exposing (Attachment, Champion, ChampionPageModel, Medal, Msg(..), Picture, ProExperience, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
+import Route
 import Table
 import UI
 import UI.Button as Button
@@ -46,7 +47,7 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
         [ row [ UI.largeSpacing ]
             [ Utils.viewIf (championLoggedIn == Nothing)
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
-                    |> Button.makeButton (Just GoBack)
+                    |> Button.makeButton (Just RequestedPreviousListingPage)
                     |> Button.withBackgroundColor Color.lightGrey
                     |> Button.withAttrs []
                     |> Button.viewButton
@@ -174,7 +175,7 @@ viewPictures champion =
                 (champion.pictures
                     |> List.indexedMap
                         (\idx { attachment } ->
-                            image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = Model.baseEndpoint ++ "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
+                            image [ onClick <| ClickedOnPicture idx, width <| px 200 ] { src = Route.baseEndpoint ++ "/uploads/" ++ id ++ "/" ++ attachment.filename, description = "" }
                         )
                 )
         ]
@@ -263,6 +264,6 @@ viewPictureDialog (Id championId) { attachment } pictures =
             else
                 Nothing
         , body =
-            image [ centerX, centerY ] { src = Model.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ attachment.filename, description = "" }
+            image [ centerX, centerY ] { src = Route.baseEndpoint ++ "/uploads/" ++ championId ++ "/" ++ attachment.filename, description = "" }
         , closable = Just ClickedOnPictureDialogBackground
         }

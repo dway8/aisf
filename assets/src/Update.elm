@@ -45,8 +45,11 @@ update msg model =
                 External _ ->
                     ( model, Cmd.none )
 
-        GoBack ->
+        RequestedPreviousPage ->
             goBack model
+
+        RequestedPreviousListingPage ->
+            goToPreviousListing model
 
         ChampionSelected id ->
             selectChampion id model
@@ -281,16 +284,40 @@ update msg model =
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
     let
-        ( page, cmd ) =
+        ( newPage, cmd ) =
             Route.parseUrl newLocation
                 |> getPageAndCmdFromRoute model.currentYear model.isAdmin model.championLoggedIn model.key
+
+        previousListing =
+            case model.currentPage of
+                ChampionsPage _ ->
+                    Just ChampionsRoute
+
+                MedalsPage _ ->
+                    Just MedalsRoute
+
+                TeamsPage _ ->
+                    Just TeamsRoute
+
+                _ ->
+                    model.previousListing
     in
-    ( { model | currentPage = page }, cmd )
+    ( { model | currentPage = newPage, previousListing = previousListing }, cmd )
 
 
 goBack : Model -> ( Model, Cmd Msg )
 goBack model =
     ( model, Nav.back model.key 1 )
+
+
+goToPreviousListing : Model -> ( Model, Cmd Msg )
+goToPreviousListing model =
+    let
+        newRoute =
+            model.previousListing
+                |> Maybe.withDefault ChampionsRoute
+    in
+    ( model, Nav.pushUrl model.key (Route.routeToString newRoute) )
 
 
 getPageAndCmdFromRoute : Year -> Bool -> Maybe Id -> Nav.Key -> Route -> ( Page, Cmd Msg )
@@ -820,18 +847,7 @@ updateCurrentYear str model =
 
 handleChampionsResponse : RemoteData (Graphql.Http.Error Champions) Champions -> Model -> ( Model, Cmd Msg )
 handleChampionsResponse resp model =
-    case model.currentPage of
-        ChampionsPage cModel ->
-            ( { model | currentPage = ChampionsPage { cModel | champions = resp, sport = Nothing } }, Cmd.none )
-
-        MedalsPage mModel ->
-            ( { model | currentPage = MedalsPage { mModel | champions = resp } }, Cmd.none )
-
-        TeamsPage tModel ->
-            ( { model | currentPage = TeamsPage { tModel | champions = resp } }, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
+    ( { model | champions = resp }, Cmd.none )
 
 
 handleTableMsg : Table.State -> Model -> ( Model, Cmd msg )

@@ -14,6 +14,7 @@ import Html.Events as HE
 import Json.Decode as D
 import Model exposing (..)
 import RemoteData exposing (RemoteData(..), WebData)
+import Route
 import Table
 import UI
 import UI.Color as Color
@@ -199,7 +200,7 @@ profilePictureColumn =
                         src =
                             case champion.profilePicture of
                                 Just { filename } ->
-                                    Model.baseEndpoint ++ "/uploads/" ++ filename
+                                    Route.baseEndpoint ++ "/uploads/" ++ filename
 
                                 _ ->
                                     Model.resourcesEndpoint ++ "/images/no-profile-pic.jpg"
@@ -374,7 +375,7 @@ viewProfilePicture widthPx profilePicture =
                 el [ width fill ] none
 
             Just { filename } ->
-                image [ width <| px widthPx ] { src = Model.baseEndpoint ++ "/uploads/" ++ filename, description = "Photo de profil" }
+                image [ width <| px widthPx ] { src = Route.baseEndpoint ++ "/uploads/" ++ filename, description = "Photo de profil" }
 
 
 viewInfoRow : String -> Element Msg -> Element Msg
@@ -416,7 +417,7 @@ viewBlockTitle title =
             String.toUpper title
 
 
-competitionSelector : Bool ->List Competition ->  (String -> Msg) -> Maybe Competition -> Element Msg
+competitionSelector : Bool -> List Competition -> (String -> Msg) -> Maybe Competition -> Element Msg
 competitionSelector showOptionAll competitionsList msg currentCompetition =
     el [] <|
         html <|

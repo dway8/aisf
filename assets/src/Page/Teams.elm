@@ -1,13 +1,15 @@
 module Page.Teams exposing (init, view)
 
 import Aisf.Scalar exposing (Id(..))
-import Api
 import Common
 import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Keyed as EK
+import Element.Lazy as EL
+import Graphql.Http
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, Msg(..), Sport, TeamsPageModel, Year)
+import Model exposing (Champion, Champions, Msg(..), Sport, TeamsPageModel, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 import UI
@@ -15,42 +17,49 @@ import UI
 
 init : Year -> ( TeamsPageModel, Cmd Msg )
 init year =
-    ( { champions = Loading
-      , sport = Nothing
+    ( { sport = Nothing
       , tableState = Table.initialSort "ANNÉE"
       , currentYear = year
       , selectedYear = Nothing
       , searchQuery = Nothing
       }
-    , Api.getChampions
+    , Cmd.none
     )
 
 
-view : TeamsPageModel -> Element Msg
-view model =
-    column [ UI.largeSpacing, width fill ]
-        [ row [ UI.largeSpacing ]
-            [ Common.viewSearchQuery model.searchQuery
-            , Common.sportSelector True model.sport
-            , Common.yearSelector True model.currentYear SelectedAYear Nothing
+view : RemoteData (Graphql.Http.Error Champions) Champions -> TeamsPageModel -> Element Msg
+view rdChampions model =
+    EK.el [ width fill ] <|
+        ( "teams-page"
+        , column [ UI.largeSpacing, width fill ]
+            [ row [ UI.largeSpacing ]
+                [ Common.viewSearchQuery model.searchQuery
+                , Common.sportSelector True model.sport
+                , Common.yearSelector True model.currentYear SelectedAYear Nothing
+                ]
+            , case rdChampions of
+                Success champions ->
+                    EL.lazy5 viewChampionsTable model.searchQuery model.sport model.selectedYear model.tableState champions
+
+                Loading ->
+                    UI.spinner
+
+                _ ->
+                    none
             ]
-        , case model.champions of
-            Success champions ->
-                champions
-                    |> Common.filterBySearchQuery model.searchQuery
-                    |> getYearsInTeamsFromChampions
-                    |> filterBySport model.sport
-                    |> filterByYear model.selectedYear
-                    |> Table.view tableConfig model.tableState
-                    |> html
-                    |> el [ htmlAttribute <| HA.id "teams-list", width fill ]
+        )
 
-            Loading ->
-                UI.spinner
 
-            _ ->
-                none
-        ]
+viewChampionsTable : Maybe String -> Maybe Sport -> Maybe Year -> Table.State -> Champions -> Element Msg
+viewChampionsTable searchQuery sport selectedYear tableState champions =
+    champions
+        |> Common.filterBySearchQuery searchQuery
+        |> getYearsInTeamsFromChampions
+        |> filterBySport sport
+        |> filterByYear selectedYear
+        |> Table.view tableConfig tableState
+        |> html
+        |> el [ htmlAttribute <| HA.id "teams-list", width fill ]
 
 
 type alias YearInTeamFromChampion =

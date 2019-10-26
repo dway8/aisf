@@ -44,8 +44,10 @@ init flags url key =
       , key = key
       , isAdmin = flags.isAdmin
       , currentYear = currentYear
+      , champions = Loading
       , sectors = Loading
       , championLoggedIn = Nothing
+      , previousListing = Nothing
       }
-    , Cmd.batch [ cmd, Api.getSectors ]
+    , Cmd.batch [ cmd, Api.getChampions, Api.getSectors ]
     )

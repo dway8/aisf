@@ -1,4 +1,4 @@
-module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getChampionsWithMedals, getEvents, getRecords, getSectors, login, updateChampion)
+module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getEvents, getRecords, getSectors, login, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -22,11 +22,12 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
 import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, LoginResponse(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Record, RecordType(..), Sector, Specialty(..), Sport(..), Winner, Year(..))
 import RemoteData
+import Route
 
 
 endpoint : String
 endpoint =
-    Model.baseEndpoint ++ "/graphql"
+    Route.baseEndpoint ++ "/graphql"
 
 
 getChampions : Cmd Msg
@@ -44,14 +45,6 @@ getChampion isAdmin id =
         |> Graphql.Http.queryRequest endpoint
         |> Graphql.Http.withCredentials
         |> Graphql.Http.send (RemoteData.fromResult >> GotChampion)
-
-
-getChampionsWithMedals : Cmd Msg
-getChampionsWithMedals =
-    Query.championsWithMedals (championSelection False)
-        |> Graphql.Http.queryRequest endpoint
-        |> Graphql.Http.withCredentials
-        |> Graphql.Http.send (RemoteData.fromResult >> GotChampions)
 
 
 getSectors : Cmd Msg

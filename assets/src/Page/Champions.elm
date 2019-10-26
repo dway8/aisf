@@ -1,6 +1,5 @@
 module Page.Champions exposing (init, view)
 
-import Api
 import Common
 import Dict exposing (Dict)
 import Element exposing (..)
@@ -9,7 +8,7 @@ import Html
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Champion, ChampionsPageModel, Msg(..), Sector, Sectors, Sport)
+import Model exposing (Champion, Champions, ChampionsPageModel, Msg(..), Sector, Sectors, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Table
@@ -21,18 +20,17 @@ import Utils
 
 init : ( ChampionsPageModel, Cmd Msg )
 init =
-    ( { champions = Loading
-      , sport = Nothing
+    ( { sport = Nothing
       , tableState = Table.sortBy "NOM / PRÉNOM" True
       , searchQuery = Nothing
       , sector = Nothing
       }
-    , Api.getChampions
+    , Cmd.none
     )
 
 
-view : Bool -> RemoteData (Graphql.Http.Error Sectors) Sectors -> ChampionsPageModel -> Element Msg
-view isAdmin rdSectors model =
+view : Bool -> RemoteData (Graphql.Http.Error Champions) Champions -> RemoteData (Graphql.Http.Error Sectors) Sectors -> ChampionsPageModel -> Element Msg
+view isAdmin rdChampions rdSectors model =
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.largeSpacing ]
             [ Common.viewSearchQuery model.searchQuery
@@ -48,7 +46,7 @@ view isAdmin rdSectors model =
                         |> Button.withBackgroundColor Color.green
                         |> Button.viewButton
                 }
-        , case model.champions of
+        , case rdChampions of
             Success champions ->
                 champions
                     |> Common.filterBySearchQuery model.searchQuery

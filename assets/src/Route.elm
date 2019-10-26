@@ -1,7 +1,6 @@
-module Route exposing (Route(..), parseUrl, routeToString)
+module Route exposing (Route(..), baseEndpoint, parseUrl, routeToString)
 
 import Aisf.Scalar exposing (Id(..))
-import Model
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, string, top)
 
@@ -40,7 +39,7 @@ parseUrl url =
 
 routeToString : Route -> String
 routeToString route =
-    Model.baseEndpoint
+    baseEndpoint
         ++ (case route of
                 ChampionsRoute ->
                     "/champions"
@@ -69,3 +68,8 @@ routeToString route =
                 LoginRoute ->
                     "/login"
            )
+
+
+baseEndpoint : String
+baseEndpoint =
+    "/elixir"

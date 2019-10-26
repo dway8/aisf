@@ -56,13 +56,13 @@ viewBody model =
                     Utils.viewIf (model.championLoggedIn == Nothing) <| viewMenu model.currentPage
             , case model.currentPage of
                 ChampionsPage championsModel ->
-                    Page.Champions.view model.isAdmin model.sectors championsModel
+                    Page.Champions.view model.isAdmin model.champions model.sectors championsModel
 
                 MedalsPage medalsModel ->
-                    Page.Medals.view medalsModel
+                    Page.Medals.view model.champions medalsModel
 
                 TeamsPage teamsModel ->
-                    Page.Teams.view teamsModel
+                    Page.Teams.view model.champions teamsModel
 
                 ChampionPage championModel ->
                     Page.Champion.view model.isAdmin model.championLoggedIn championModel
