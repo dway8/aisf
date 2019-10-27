@@ -75,6 +75,7 @@ initChampionForm =
     , background = Nothing
     , volunteering = Nothing
     , pictures = Dict.empty
+    , login = Nothing
     }
 
 
@@ -109,6 +110,7 @@ championToForm champion =
     , background = champion.background
     , volunteering = champion.volunteering
     , pictures = champion.pictures |> toDict
+    , login = champion.login
     }
 
 
@@ -140,11 +142,7 @@ view rdSectors currentYear model =
                         [ row [ UI.defaultSpacing ] [ el [ Font.bold ] <| text "Discipline", Common.sportSelector False (Just champion.sport) ]
                         , memberCheckbox champion.isMember
                         ]
-                    , let
-                        ( label, value ) =
-                            getChampionFormFieldData Intro champion
-                      in
-                      viewTextArea label value (UpdatedChampionField Intro)
+                    , viewChampionTextArea Intro champion
                     , editHighlights champion
                     , editPrivateInfo champion
                     , editSportCareer champion
@@ -176,7 +174,15 @@ memberCheckbox isMember =
 editPrivateInfo : ChampionForm -> Element Msg
 editPrivateInfo champion =
     Common.viewBlock "Informations privées"
-        [ viewChampionTextInput BirthDate champion
+        [ row [ UI.defaultSpacing, width fill ]
+            [ UI.textInput ([ width fill ] ++ UI.disabledTextInputAttrs)
+                { onChange = always NoOp
+                , text = champion.login |> Maybe.map String.fromInt |> Maybe.withDefault ""
+                , placeholder = Nothing
+                , label = Just "Numéro champion"
+                }
+            , viewChampionTextInput BirthDate champion
+            ]
         , viewChampionTextInput Address champion
         , row [ UI.defaultSpacing, width fill ]
             [ viewChampionTextInput Email champion
@@ -189,10 +195,10 @@ editSportCareer : ChampionForm -> Element Msg
 editSportCareer champion =
     Common.viewBlock "Carrière sportive"
         [ viewChampionTextInput FrenchTeamParticipation champion
-        , viewChampionTextInput OlympicGamesParticipation champion
-        , viewChampionTextInput WorldCupParticipation champion
-        , viewChampionTextInput TrackRecord champion
-        , viewChampionTextInput BestMemory champion
+        , viewChampionTextArea OlympicGamesParticipation champion
+        , viewChampionTextArea WorldCupParticipation champion
+        , viewChampionTextArea TrackRecord champion
+        , viewChampionTextArea BestMemory champion
         , viewChampionTextInput Decoration champion
         ]
 
@@ -201,7 +207,7 @@ editProfessionalCareer : Sectors -> Dropdown.Model -> ChampionForm -> Element Ms
 editProfessionalCareer sectors sectorDropdown champion =
     Common.viewBlock "Carrière professionnelle"
         [ viewChampionTextInput Background champion
-        , viewChampionTextInput Volunteering champion
+        , viewChampionTextArea Volunteering champion
         , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, right = 0, left = 0 } ]
             [ row [ UI.defaultSpacing ]
                 [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
@@ -224,7 +230,11 @@ editProExperiences sectors sectorDropdown { proExperiences } =
                             [ viewProExperienceTextInput id Title exp
                             , viewProExperienceTextInput id CompanyName exp
                             ]
-                        , viewProExperienceTextInput id Description exp
+                        , let
+                            ( label, value ) =
+                                getProExperienceFormFieldData Description exp
+                          in
+                          viewGenericTextArea label value (UpdatedProExperienceField id Description)
                         , row [ UI.defaultSpacing, width fill ]
                             [ viewProExperienceTextInput id Website exp
                             , viewProExperienceTextInput id Contact exp
@@ -426,8 +436,17 @@ viewChampionTextInput field champion =
         }
 
 
-viewTextArea : String -> String -> (String -> Msg) -> Element Msg
-viewTextArea label value msg =
+viewChampionTextArea : FormField -> ChampionForm -> Element Msg
+viewChampionTextArea field champion =
+    let
+        ( label, value ) =
+            getChampionFormFieldData field champion
+    in
+    viewGenericTextArea label value (UpdatedChampionField field)
+
+
+viewGenericTextArea : String -> String -> (String -> Msg) -> Element Msg
+viewGenericTextArea label value msg =
     Input.multiline
         [ Border.solid
         , Border.rounded 8

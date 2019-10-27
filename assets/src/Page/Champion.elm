@@ -65,18 +65,29 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
                 column [ UI.largerSpacing, width fill ]
                     [ row [ UI.largeSpacing ]
                         [ Common.viewProfilePicture 150 champ.profilePicture
-                        , column [ UI.largeSpacing, alignTop ]
-                            [ el [ Font.bold, UI.largestFont ] <| text champ.lastName
-                            , el [ Font.bold, UI.largestFont ] <| text champ.firstName
+                        , column [ UI.largeSpacing, alignBottom ]
+                            [ column [ UI.defaultSpacing ]
+                                [ el [ Font.bold, UI.largestFont ] <| text champ.firstName
+                                , el [ Font.bold, UI.largeFont ] <| text champ.lastName
+                                ]
                             , row [ UI.defaultSpacing ]
-                                [ image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon champ.sport, description = Model.sportToString champ.sport }
+                                [ image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
+                                , image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getSportIcon champ.sport, description = Model.sportToString champ.sport }
                                 , text (Model.sportToString champ.sport)
                                 ]
-                            , image [ width <| px 50 ] { src = Model.resourcesEndpoint ++ "/images/" ++ Model.getIsMemberIcon champ.isMember, description = "" }
                             ]
                         ]
                     , champ.intro
-                        |> Maybe.map (\intro -> paragraph [ width <| maximum 900 fill, Background.color Color.lighterGrey, UI.largePadding ] [ text intro ])
+                        |> Maybe.map
+                            (\intro ->
+                                el
+                                    [ width <| maximum 900 fill
+                                    , Background.color Color.lighterGrey
+                                    , UI.largePadding
+                                    ]
+                                <|
+                                    viewTextArea intro
+                            )
                         |> Maybe.withDefault none
                     , viewHighlights champ.highlights
                     , Utils.viewIf adminOrCurrentChampion <| viewPrivateInfo champ
@@ -97,12 +108,31 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
         ]
 
 
+viewTextArea : String -> Element Msg
+viewTextArea t =
+    html <|
+        Html.p
+            [ HA.style "white-space" "pre-wrap"
+            , HA.style "overflow-wrap" "break-word"
+            , HA.style "word-wrap" "break-word"
+            , HA.style "margin" "0"
+            ]
+            [ Html.text t
+            ]
+
+
 viewHighlights : List String -> Element Msg
 viewHighlights highlights =
     Utils.viewIf (highlights /= []) <|
-        column [ UI.defaultSpacing, paddingXY 10 0 ]
+        column [ UI.defaultSpacing, paddingEach { top = 0, bottom = 0, right = 0, left = 30 } ]
             (highlights
-                |> List.map (\h -> paragraph [ UI.largeFont, Font.bold, Font.italic ] [ text "-\u{00A0}\u{00A0}", text h ])
+                |> List.map
+                    (\h ->
+                        row [ UI.defaultSpacing ]
+                            [ el [ Font.color Color.blue, UI.smallestFont, moveDown 2 ] <| UI.viewIcon "circle"
+                            , paragraph [ UI.largeFont, Font.bold ] [ text h ]
+                            ]
+                    )
             )
 
 
@@ -121,10 +151,10 @@ viewSportCareer : Champion -> Element Msg
 viewSportCareer champion =
     Common.viewBlock "Carrière sportive"
         [ Common.viewInfoRow "Années en équipe de France" (champion.frenchTeamParticipation |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Participation aux JO" (champion.olympicGamesParticipation |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Championnats du monde" (champion.worldCupParticipation |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Palmarès" (champion.trackRecord |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Ton meilleur souvenir" (champion.bestMemory |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Participation aux JO" (champion.olympicGamesParticipation |> Maybe.withDefault "-" |> viewTextArea)
+        , Common.viewInfoRow "Championnats du monde" (champion.worldCupParticipation |> Maybe.withDefault "-" |> viewTextArea)
+        , Common.viewInfoRow "Palmarès" (champion.trackRecord |> Maybe.withDefault "-" |> viewTextArea)
+        , Common.viewInfoRow "Ton meilleur souvenir" (champion.bestMemory |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Décoration" (champion.decoration |> Maybe.withDefault "-" |> text)
         ]
 
@@ -133,7 +163,7 @@ viewProfessionalCareer : Champion -> Element Msg
 viewProfessionalCareer champion =
     Common.viewBlock "Carrière professionnelle"
         [ Common.viewInfoRow "Formation" (champion.background |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Bénévolat" (champion.volunteering |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Bénévolat" (champion.volunteering |> Maybe.withDefault "-" |> viewTextArea)
         , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, left = 0, right = 0 } ]
             [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Expériences professionnelles"
             , if champion.proExperiences == [] then
@@ -150,11 +180,11 @@ viewProfessionalCareer champion =
 
 viewProExperience : ProExperience -> Element Msg
 viewProExperience exp =
-    column [ UI.smallSpacing, width fill, Background.color Color.lightestGrey, UI.largePadding ]
+    column [ UI.defaultSpacing, width fill, Background.color Color.lightestGrey, UI.largePadding ]
         [ Common.viewInfoRow "Secteurs" (exp.sectors |> String.join ", " |> text)
         , Common.viewInfoRow "Titre" (exp.title |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Entreprise" (exp.companyName |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Description" (exp.description |> Maybe.withDefault "-" |> text)
+        , Common.viewInfoRow "Description" (exp.description |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Site internet" (exp.website |> Maybe.withDefault "-" |> text)
         , Common.viewInfoRow "Contact" (exp.contact |> Maybe.withDefault "-" |> text)
         ]

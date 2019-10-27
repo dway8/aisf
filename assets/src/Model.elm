@@ -201,6 +201,7 @@ type alias ChampionForm =
     , background : Maybe String
     , volunteering : Maybe String
     , pictures : Dict Int Picture
+    , login : Maybe Int
     }
 
 

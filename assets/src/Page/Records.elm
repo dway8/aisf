@@ -83,7 +83,7 @@ viewRecord record =
             , el [ Font.italic ] <| text " en "
             , el [ Font.italic ] <| text <| String.toLower <| Model.specialtyToDisplay record.specialty
             ]
-        , wrappedRow [ UI.defaultSpacing ]
+        , column [ UI.defaultSpacing, paddingEach { top = 0, bottom = 0, right = 0, left = 20 } ]
             (record.winners
                 |> Dict.map
                     (\i w ->
@@ -103,7 +103,6 @@ viewRecord record =
                             ]
                     )
                 |> Dict.values
-                |> List.intersperse (text "-")
             )
         ]
 

@@ -215,6 +215,15 @@ textInput attrs config =
         }
 
 
+disabledTextInputAttrs : List (Attribute msg)
+disabledTextInputAttrs =
+    [ htmlAttribute <| HA.disabled True
+    , Background.color UI.Color.lighterGrey
+    , notAllowedCursor
+    , Font.color UI.Color.darkGrey
+    ]
+
+
 type alias DialogConfig msg =
     { header : Maybe (Element msg)
     , outerSideElements : Maybe ( Element msg, Element msg )
