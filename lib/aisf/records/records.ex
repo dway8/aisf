@@ -42,11 +42,7 @@ defmodule Aisf.Records.Records do
         end).()
   end
 
-  @doc """
-  Creates a pro_experience.
-
-  """
-  defp create_winner(record, attrs \\ %{}) do
+  defp create_winner(record, attrs) do
     Logger.info("Creating winner for record #{record.id}")
 
     record

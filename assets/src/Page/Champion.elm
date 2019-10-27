@@ -28,20 +28,15 @@ init isAdmin championLoggedIn id =
       , medalsTableState = Table.initialSort "ANNÉE"
       , pictureDialog = Nothing
       }
-    , Api.getChampion (isAdminOrCurrentChampion isAdmin championLoggedIn id) id
+    , Api.getChampion (Model.isAdminOrCurrentChampion isAdmin championLoggedIn id) id
     )
-
-
-isAdminOrCurrentChampion : Bool -> Maybe Id -> Id -> Bool
-isAdminOrCurrentChampion isAdmin championLoggedIn id =
-    isAdmin || (championLoggedIn |> Maybe.map ((==) id) |> Maybe.withDefault False)
 
 
 view : Bool -> Maybe Id -> ChampionPageModel -> Element Msg
 view isAdmin championLoggedIn { id, champion, medalsTableState } =
     let
         adminOrCurrentChampion =
-            isAdminOrCurrentChampion isAdmin championLoggedIn id
+            Model.isAdminOrCurrentChampion isAdmin championLoggedIn id
     in
     column [ UI.largeSpacing, width fill ]
         [ row [ UI.defaultSpacing ]

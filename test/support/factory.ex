@@ -15,7 +15,8 @@ defmodule AisfWeb.Factory do
         pro_experiences: [],
         medals: [],
         is_member: false,
-        intro: Faker.Lorem.paragraph(Enum.random(2..5))
+        intro: Faker.Lorem.paragraph(Enum.random(2..5)),
+        highlights: []
       }
       |> Map.merge(attrs)
 

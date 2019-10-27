@@ -32,7 +32,7 @@ jobs:
       - run: mix do deps.get, compile  # get updated dependencies & compile them
 
       - run: cd assets && npm install
-      - run: npm run deploy --prefix ./assets && mix phx.digest
+      - run: npm run build --prefix ./assets && mix phx.digest
 
       - save_cache:  # generate and store mix cache
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}

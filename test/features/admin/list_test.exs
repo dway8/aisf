@@ -9,20 +9,10 @@ defmodule AisfWeb.Admin.ListTest do
     {:ok, champion4} = Factory.create_champion_with(%{sport: "Ski de fond"})
 
     context.session
-    |> visit("/")
+    |> visit("/elixir/")
     |> set_cookie("isAdmin", "1")
 
     {:ok, champion1: champion1, champion2: champion2, champion3: champion3, champion4: champion4}
-  end
-
-  test "viewing a list of all the champions", context do
-    context.session
-    |> visit("/admin")
-    |> assert_has(Query.css(".champion-item", count: 4))
-    |> assert_has(Query.text(context.champion1.first_name))
-    |> assert_has(Query.text(context.champion2.first_name))
-    |> assert_has(Query.text(context.champion3.first_name))
-    |> assert_has(Query.text(context.champion4.first_name))
   end
 
   test "filtering champions by sport", %{
@@ -32,7 +22,7 @@ defmodule AisfWeb.Admin.ListTest do
     champion3: champion3
   } do
     session
-    |> visit("/admin")
+    |> visit("/elixir/")
     |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Biathlon"))
     |> assert_has(Query.css(".champion-item", count: 1))
@@ -43,20 +33,14 @@ defmodule AisfWeb.Admin.ListTest do
     |> assert_has(Query.text(champion3.first_name))
   end
 
-  test "selecting a champion in the list goes the champion edit page", %{
+  test "selecting a champion in the list goes to the full champion page", %{
     session: session,
     champion1: champion1
   } do
     session
-    |> visit("/admin")
+    |> visit("/elixir/")
     |> click(Query.text(champion1.first_name))
-    |> assert_has(Query.text("ÉDITER CHAMPION"))
-
-    assert(
-      String.ends_with?(
-        current_url(session),
-        "/champions/edit/" <> to_string(champion1.id)
-      )
-    )
+    |> assert_has(Query.text("Éditer la fiche"))
+    |> assert_has(Query.text("INFORMATIONS PRIVÉES"))
   end
 end

@@ -10,7 +10,7 @@ defmodule Aisf.Champions do
   alias Aisf.Champions.Champion
   alias Aisf.ProExperiences.ProExperiences
   alias Aisf.Pictures.{Pictures, Picture}
-  alias Aisf.Medals.{Medals, Medal}
+  alias Aisf.Medals.{Medals}
   alias Aisf.UploadUtils
 
   @upload_dir Application.get_env(:aisf, AisfWeb.Endpoint)[:upload_dir]
@@ -232,8 +232,13 @@ defmodule Aisf.Champions do
 
   defp generate_next_login() do
     next_login =
-      Repo.one(from(c in Champion, select: max(c.login)))
-      |> (&(&1 + 1)).()
+      case Repo.one(from(c in Champion, select: max(c.login))) do
+        nil ->
+          1
+
+        val ->
+          val + 1
+      end
 
     Logger.info("Generated next login: #{next_login}")
 

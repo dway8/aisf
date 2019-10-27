@@ -340,8 +340,22 @@ getPageAndCmdFromRoute currentYear isAdmin championLoggedIn key route =
                 |> Tuple.mapFirst ChampionPage
 
         EditChampionRoute maybeId ->
-            Page.EditChampion.init maybeId
-                |> Tuple.mapFirst EditChampionPage
+            let
+                allowIf bool =
+                    if bool then
+                        Page.EditChampion.init maybeId
+                            |> Tuple.mapFirst EditChampionPage
+
+                    else
+                        Page.Champions.init
+                            |> Tuple.mapBoth ChampionsPage (\cmds -> Nav.pushUrl key (Route.routeToString ChampionsRoute))
+            in
+            case maybeId of
+                Just id ->
+                    allowIf (Model.isAdminOrCurrentChampion isAdmin championLoggedIn id)
+
+                Nothing ->
+                    allowIf isAdmin
 
         EventsRoute ->
             Page.Events.init currentYear

@@ -2,13 +2,13 @@ defmodule AisfWeb.Admin.EditChampionTest do
   use AisfWeb.FeatureCase, async: true
   alias AisfWeb.Factory
 
-  @save_champion_button Query.css("#save-champion-btn")
+  @save_champion_button Query.css("#save-champion-btn", count: 2) |> Query.at(1)
 
   setup(context) do
     {:ok, champion} = Factory.create_champion_with(%{sport: "Ski alpin"})
 
     context.session
-    |> visit("/")
+    |> visit("/elixir/")
     |> set_cookie("isAdmin", "1")
 
     {:ok, champion: champion}
@@ -16,14 +16,14 @@ defmodule AisfWeb.Admin.EditChampionTest do
 
   test "editing a champion", %{session: session, champion: champion} do
     session
-    |> visit("/champions/edit/" <> to_string(champion.id))
-    |> assert_has(Query.text("ÉDITER CHAMPION"))
+    |> visit("/elixir/champions/edit/" <> to_string(champion.id))
+    |> assert_has(Query.text("ÉDITER LA FICHE CHAMPION"))
     |> has_value?(Query.text_field("Prénom"), champion.first_name)
 
     session
     |> fill_in(Query.text_field("Prénom"), with: "Diane")
     |> click(@save_champion_button)
-    |> assert_has(Query.text("INFOS"))
+    |> assert_has(Query.text("Éditer la fiche"))
     |> assert_has(Query.text("Diane"))
 
     assert(

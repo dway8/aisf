@@ -22,7 +22,7 @@ defmodule AisfWeb.FilterChampionsTest do
 
   test "filtering champions by name", context do
     context.session
-    |> visit("/champions")
+    |> visit("/elixir")
     |> assert_has(Query.css(".champion-item", count: 4))
     |> fill_in(@filter_input, with: "Paul")
     |> assert_has(Query.css(".champion-item", count: 2))
@@ -32,6 +32,6 @@ defmodule AisfWeb.FilterChampionsTest do
 
   test "filtering champions by name and sport", context do
     context.session
-    |> visit("/champions")
+    |> visit("/elixir")
   end
 end

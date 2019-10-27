@@ -36,19 +36,19 @@ defmodule AisfWeb.MedalsTest do
 
   test "viewing all the champions with medals if no sport selected", %{session: session} do
     session
-    |> visit("/medals")
+    |> visit("/elixir/medals")
     |> assert_has(Query.css(".champion-item", count: 3))
   end
 
   test "filtering medals by sport", context do
     context[:session]
-    |> visit("/medals")
+    |> visit("/elixir/medals")
     |> click(Query.text("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 2))
-      |> assert_has(Query.text("Argent"))
+      |> assert_has(Query.attribute("title", "Argent"))
       |> assert_has(Query.text("Cl. général"))
       |> assert_has(Query.text(context[:champion1].first_name, count: 2))
     end)
@@ -59,13 +59,13 @@ defmodule AisfWeb.MedalsTest do
       element
       |> assert_has(Query.css(".champion-item", count: 1))
       |> assert_has(Query.text(context[:champion2].first_name))
-      |> assert_has(Query.text("Bronze"))
+      |> assert_has(Query.attribute("title", "Bronze"))
     end)
   end
 
   test "filtering medals by sport and medals", %{session: session, champion1: champion1} do
     session
-    |> visit("/medals")
+    |> visit("/elixir/medals")
     |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> click(Query.option("Toutes les spécialités"))
@@ -73,7 +73,7 @@ defmodule AisfWeb.MedalsTest do
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 1))
-      |> assert_has(Query.text("Argent"))
+      |> assert_has(Query.attribute("title", "Argent"))
       |> assert_has(Query.text("1992"))
       |> assert_has(Query.text(champion1.first_name, count: 1))
     end)
@@ -85,7 +85,7 @@ defmodule AisfWeb.MedalsTest do
 
   test "filtering medals by sport and year", %{session: session} do
     session
-    |> visit("/medals")
+    |> visit("/elixir/medals")
     |> click(Query.option("Toutes les disciplines"))
     |> click(Query.option("Ski de fond"))
     |> click(Query.option("Toutes les années"))
@@ -93,7 +93,7 @@ defmodule AisfWeb.MedalsTest do
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 1))
-      |> assert_has(Query.text("Argent"))
+      |> assert_has(Query.attribute("title", "Argent"))
       |> assert_has(Query.text("1992"))
     end)
 
@@ -102,7 +102,7 @@ defmodule AisfWeb.MedalsTest do
     |> find(Query.css("#medals-list"), fn element ->
       element
       |> assert_has(Query.css(".champion-item", count: 1))
-      |> assert_has(Query.text("Or"))
+      |> assert_has(Query.attribute("title", "Or"))
       |> assert_has(Query.text("1981"))
     end)
 
@@ -116,10 +116,10 @@ defmodule AisfWeb.MedalsTest do
     champion1: champion1
   } do
     session
-    |> visit("/medals")
+    |> visit("/elixir/medals")
     |> click(Query.option("Ski de fond"))
     |> click(Query.text(champion1.first_name, count: 2, at: 1))
-    |> assert_has(Query.text("EXPÉRIENCES PROFESSIONNELLES"))
+    |> assert_has(Query.text("Expériences professionnelles"))
 
     assert(
       String.ends_with?(

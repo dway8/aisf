@@ -1251,3 +1251,8 @@ recordTypeToDisplay recordType =
 
         FirstSix ->
             "Six premiers"
+
+
+isAdminOrCurrentChampion : Bool -> Maybe Id -> Id -> Bool
+isAdminOrCurrentChampion isAdmin championLoggedIn id =
+    isAdmin || (championLoggedIn |> Maybe.map ((==) id) |> Maybe.withDefault False)

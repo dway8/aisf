@@ -5,15 +5,14 @@ defmodule AisfWeb.MembersTest do
   setup do
     {:ok, champion1} = Factory.create_champion_with(%{is_member: true, sport: "Ski alpin"})
     {:ok, champion2} = Factory.create_champion_with(%{is_member: true, sport: "Biathlon"})
-    {:ok, champion3} = Factory.create_champion_with(%{is_member: true, sport: "Ski alpin"})
-    {:ok, champion4} = Factory.create_champion_with(%{sport: "Ski alpin"})
+    {:ok, champion3} = Factory.create_champion_with(%{sport: "Ski alpin"})
 
-    {:ok, champion1: champion1, champion2: champion2, champion3: champion3, champion4: champion4}
+    {:ok, champion1: champion1, champion2: champion2, champion3: champion3}
   end
 
-  test "viewing a list of members only", context do
+  test "viewing a list of all the champions", context do
     context.session
-    |> visit("/champions")
+    |> visit("/elixir/champions")
     |> assert_has(Query.css(".champion-item", count: 3))
     |> assert_has(Query.text(context.champion1.first_name))
     |> assert_has(Query.text(context.champion2.first_name))
@@ -27,7 +26,7 @@ defmodule AisfWeb.MembersTest do
     champion3: champion3
   } do
     session
-    |> visit("/champions")
+    |> visit("/elixir/champions")
     |> assert_has(Query.css(".champion-item", count: 3))
     |> click(Query.text("Toutes les disciplines"))
     |> click(Query.option("Biathlon"))
@@ -44,9 +43,9 @@ defmodule AisfWeb.MembersTest do
     champion1: champion1
   } do
     session
-    |> visit("/champions")
+    |> visit("/elixir/champions")
     |> click(Query.text(champion1.first_name))
-    |> assert_has(Query.text("EXPÉRIENCES PROFESSIONNELLES"))
+    |> assert_has(Query.text("Expériences professionnelles"))
 
     assert(
       String.ends_with?(
