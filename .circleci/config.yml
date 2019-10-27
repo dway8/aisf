@@ -32,6 +32,11 @@ jobs:
       - run: mix do deps.get, compile  # get updated dependencies & compile them
 
       - run: cd assets && npm install
+
+      #elm 0.19.1
+      - run: wget https://44a95588fe4cc47efd96-ec3c2a753a12d2be9f23ba16873acc23.ssl.cf2.rackcdn.com/elm-0.19.1-beta-1-linux
+      - run: cp elm-0.19.1-beta-1-linux './assets/node_modules/.bin/elm'
+
       - run: npm run build --prefix ./assets && mix phx.digest
 
       - save_cache:  # generate and store mix cache
