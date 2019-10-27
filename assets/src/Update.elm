@@ -375,9 +375,6 @@ updateChampionForm field val model =
                                     Intro ->
                                         { champion | intro = Just val }
 
-                                    FrenchTeamParticipation ->
-                                        { champion | frenchTeamParticipation = Just val }
-
                                     OlympicGamesParticipation ->
                                         { champion | olympicGamesParticipation = Just val }
 
@@ -783,7 +780,6 @@ validateChampionForm c =
         , intro = c.intro
         , highlights = c.highlights |> Dict.values
         , profilePicture = c.profilePicture
-        , frenchTeamParticipation = c.frenchTeamParticipation
         , olympicGamesParticipation = c.olympicGamesParticipation
         , worldCupParticipation = c.worldCupParticipation
         , trackRecord = c.trackRecord

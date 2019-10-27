@@ -152,7 +152,6 @@ type alias Champion =
     , intro : Maybe String
     , highlights : List String
     , profilePicture : Maybe Attachment
-    , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
     , worldCupParticipation : Maybe String
     , trackRecord : Maybe String
@@ -192,7 +191,6 @@ type alias ChampionForm =
     , intro : Maybe String
     , highlights : Dict Int String
     , profilePicture : Maybe Attachment
-    , frenchTeamParticipation : Maybe String
     , olympicGamesParticipation : Maybe String
     , worldCupParticipation : Maybe String
     , trackRecord : Maybe String
@@ -961,7 +959,6 @@ type FormField
     = FirstName
     | LastName
     | Intro
-    | FrenchTeamParticipation
     | OlympicGamesParticipation
     | WorldCupParticipation
     | TrackRecord

@@ -77,7 +77,6 @@ championSelection isAdmin =
         |> with Champion.intro
         |> with (SelectionSet.map (Maybe.withDefault []) Champion.highlights)
         |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) Champion.profilePictureFilename)
-        |> with Champion.frenchTeamParticipation
         |> with Champion.olympicGamesParticipation
         |> with Champion.worldCupParticipation
         |> with Champion.trackRecord
@@ -177,7 +176,6 @@ fillInChampionOptionalArgs champion optional =
     { optional
         | intro = champion.intro |> GOA.fromMaybe
         , profilePicture = champion.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
-        , frenchTeamParticipation = champion.frenchTeamParticipation |> GOA.fromMaybe
         , olympicGamesParticipation = champion.olympicGamesParticipation |> GOA.fromMaybe
         , worldCupParticipation = champion.worldCupParticipation |> GOA.fromMaybe
         , trackRecord = champion.trackRecord |> GOA.fromMaybe

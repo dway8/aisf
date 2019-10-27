@@ -150,12 +150,29 @@ viewPrivateInfo champion =
 viewSportCareer : Champion -> Element Msg
 viewSportCareer champion =
     Common.viewBlock "Carrière sportive"
-        [ Common.viewInfoRow "Années en équipe de France" (champion.frenchTeamParticipation |> Maybe.withDefault "-" |> text)
-        , Common.viewInfoRow "Participation aux JO" (champion.olympicGamesParticipation |> Maybe.withDefault "-" |> viewTextArea)
+        [ Common.viewInfoRow "Participation aux JO" (champion.olympicGamesParticipation |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Championnats du monde" (champion.worldCupParticipation |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Palmarès" (champion.trackRecord |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Ton meilleur souvenir" (champion.bestMemory |> Maybe.withDefault "-" |> viewTextArea)
         , Common.viewInfoRow "Décoration" (champion.decoration |> Maybe.withDefault "-" |> text)
+        , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, left = 0, right = 0 } ]
+            [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Années en équipe de France"
+            , if champion.yearsInFrenchTeam == [] then
+                el [ Font.italic ] <| text "Aucune année renseignée"
+
+              else
+                wrappedRow [ width fill, UI.defaultSpacing ]
+                    (champion.yearsInFrenchTeam
+                        |> List.map
+                            (\year ->
+                                year
+                                    |> Model.getYear
+                                    |> String.fromInt
+                                    |> text
+                                    |> el UI.badgeAttrs
+                            )
+                    )
+            ]
         ]
 
 

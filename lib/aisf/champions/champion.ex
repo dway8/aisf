@@ -50,7 +50,6 @@ defmodule Aisf.Champions.Champion do
       :is_member,
       :intro,
       :profile_picture_filename,
-      :french_team_participation,
       :olympic_games_participation,
       :world_cup_participation,
       :track_record,

@@ -174,15 +174,7 @@ viewDropdownInput config dropdownModel itemsList =
                 ((dropdownModel.selected
                     |> List.map
                         (\item ->
-                            row
-                                [ Border.width 1
-                                , Border.rounded 4
-                                , UI.smallPadding
-                                , Border.color Color.blue
-                                , Background.color Color.blue
-                                , Font.color Color.white
-                                , UI.smallSpacing
-                                ]
+                            row UI.badgeAttrs
                                 [ el [ UI.mediumFont, pointer, Events.onClick <| removeMsg item ] <| UI.viewIcon "close"
                                 , Element.map (always noOp) <| el [ UI.smallFont ] <| text <| item
                                 ]

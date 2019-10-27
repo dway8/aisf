@@ -66,7 +66,6 @@ initChampionForm =
     , intro = Nothing
     , highlights = Dict.empty
     , profilePicture = Nothing
-    , frenchTeamParticipation = Nothing
     , olympicGamesParticipation = Nothing
     , worldCupParticipation = Nothing
     , trackRecord = Nothing
@@ -101,7 +100,6 @@ championToForm champion =
     , intro = champion.intro
     , highlights = champion.highlights |> toDict
     , profilePicture = champion.profilePicture
-    , frenchTeamParticipation = champion.frenchTeamParticipation
     , olympicGamesParticipation = champion.olympicGamesParticipation
     , worldCupParticipation = champion.worldCupParticipation
     , trackRecord = champion.trackRecord
@@ -149,7 +147,6 @@ view rdSectors currentYear model =
                     , editProfessionalCareer sectors model.sectorDropdown champion
                     , editPictures champion
                     , editMedals currentYear model.medalsTableState champion
-                    , editYearsInFrenchTeam currentYear champion
                     , viewButtons
                     ]
 
@@ -194,12 +191,29 @@ editPrivateInfo champion =
 editSportCareer : ChampionForm -> Element Msg
 editSportCareer champion =
     Common.viewBlock "Carrière sportive"
-        [ viewChampionTextInput FrenchTeamParticipation champion
-        , viewChampionTextArea OlympicGamesParticipation champion
+        [ viewChampionTextArea OlympicGamesParticipation champion
         , viewChampionTextArea WorldCupParticipation champion
         , viewChampionTextArea TrackRecord champion
         , viewChampionTextArea BestMemory champion
         , viewChampionTextInput Decoration champion
+        , column [ UI.defaultSpacing, width fill, paddingEach { top = 10, bottom = 0, right = 0, left = 0 } ]
+            [ row [ UI.defaultSpacing ]
+                [ el [ Font.bold, UI.largeFont, Font.color Color.blue ] <| text "Années en équipe de France"
+                ]
+            , Utils.viewIf (Dict.size champion.yearsInFrenchTeam > 0) <|
+                column [ UI.defaultSpacing ]
+                    (champion.yearsInFrenchTeam
+                        |> Dict.map
+                            (\id year ->
+                                row [ UI.largeSpacing ]
+                                    [ text <| String.fromInt (Model.getYear year)
+                                    , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
+                                    ]
+                            )
+                        |> Dict.values
+                    )
+            , viewAddButton "Ajouter une année" PressedAddYearInFrenchTeamButton
+            ]
         ]
 
 
@@ -361,27 +375,6 @@ tableColumns sport currentYear =
     ]
 
 
-editYearsInFrenchTeam : Year -> ChampionForm -> Element Msg
-editYearsInFrenchTeam currentYear champion =
-    Common.viewBlock "Années en équipe de France"
-        [ column [ UI.largeSpacing ]
-            [ Utils.viewIf (Dict.size champion.yearsInFrenchTeam > 0) <|
-                column [ UI.defaultSpacing ]
-                    (champion.yearsInFrenchTeam
-                        |> Dict.map
-                            (\id year ->
-                                row [ UI.largeSpacing ]
-                                    [ text <| String.fromInt (Model.getYear year)
-                                    , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
-                                    ]
-                            )
-                        |> Dict.values
-                    )
-            , viewAddButton "Ajouter une année" PressedAddYearInFrenchTeamButton
-            ]
-        ]
-
-
 viewProExperienceTextInput : Int -> FormField -> ProExperience -> Element Msg
 viewProExperienceTextInput id field exp =
     let
@@ -476,9 +469,6 @@ getChampionFormFieldData field champion =
 
         Intro ->
             ( "Intro", champion.intro |> Maybe.withDefault "" )
-
-        FrenchTeamParticipation ->
-            ( "Années en équipe de France", champion.frenchTeamParticipation |> Maybe.withDefault "" )
 
         OlympicGamesParticipation ->
             ( "Participation aux JO", champion.olympicGamesParticipation |> Maybe.withDefault "" )

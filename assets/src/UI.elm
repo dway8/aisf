@@ -298,3 +298,15 @@ smallButton maybeMsg elem =
         |> Button.withAttrs [ Font.regular ]
         |> Button.withFontSize smallFont
         |> Button.withPadding (padding 5)
+
+
+badgeAttrs : List (Attribute msg)
+badgeAttrs =
+    [ Border.width 1
+    , Border.rounded 4
+    , smallPadding
+    , Border.color UI.Color.blue
+    , Background.color UI.Color.blue
+    , Font.color UI.Color.white
+    , smallSpacing
+    ]
