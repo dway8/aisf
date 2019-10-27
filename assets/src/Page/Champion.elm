@@ -44,7 +44,7 @@ view isAdmin championLoggedIn { id, champion, medalsTableState } =
             isAdminOrCurrentChampion isAdmin championLoggedIn id
     in
     column [ UI.largeSpacing, width fill ]
-        [ row [ UI.largeSpacing ]
+        [ row [ UI.defaultSpacing ]
             [ Utils.viewIf (championLoggedIn == Nothing)
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
                     |> Button.makeButton (Just RequestedPreviousListingPage)
