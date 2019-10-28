@@ -893,6 +893,7 @@ type Msg
     | PressedDeleteProExperienceButton Int
     | UpdatedProExperienceField Int FormField String
     | PressedAddYearInFrenchTeamButton
+    | SelectedAYearInFrenchTeam Int String
     | PressedDeleteYearInFrenchTeamButton Int
     | PressedAddMedalButton
     | PressedDeleteMedalButton Int

@@ -109,6 +109,9 @@ update msg model =
         PressedAddYearInFrenchTeamButton ->
             addYearInFrenchTeam model
 
+        SelectedAYearInFrenchTeam id str ->
+            updateYearInFrenchTeam id str model
+
         PressedDeleteYearInFrenchTeamButton id ->
             deleteYearInFrenchTeam id model
 
@@ -602,6 +605,34 @@ addYearInFrenchTeam model =
                                 { champion | yearsInFrenchTeam = newYears }
                         in
                         ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+updateYearInFrenchTeam : Int -> String -> Model -> ( Model, Cmd Msg )
+updateYearInFrenchTeam id str model =
+    case model.currentPage of
+        EditChampionPage eModel ->
+            eModel.champion
+                |> RD.map
+                    (\champion ->
+                        case String.toInt str of
+                            Just year ->
+                                let
+                                    newYears =
+                                        champion.yearsInFrenchTeam
+                                            |> Dict.insert id (Year year)
+
+                                    newChampion =
+                                        { champion | yearsInFrenchTeam = newYears }
+                                in
+                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+
+                            Nothing ->
+                                ( model, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 

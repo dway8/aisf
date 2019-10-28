@@ -143,7 +143,7 @@ view rdSectors currentYear model =
                     , viewChampionTextArea Intro champion
                     , editHighlights champion
                     , editPrivateInfo champion
-                    , editSportCareer champion
+                    , editSportCareer currentYear champion
                     , editProfessionalCareer sectors model.sectorDropdown champion
                     , editPictures champion
                     , editMedals currentYear model.medalsTableState champion
@@ -188,8 +188,8 @@ editPrivateInfo champion =
         ]
 
 
-editSportCareer : ChampionForm -> Element Msg
-editSportCareer champion =
+editSportCareer : Year -> ChampionForm -> Element Msg
+editSportCareer currentYear champion =
     Common.viewBlock "Carrière sportive"
         [ viewChampionTextArea OlympicGamesParticipation champion
         , viewChampionTextArea WorldCupParticipation champion
@@ -206,7 +206,7 @@ editSportCareer champion =
                         |> Dict.map
                             (\id year ->
                                 row [ UI.largeSpacing ]
-                                    [ text <| String.fromInt (Model.getYear year)
+                                    [ Common.yearSelector False currentYear (SelectedAYearInFrenchTeam id) (Just year)
                                     , viewDeleteButton (PressedDeleteYearInFrenchTeamButton id)
                                     ]
                             )
