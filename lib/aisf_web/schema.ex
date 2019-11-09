@@ -32,6 +32,18 @@ defmodule AisfWeb.Schema do
     field(:pictures, non_null(list_of(non_null(:picture))))
   end
 
+  object :champion_lite do
+    field(:id, non_null(:id))
+    field(:last_name, non_null(:string))
+    field(:first_name, non_null(:string))
+    field(:sport, non_null(:string))
+    field(:is_member, non_null(:boolean))
+    field(:profile_picture_filename, :string)
+    field(:years_in_french_team, list_of(non_null(:integer)))
+    field(:medals, non_null(list_of(non_null(:medal))))
+    field(:pro_experiences, non_null(list_of(non_null(:pro_experience))))
+  end
+
   object :picture do
     field(:id, non_null(:id))
     field(:filename, non_null(:string))
@@ -87,8 +99,8 @@ defmodule AisfWeb.Schema do
   end
 
   query do
-    field :champions, non_null(list_of(non_null(:champion))) do
-      resolve(&ChampionsResolver.all/3)
+    field :champions, non_null(list_of(non_null(:champion_lite))) do
+      resolve(&ChampionsResolver.all_lite/3)
     end
 
     field :champion, non_null(:champion) do
@@ -120,55 +132,67 @@ defmodule AisfWeb.Schema do
       arg(:first_name, non_null(:string))
       arg(:last_name, non_null(:string))
       arg(:sport, non_null(:string))
-      arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
-      arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
-      arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
-      arg(:intro, :string)
-      arg(:olympic_games_participation, :string)
-      arg(:world_cup_participation, :string)
-      arg(:track_record, :string)
-      arg(:best_memory, :string)
-      arg(:decoration, :string)
-      arg(:background, :string)
-      arg(:volunteering, :string)
-      arg(:highlights, non_null(list_of(non_null(:string))))
-      arg(:pictures, non_null(list_of(non_null(:picture_params))))
-      arg(:birth_date, :string)
-      arg(:address, :string)
-      arg(:email, :string)
-      arg(:phone_number, :string)
-      arg(:profile_picture, :file_params)
 
       resolve(&ChampionsResolver.create/2)
     end
 
-    field :update_champion, type: :champion do
+    field :update_champion_presentation, type: :champion do
       arg(:id, non_null(:string))
       arg(:first_name, non_null(:string))
       arg(:last_name, non_null(:string))
       arg(:sport, non_null(:string))
-      arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
-      arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
-      arg(:medals, non_null(list_of(non_null(:medal_params))))
       arg(:is_member, non_null(:boolean))
       arg(:intro, :string)
-      arg(:profile_picture, :file_params)
-      arg(:olympic_games_participation, :string)
-      arg(:world_cup_participation, :string)
-      arg(:track_record, :string)
-      arg(:best_memory, :string)
-      arg(:decoration, :string)
-      arg(:background, :string)
-      arg(:volunteering, :string)
       arg(:highlights, non_null(list_of(non_null(:string))))
-      arg(:pictures, non_null(list_of(non_null(:picture_params))))
+      arg(:profile_picture, :file_params)
+
+      resolve(&ChampionsResolver.update_presentation/2)
+    end
+
+    field :update_champion_private_info, type: :champion do
+      arg(:id, non_null(:string))
       arg(:birth_date, :string)
       arg(:address, :string)
       arg(:email, :string)
       arg(:phone_number, :string)
 
-      resolve(&ChampionsResolver.update/2)
+      resolve(&ChampionsResolver.update_private_info/2)
+    end
+
+    field :update_champion_sport_career, type: :champion do
+      arg(:id, non_null(:string))
+      arg(:olympic_games_participation, :string)
+      arg(:world_cup_participation, :string)
+      arg(:track_record, :string)
+      arg(:best_memory, :string)
+      arg(:decoration, :string)
+      arg(:years_in_french_team, non_null(list_of(non_null(:integer))))
+
+      resolve(&ChampionsResolver.update_sport_career/2)
+    end
+
+    field :update_champion_professional_career, type: :champion do
+      arg(:id, non_null(:string))
+      arg(:background, :string)
+      arg(:volunteering, :string)
+      arg(:pro_experiences, non_null(list_of(non_null(:pro_experience_params))))
+
+      resolve(&ChampionsResolver.update_professional_career/2)
+    end
+
+    field :update_champion_pictures, type: :champion do
+      arg(:id, non_null(:string))
+      arg(:pictures, non_null(list_of(non_null(:picture_params))))
+
+      resolve(&ChampionsResolver.update_pictures/2)
+    end
+
+    field :update_champion_medals, type: :champion do
+      arg(:id, non_null(:string))
+      arg(:medals, non_null(list_of(non_null(:medal_params))))
+
+      resolve(&ChampionsResolver.update_medals/2)
     end
 
     field :create_event, type: non_null(:event) do

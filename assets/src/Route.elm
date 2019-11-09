@@ -10,7 +10,7 @@ type Route
     | MedalsRoute
     | TeamsRoute
     | ChampionRoute Id
-    | EditChampionRoute (Maybe Id)
+    | NewChampionRoute
     | EventsRoute
     | RecordsRoute
     | LoginRoute
@@ -26,8 +26,7 @@ parseUrl url =
                         , map ChampionsRoute (s "champions")
                         , map MedalsRoute (s "medals")
                         , map TeamsRoute (s "teams")
-                        , map (EditChampionRoute Nothing) (s "champions" </> s "new")
-                        , map (\intId -> EditChampionRoute <| Just <| Id (String.fromInt intId)) (s "champions" </> s "edit" </> int)
+                        , map NewChampionRoute (s "champions" </> s "new")
                         , map (\intId -> ChampionRoute <| Id (String.fromInt intId)) (s "champions" </> int)
                         , map EventsRoute (s "events")
                         , map RecordsRoute (s "records")
@@ -53,10 +52,7 @@ routeToString route =
                 ChampionRoute (Id id) ->
                     "/champions/" ++ id
 
-                EditChampionRoute (Just (Id id)) ->
-                    "/champions/edit/" ++ id
-
-                EditChampionRoute Nothing ->
+                NewChampionRoute ->
                     "/champions/new"
 
                 EventsRoute ->

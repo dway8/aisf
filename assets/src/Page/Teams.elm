@@ -9,7 +9,7 @@ import Element.Lazy as EL
 import Graphql.Http
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, Champions, Msg(..), Sport, TeamsPageModel, Year)
+import Model exposing (Champions, Msg(..), Sport, TeamsPageModel, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 import UI
@@ -71,7 +71,7 @@ type alias YearInTeamFromChampion =
     }
 
 
-getYearsInTeamsFromChampions : List Champion -> List YearInTeamFromChampion
+getYearsInTeamsFromChampions : Champions -> List YearInTeamFromChampion
 getYearsInTeamsFromChampions champions =
     champions
         |> List.foldl

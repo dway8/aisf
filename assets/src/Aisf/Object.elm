@@ -2,11 +2,15 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Object exposing (Champion(..), Event(..), LoginResponse(..), Medal(..), Picture(..), ProExperience(..), Record(..), Sector(..), Winner(..))
+module Aisf.Object exposing (Champion(..), ChampionLite(..), Event(..), LoginResponse(..), Medal(..), Picture(..), ProExperience(..), Record(..), Sector(..), Winner(..))
 
 
 type Champion
     = Champion
+
+
+type ChampionLite
+    = ChampionLite
 
 
 type Event

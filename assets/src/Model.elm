@@ -5,6 +5,7 @@ import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Dropdown
+import Editable exposing (Editable)
 import File exposing (File)
 import Graphql.Http
 import Menu
@@ -32,10 +33,10 @@ type Page
     | MedalsPage MedalsPageModel
     | TeamsPage TeamsPageModel
     | ChampionPage ChampionPageModel
-    | EditChampionPage EditChampionPageModel
     | EventsPage EventsPageModel
     | RecordsPage RecordsPageModel
     | LoginPage LoginPageModel
+    | NewChampionPage NewChampionPageModel
 
 
 type alias ChampionsPageModel =
@@ -70,14 +71,14 @@ type alias ChampionPageModel =
     , champion : RemoteData (Graphql.Http.Error Champion) Champion
     , medalsTableState : Table.State
     , pictureDialog : Maybe Picture
+    , sectorDropdown : Dropdown.Model
+    , currentYear : Year
     }
 
 
-type alias EditChampionPageModel =
-    { id : Maybe Id
-    , champion : RemoteData (Graphql.Http.Error Champion) ChampionForm
-    , sectorDropdown : Dropdown.Model
-    , medalsTableState : Table.State
+type alias NewChampionPageModel =
+    { champion : Champion
+    , saveRequest : RemoteData (Graphql.Http.Error Champion) Champion
     }
 
 
@@ -136,36 +137,7 @@ type alias Winner =
 
 
 type alias Champions =
-    List Champion
-
-
-type alias Champion =
-    { id : Id
-    , lastName : String
-    , firstName : String
-    , website : Maybe String
-    , sport : Sport
-    , proExperiences : List ProExperience
-    , yearsInFrenchTeam : List Year
-    , medals : List Medal
-    , isMember : Bool
-    , intro : Maybe String
-    , highlights : List String
-    , profilePicture : Maybe Attachment
-    , olympicGamesParticipation : Maybe String
-    , worldCupParticipation : Maybe String
-    , trackRecord : Maybe String
-    , bestMemory : Maybe String
-    , decoration : Maybe String
-    , background : Maybe String
-    , volunteering : Maybe String
-    , pictures : List Picture
-    , birthDate : Maybe String
-    , email : Maybe String
-    , address : Maybe String
-    , phoneNumber : Maybe String
-    , login : Maybe Int
-    }
+    List ChampionLite
 
 
 type alias Picture =
@@ -174,32 +146,64 @@ type alias Picture =
     }
 
 
-type alias ChampionForm =
+type alias ChampionLite =
     { id : Id
     , lastName : String
     , firstName : String
-    , email : Maybe String
-    , birthDate : Maybe String
-    , address : Maybe String
-    , phoneNumber : Maybe String
-    , website : Maybe String
     , sport : Sport
-    , proExperiences : Dict Int ProExperience
-    , yearsInFrenchTeam : Dict Int Year
-    , medals : Dict Int Medal
+    , isMember : Bool
+    , profilePicture : Maybe Attachment
+    , yearsInFrenchTeam : List Year
+    , medals : List Medal
+    , sectors : List String
+    }
+
+
+type alias Champion =
+    { id : Id
+    , presentation : Editable Presentation
+    , privateInfo : Editable PrivateInfo
+    , sportCareer : Editable SportCareer
+    , professionalCareer : Editable ProfessionalCareer
+    , pictures : Editable (Dict Int Picture)
+    , medals : Editable (Dict Int Medal)
+    }
+
+
+type alias Presentation =
+    { lastName : String
+    , firstName : String
+    , sport : Sport
     , isMember : Bool
     , intro : Maybe String
     , highlights : Dict Int String
     , profilePicture : Maybe Attachment
-    , olympicGamesParticipation : Maybe String
+    }
+
+
+type alias PrivateInfo =
+    { login : Maybe Int
+    , birthDate : Maybe String
+    , address : Maybe String
+    , email : Maybe String
+    , phoneNumber : Maybe String
+    }
+
+
+type alias SportCareer =
+    { olympicGamesParticipation : Maybe String
     , worldCupParticipation : Maybe String
     , trackRecord : Maybe String
     , bestMemory : Maybe String
     , decoration : Maybe String
-    , background : Maybe String
+    , yearsInFrenchTeam : Dict Int Year
+    }
+
+
+type alias ProfessionalCareer =
+    { background : Maybe String
     , volunteering : Maybe String
-    , pictures : Dict Int Picture
-    , login : Maybe Int
+    , proExperiences : Dict Int ProExperience
     }
 
 
@@ -868,7 +872,7 @@ getId { id } =
             str
 
 
-getName : Champion -> String
+getName : ChampionLite -> String
 getName { firstName, lastName } =
     String.toUpper lastName ++ " " ++ Utils.capitalize firstName
 
@@ -879,15 +883,25 @@ type alias Flags =
     }
 
 
+type FormBlock
+    = PresentationBlock
+    | PrivateInfoBlock
+    | SportCareerBlock
+    | ProfessionalCareerBlock
+    | MedalsBlock
+    | PicturesBlock
+
+
 type Msg
     = NoOp
     | UrlRequested UrlRequest
     | UrlChanged Url
     | GotChampions (RemoteData (Graphql.Http.Error Champions) Champions)
     | GotChampion (RemoteData (Graphql.Http.Error Champion) Champion)
-    | UpdatedChampionField FormField String
-    | PressedSaveChampionButton
-    | GotSaveChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
+    | UpdatedChampionField FormBlock FormField String
+    | PressedSaveChampionButton FormBlock
+    | GotSaveChampionResponse (Maybe FormBlock) (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
+    | GotCreateChampionResponse (RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion))
     | SelectedASport String
     | PressedAddProExperienceButton
     | PressedDeleteProExperienceButton Int
@@ -925,9 +939,9 @@ type Msg
     | PressedAddHighlightButton
     | PressedDeleteHighlightButton Int
     | UpdatedHighlight Int String
-    | RequestedPreviousPage
     | RequestedPreviousListingPage
     | PressedEditChampionButton Id
+    | PressedCancelEditionButton FormBlock
     | PressedAddPictureButton
     | ClickedOnPicture Int
     | ClickedOnPictureDialogBackground
@@ -954,6 +968,8 @@ type Msg
     | UpdatedLoginIdField String
     | PressedLoginButton
     | GotLoginResponse (RemoteData (Graphql.Http.Error LoginResponse) LoginResponse)
+    | PressedEditBlockButton FormBlock
+    | PressedSaveNewChampionButton
 
 
 type FormField

@@ -4,6 +4,7 @@ import Aisf.InputObject
 import Aisf.Mutation as Mutation
 import Aisf.Object
 import Aisf.Object.Champion as Champion
+import Aisf.Object.ChampionLite as ChampionLite
 import Aisf.Object.Event as Event
 import Aisf.Object.LoginResponse as LoginResponse
 import Aisf.Object.Medal as Medal
@@ -15,14 +16,16 @@ import Aisf.Object.Winner as Winner
 import Aisf.Query as Query
 import Aisf.Scalar exposing (Id(..))
 import Dict
+import Editable exposing (Editable(..))
 import Graphql.Http
 import Graphql.Internal.Builder.Object as Object
 import Graphql.OptionalArgument as GOA
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Json.Decode as D
-import Model exposing (Attachment, Champion, ChampionForm, Competition(..), Event, LoginResponse(..), Medal, MedalType(..), Msg(..), Picture, ProExperience, Record, RecordType(..), Sector, Specialty(..), Sport(..), Winner, Year(..))
+import Model exposing (..)
 import RemoteData
 import Route
+import Utils
 
 
 endpoint : String
@@ -32,7 +35,7 @@ endpoint =
 
 getChampions : Cmd Msg
 getChampions =
-    Query.champions (championSelection False)
+    Query.champions (championLiteSelection False)
         |> Graphql.Http.queryRequest endpoint
         -- We have to use `withCredentials` to support a CORS endpoint that allows a wildcard origin
         |> Graphql.Http.withCredentials
@@ -64,33 +67,51 @@ sectorSelection =
 
 championSelection : Bool -> SelectionSet Champion Aisf.Object.Champion
 championSelection isAdmin =
-    SelectionSet.succeed Champion
+    SelectionSet.succeed (\i p pi sc pc pic m -> Champion i (ReadOnly p) (ReadOnly pi) (ReadOnly sc) (ReadOnly pc) (ReadOnly pic) (ReadOnly m))
         |> with Champion.id
+        |> with presentationFragment
+        |> with (privateInfoFragment isAdmin)
+        |> with sportCareerFragment
+        |> with professionalCareerFragment
+        |> with (SelectionSet.map Utils.toDict (Champion.pictures pictureSelection))
+        |> with (SelectionSet.map Utils.toDict (Champion.medals medalSelection))
+
+
+championLiteSelection : Bool -> SelectionSet ChampionLite Aisf.Object.ChampionLite
+championLiteSelection isAdmin =
+    SelectionSet.succeed ChampionLite
+        |> with ChampionLite.id
+        |> with ChampionLite.lastName
+        |> with ChampionLite.firstName
+        |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) ChampionLite.sport)
+        |> with ChampionLite.isMember
+        |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) ChampionLite.profilePictureFilename)
+        |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year) ChampionLite.yearsInFrenchTeam)
+        |> with (ChampionLite.medals medalSelection)
+        |> with (SelectionSet.map (List.concatMap .sectors) (ChampionLite.proExperiences proExperienceSelection))
+
+
+presentationFragment : SelectionSet Presentation Aisf.Object.Champion
+presentationFragment =
+    SelectionSet.succeed Presentation
         |> with Champion.lastName
         |> with Champion.firstName
-        |> with Champion.website
         |> with (SelectionSet.map (Model.sportFromString >> Maybe.withDefault SkiAlpin) Champion.sport)
-        |> with (Champion.proExperiences proExperienceSelection)
-        |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year) Champion.yearsInFrenchTeam)
-        |> with (Champion.medals medalSelection)
         |> with Champion.isMember
         |> with Champion.intro
-        |> with (SelectionSet.map (Maybe.withDefault []) Champion.highlights)
+        |> with (SelectionSet.map (Maybe.map Utils.toDict >> Maybe.withDefault Dict.empty) Champion.highlights)
         |> with (SelectionSet.map (Maybe.map (\f -> Attachment f Nothing)) Champion.profilePictureFilename)
-        |> with Champion.olympicGamesParticipation
-        |> with Champion.worldCupParticipation
-        |> with Champion.trackRecord
-        |> with Champion.bestMemory
-        |> with Champion.decoration
-        |> with Champion.background
-        |> with Champion.volunteering
-        |> with (Champion.pictures pictureSelection)
+
+
+privateInfoFragment : Bool -> SelectionSet PrivateInfo Aisf.Object.Champion
+privateInfoFragment isAdmin =
+    SelectionSet.succeed PrivateInfo
         |> (if isAdmin then
-                with Champion.birthDate
-                    >> with Champion.email
+                with Champion.login
+                    >> with Champion.birthDate
                     >> with Champion.address
+                    >> with Champion.email
                     >> with Champion.phoneNumber
-                    >> with Champion.login
 
             else
                 SelectionSet.hardcoded Nothing
@@ -99,6 +120,25 @@ championSelection isAdmin =
                     >> SelectionSet.hardcoded Nothing
                     >> SelectionSet.hardcoded Nothing
            )
+
+
+sportCareerFragment : SelectionSet SportCareer Aisf.Object.Champion
+sportCareerFragment =
+    SelectionSet.succeed SportCareer
+        |> with Champion.olympicGamesParticipation
+        |> with Champion.worldCupParticipation
+        |> with Champion.trackRecord
+        |> with Champion.bestMemory
+        |> with Champion.decoration
+        |> with (SelectionSet.map (Maybe.withDefault [] >> List.map Year >> Utils.toDict) Champion.yearsInFrenchTeam)
+
+
+professionalCareerFragment : SelectionSet ProfessionalCareer Aisf.Object.Champion
+professionalCareerFragment =
+    SelectionSet.succeed ProfessionalCareer
+        |> with Champion.background
+        |> with Champion.volunteering
+        |> with (SelectionSet.map Utils.toDict (Champion.proExperiences proExperienceSelection))
 
 
 pictureSelection : SelectionSet Picture Aisf.Object.Picture
@@ -132,62 +172,123 @@ medalSelection =
 
 createChampion : Champion -> Cmd Msg
 createChampion champion =
+    let
+        presentation =
+            champion.presentation |> Editable.value
+    in
     Mutation.createChampion
-        (fillInChampionOptionalArgs champion)
-        { firstName = champion.firstName
-        , lastName = champion.lastName
-        , sport = Model.sportToString champion.sport
-        , proExperiences = champion.proExperiences |> List.map proExperienceToParams
-        , yearsInFrenchTeam = champion.yearsInFrenchTeam |> List.map Model.getYear
-        , medals = champion.medals |> List.map medalToParams
-        , isMember = champion.isMember
-        , highlights = champion.highlights
-        , pictures = champion.pictures |> List.map pictureToParams
+        { firstName = presentation.firstName
+        , lastName = presentation.lastName
+        , sport = Model.sportToString presentation.sport
+        , isMember = presentation.isMember
         }
         (championSelection True)
         |> Graphql.Http.mutationRequest endpoint
         |> Graphql.Http.withCredentials
-        |> Graphql.Http.send (RemoteData.fromResult >> GotSaveChampionResponse)
+        |> Graphql.Http.send (RemoteData.fromResult >> GotCreateChampionResponse)
 
 
-updateChampion : Champion -> Cmd Msg
-updateChampion ({ firstName, lastName, email, sport, proExperiences, yearsInFrenchTeam, medals, isMember, intro } as champion) =
-    Mutation.updateChampion
-        (fillInChampionOptionalArgs champion)
-        { id = Model.getId champion
-        , firstName = firstName
-        , lastName = lastName
-        , sport = Model.sportToString sport
-        , proExperiences = proExperiences |> List.map proExperienceToParams
-        , yearsInFrenchTeam = yearsInFrenchTeam |> List.map Model.getYear
-        , medals = medals |> List.map medalToParams
-        , isMember = isMember
-        , highlights = champion.highlights
-        , pictures = champion.pictures |> List.map pictureToParams
-        }
+updateChampion : FormBlock -> Champion -> Cmd Msg
+updateChampion block champion =
+    let
+        mutation =
+            case block of
+                PresentationBlock ->
+                    let
+                        p =
+                            champion.presentation |> Editable.value
+                    in
+                    Mutation.updateChampionPresentation
+                        (\optional ->
+                            { optional
+                                | intro = p.intro |> GOA.fromMaybe
+                                , profilePicture = p.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
+                            }
+                        )
+                        { id = Model.getId champion
+                        , firstName = p.firstName
+                        , lastName = p.lastName
+                        , sport = Model.sportToString p.sport
+                        , isMember = p.isMember
+                        , highlights = p.highlights |> Dict.values
+                        }
+
+                PrivateInfoBlock ->
+                    let
+                        pi =
+                            champion.privateInfo |> Editable.value
+                    in
+                    Mutation.updateChampionPrivateInfo
+                        (\optional ->
+                            { optional
+                                | birthDate = pi.birthDate |> GOA.fromMaybe
+                                , address = pi.address |> GOA.fromMaybe
+                                , email = pi.email |> GOA.fromMaybe
+                                , phoneNumber = pi.phoneNumber |> GOA.fromMaybe
+                            }
+                        )
+                        { id = Model.getId champion }
+
+                SportCareerBlock ->
+                    let
+                        sc =
+                            champion.sportCareer |> Editable.value
+                    in
+                    Mutation.updateChampionSportCareer
+                        (\optional ->
+                            { optional
+                                | olympicGamesParticipation = sc.olympicGamesParticipation |> GOA.fromMaybe
+                                , worldCupParticipation = sc.worldCupParticipation |> GOA.fromMaybe
+                                , trackRecord = sc.trackRecord |> GOA.fromMaybe
+                                , bestMemory = sc.bestMemory |> GOA.fromMaybe
+                                , decoration = sc.decoration |> GOA.fromMaybe
+                            }
+                        )
+                        { id = Model.getId champion
+                        , yearsInFrenchTeam = sc.yearsInFrenchTeam |> Dict.values |> List.map Model.getYear
+                        }
+
+                ProfessionalCareerBlock ->
+                    let
+                        pc =
+                            champion.professionalCareer |> Editable.value
+                    in
+                    Mutation.updateChampionProfessionalCareer
+                        (\optional ->
+                            { optional
+                                | background = pc.background |> GOA.fromMaybe
+                                , volunteering = pc.volunteering |> GOA.fromMaybe
+                            }
+                        )
+                        { id = Model.getId champion
+                        , proExperiences = pc.proExperiences |> Dict.values |> List.map proExperienceToParams
+                        }
+
+                PicturesBlock ->
+                    let
+                        pictures =
+                            champion.pictures |> Editable.value
+                    in
+                    Mutation.updateChampionPictures
+                        { id = Model.getId champion
+                        , pictures = pictures |> Dict.values |> List.map pictureToParams
+                        }
+
+                MedalsBlock ->
+                    let
+                        medals =
+                            champion.medals |> Editable.value
+                    in
+                    Mutation.updateChampionMedals
+                        { id = Model.getId champion
+                        , medals = medals |> Dict.values |> List.map medalToParams
+                        }
+    in
+    mutation
         (championSelection True)
         |> Graphql.Http.mutationRequest endpoint
         |> Graphql.Http.withCredentials
-        |> Graphql.Http.send (RemoteData.fromResult >> GotSaveChampionResponse)
-
-
-fillInChampionOptionalArgs : Champion -> Mutation.UpdateChampionOptionalArguments -> Mutation.UpdateChampionOptionalArguments
-fillInChampionOptionalArgs champion optional =
-    { optional
-        | intro = champion.intro |> GOA.fromMaybe
-        , profilePicture = champion.profilePicture |> GOA.fromMaybe |> GOA.map fileToParams
-        , olympicGamesParticipation = champion.olympicGamesParticipation |> GOA.fromMaybe
-        , worldCupParticipation = champion.worldCupParticipation |> GOA.fromMaybe
-        , trackRecord = champion.trackRecord |> GOA.fromMaybe
-        , bestMemory = champion.bestMemory |> GOA.fromMaybe
-        , decoration = champion.decoration |> GOA.fromMaybe
-        , background = champion.background |> GOA.fromMaybe
-        , volunteering = champion.volunteering |> GOA.fromMaybe
-        , birthDate = champion.birthDate |> GOA.fromMaybe
-        , address = champion.address |> GOA.fromMaybe
-        , email = champion.email |> GOA.fromMaybe
-        , phoneNumber = champion.phoneNumber |> GOA.fromMaybe
-    }
+        |> Graphql.Http.send (RemoteData.fromResult >> GotSaveChampionResponse (Just block))
 
 
 proExperienceToParams : ProExperience -> Aisf.InputObject.ProExperienceParams

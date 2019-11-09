@@ -6,6 +6,7 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
@@ -18,6 +19,7 @@ import Route
 import Table
 import UI
 import UI.Color as Color
+import Utils
 
 
 sportSelector : Bool -> Maybe Sport -> Element Msg
@@ -180,7 +182,7 @@ centeredCell attrs htmlEl =
     Table.HtmlDetails ([ HA.style "vertical-align" "middle", HA.style "text-align" "center" ] ++ [ HA.height 40 ] ++ attrs) [ htmlEl ]
 
 
-nameColumn : Table.Column Champion Msg
+nameColumn : Table.Column ChampionLite Msg
 nameColumn =
     Table.veryCustomColumn
         { name = "NOM / PRÉNOM"
@@ -189,7 +191,7 @@ nameColumn =
         }
 
 
-profilePictureColumn : Table.Column Champion Msg
+profilePictureColumn : Table.Column ChampionLite Msg
 profilePictureColumn =
     Table.veryCustomColumn
         { name = ""
@@ -348,7 +350,7 @@ viewSearchQuery query =
         }
 
 
-filterBySearchQuery : Maybe String -> List Champion -> List Champion
+filterBySearchQuery : Maybe String -> List ChampionLite -> List ChampionLite
 filterBySearchQuery query champions =
     case query of
         Nothing ->
@@ -393,17 +395,17 @@ viewInfoRow title content =
         ]
 
 
-viewBlock : String -> List (Element Msg) -> Element Msg
-viewBlock title content =
+viewBlock : Bool -> FormBlock -> String -> List (Element Msg) -> Element Msg
+viewBlock isEditable block title content =
     column [ UI.largeSpacing, width <| maximum 900 fill ]
-        [ viewBlockTitle title
+        [ viewBlockTitle isEditable block title
         , column [ UI.defaultSpacing, width fill ] content
         ]
 
 
-viewBlockTitle : String -> Element Msg
-viewBlockTitle title =
-    el
+viewBlockTitle : Bool -> FormBlock -> String -> Element Msg
+viewBlockTitle isEditable block title =
+    row
         [ width fill
         , UI.largestFont
         , Font.color Color.blue
@@ -412,9 +414,18 @@ viewBlockTitle title =
         , Border.color Color.blue
         , paddingEach { top = 0, bottom = 3, left = 0, right = 0 }
         ]
-    <|
-        text <|
-            String.toUpper title
+        [ text <| String.toUpper title
+        , Utils.viewIf isEditable <|
+            row
+                [ alignRight
+                , onClick <| PressedEditBlockButton block
+                , pointer
+                , UI.smallSpacing
+                ]
+                [ el [] <| UI.viewIcon "edit"
+                , el [ UI.mediumFont ] <| text "Modifier"
+                ]
+        ]
 
 
 competitionSelector : Bool -> List Competition -> (String -> Msg) -> Maybe Competition -> Element Msg

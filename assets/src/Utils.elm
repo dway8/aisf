@@ -1,5 +1,6 @@
-module Utils exposing (capitalize, viewIf)
+module Utils exposing (..)
 
+import Dict exposing (Dict)
 import Element exposing (..)
 
 
@@ -20,3 +21,8 @@ viewIf condition elem =
 
     else
         none
+
+
+toDict : List a -> Dict Int a
+toDict =
+    List.indexedMap Tuple.pair >> Dict.fromList
