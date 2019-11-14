@@ -16,8 +16,10 @@ defmodule AisfWeb.Admin.EditChampionTest do
 
   test "editing a champion", %{session: session, champion: champion} do
     session
-    |> visit("/elixir/champions/edit/" <> to_string(champion.id))
-    |> assert_has(Query.text("ÉDITER LA FICHE CHAMPION"))
+    |> visit("/elixir/champions/" <> to_string(champion.id))
+    |> assert_has(Query.text("Éditer", count: 6))
+    |> assert_has(Query.text(champion.first_name))
+    |> click(Query.text("Éditer") |> Query.at(1))
     |> has_value?(Query.text_field("Prénom"), champion.first_name)
 
     session

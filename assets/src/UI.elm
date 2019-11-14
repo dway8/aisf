@@ -310,3 +310,17 @@ badgeAttrs =
     , Font.color UI.Color.white
     , smallSpacing
     ]
+
+
+viewTextArea : String -> Element msg
+viewTextArea t =
+    html <|
+        Html.p
+            [ HA.style "white-space" "pre-wrap"
+            , HA.style "overflow-wrap" "break-word"
+            , HA.style "word-wrap" "break-word"
+            , HA.style "margin" "0"
+            , HA.style "line-height" "1.3"
+            ]
+            [ Html.text t
+            ]

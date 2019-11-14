@@ -9,10 +9,10 @@ import Html exposing (Html)
 import Model exposing (Model, Msg, Page(..))
 import Page.Champion
 import Page.Champions
-import Page.EditChampion
 import Page.Events
 import Page.Login
 import Page.Medals
+import Page.NewChampion
 import Page.Records
 import Page.Teams
 import RemoteData as RD
@@ -46,9 +46,6 @@ viewBody model =
     <|
         column [ centerX, height fill, UI.largerSpacing, width <| px 800 ]
             [ case model.currentPage of
-                EditChampionPage _ ->
-                    none
-
                 LoginPage _ ->
                     none
 
@@ -65,10 +62,10 @@ viewBody model =
                     Page.Teams.view model.champions teamsModel
 
                 ChampionPage championModel ->
-                    Page.Champion.view model.isAdmin model.championLoggedIn championModel
+                    Page.Champion.view model.sectors model.isAdmin model.championLoggedIn championModel
 
-                EditChampionPage editChampionModel ->
-                    Page.EditChampion.view model.sectors model.currentYear editChampionModel
+                NewChampionPage newChampionModel ->
+                    Page.NewChampion.view newChampionModel
 
                 EventsPage eventsModel ->
                     Page.Events.view model.isAdmin eventsModel

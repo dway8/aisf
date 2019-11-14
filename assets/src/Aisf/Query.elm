@@ -28,7 +28,7 @@ champion requiredArgs object_ =
     Object.selectionForCompositeField "champion" [ Argument.required "id" requiredArgs.id (Aisf.ScalarCodecs.codecs |> Aisf.Scalar.unwrapEncoder .codecId) ] object_ identity
 
 
-champions : SelectionSet decodesTo Aisf.Object.Champion -> SelectionSet (List decodesTo) RootQuery
+champions : SelectionSet decodesTo Aisf.Object.ChampionLite -> SelectionSet (List decodesTo) RootQuery
 champions object_ =
     Object.selectionForCompositeField "champions" [] object_ (identity >> Decode.list)
 

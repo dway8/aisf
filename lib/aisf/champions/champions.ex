@@ -18,13 +18,12 @@ defmodule Aisf.Champions do
   @doc """
   Returns the list of champions.
   """
-  def list_champions do
+  def list_champions_lite do
     Logger.info("Listing all champions")
 
     Repo.all(Champion)
     |> Repo.preload(pro_experiences: [:sectors])
     |> Repo.preload([:medals])
-    |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))
   end
 
   @doc """
@@ -55,7 +54,7 @@ defmodule Aisf.Champions do
   Creates a champion.
   """
   def create_champion(attrs \\ %{}) do
-    Logger.info("Creating new champion")
+    Logger.info("Creating new champion with attrs #{inspect(attrs)}")
 
     attrs =
       attrs
@@ -67,12 +66,26 @@ defmodule Aisf.Champions do
     |> (fn {:ok, champion} ->
           Logger.info("Creating champion OK with id #{champion.id}")
 
-          attrs.pro_experiences
-          |> Enum.map(fn p -> ProExperiences.create_pro_experience(champion, p) end)
+          {:ok,
+           champion
+           |> Repo.preload(pro_experiences: [:sectors])
+           |> Repo.preload([:medals])
+           |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
+        end).()
+  end
 
-          attrs.medals
-          |> Enum.map(fn m -> Medals.create_medal(champion, m) end)
+  @doc """
+  Updates a champion presentation.
 
+  ## Examples
+  """
+  def update_presentation(%Champion{} = champion, attrs) do
+    Logger.info("Updating presentation of champion #{champion.id} with attrs #{inspect(attrs)}")
+
+    champion
+    |> Champion.presentation_changeset(attrs)
+    |> Repo.update()
+    |> (fn {:ok, champion} ->
           if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
             {:ok, champion} = update_profile_picture(champion, attrs.profile_picture)
           end
@@ -86,26 +99,60 @@ defmodule Aisf.Champions do
   end
 
   @doc """
-  Updates a champion.
+  Updates a champion private info.
 
   ## Examples
   """
-  def update_champion(%Champion{} = champion, attrs) do
-    Logger.info("Updating champion with id #{champion.id}")
+  def update_private_info(%Champion{} = champion, attrs) do
+    Logger.info("Updating private info of champion #{champion.id} with attrs #{inspect(attrs)}")
 
     champion
-    |> Champion.changeset(attrs)
+    |> Champion.private_info_changeset(attrs)
+    |> Repo.update()
+    |> (fn {:ok, champion} ->
+          {:ok,
+           champion
+           |> Repo.preload(pro_experiences: [:sectors])
+           |> Repo.preload([:medals])
+           |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
+        end).()
+  end
+
+  @doc """
+  Updates a champion sport career.
+
+  ## Examples
+  """
+  def update_sport_career(%Champion{} = champion, attrs) do
+    Logger.info("Updating sport career of champion #{champion.id} with attrs #{inspect(attrs)}")
+
+    champion
+    |> Champion.sport_career_changeset(attrs)
+    |> Repo.update()
+    |> (fn {:ok, champion} ->
+          {:ok,
+           champion
+           |> Repo.preload(pro_experiences: [:sectors])
+           |> Repo.preload([:medals])
+           |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
+        end).()
+  end
+
+  @doc """
+  Updates a champion professional career.
+
+  ## Examples
+  """
+  def update_professional_career(%Champion{} = champion, attrs) do
+    Logger.info(
+      "Updating professional career of champion #{champion.id} with attrs #{inspect(attrs)}"
+    )
+
+    champion
+    |> Champion.professional_career_changeset(attrs)
     |> Repo.update()
     |> (fn {:ok, champion} ->
           update_pro_experiences(champion, attrs.pro_experiences)
-
-          update_medals(champion, attrs.medals)
-
-          update_pictures(champion, attrs.pictures)
-
-          if Map.has_key?(attrs, :profile_picture) && Map.has_key?(attrs.profile_picture, :base64) do
-            {:ok, champion} = update_profile_picture(champion, attrs.profile_picture)
-          end
 
           {:ok,
            champion
@@ -113,6 +160,40 @@ defmodule Aisf.Champions do
            |> Repo.preload([:medals])
            |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
         end).()
+  end
+
+  @doc """
+  Updates a champion pictures.
+
+  ## Examples
+  """
+  def update_pictures(%Champion{} = champion, attrs) do
+    Logger.info("Updating pictures of champion #{champion.id} with attrs #{inspect(attrs)}")
+
+    do_update_pictures(champion, attrs.pictures)
+
+    {:ok,
+     champion
+     |> Repo.preload(pro_experiences: [:sectors])
+     |> Repo.preload([:medals])
+     |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
+  end
+
+  @doc """
+  Updates a champion private info.
+
+  ## Examples
+  """
+  def update_medals(%Champion{} = champion, attrs) do
+    Logger.info("Updating medals of champion #{champion.id} with attrs #{inspect(attrs)}")
+
+    do_update_medals(champion, attrs.medals)
+
+    {:ok,
+     champion
+     |> Repo.preload(pro_experiences: [:sectors])
+     |> Repo.preload([:medals])
+     |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
   end
 
   defp update_pro_experiences(champion, attrs) do
@@ -139,7 +220,7 @@ defmodule Aisf.Champions do
     end)
   end
 
-  defp update_medals(champion, attrs) do
+  defp do_update_medals(champion, attrs) do
     received_medal_ids = get_received_ids(attrs)
     # delete removed medals
     champion.medals
@@ -175,7 +256,7 @@ defmodule Aisf.Champions do
     end)
   end
 
-  defp update_pictures(champion, attrs) do
+  defp do_update_pictures(champion, attrs) do
     received_picture_ids = get_received_ids(attrs)
 
     # delete removed pictures
@@ -212,7 +293,7 @@ defmodule Aisf.Champions do
     UploadUtils.copy_file_to_dest(file, new_filename, @upload_dir)
 
     champion
-    |> Champion.changeset(%{profile_picture_filename: new_filename})
+    |> Ecto.Changeset.change(%{profile_picture_filename: new_filename})
     |> Repo.update()
   end
 
@@ -221,13 +302,6 @@ defmodule Aisf.Champions do
   """
   def delete_champion(%Champion{} = champion) do
     Repo.delete(champion)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking champion changes.
-  """
-  def change_champion(%Champion{} = champion) do
-    Champion.changeset(champion, %{})
   end
 
   defp generate_next_login() do

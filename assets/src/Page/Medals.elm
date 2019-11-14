@@ -7,7 +7,7 @@ import Element exposing (..)
 import Graphql.Http
 import Html
 import Html.Attributes as HA
-import Model exposing (Champion, Champions, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
+import Model exposing (Champions, Competition, MedalType, MedalsPageModel, Msg(..), Specialty, Sport, Year)
 import RemoteData exposing (RemoteData(..))
 import Table
 import UI
@@ -67,7 +67,7 @@ type alias MedalFromChampion =
     }
 
 
-getMedalsFromChampions : List Champion -> List MedalFromChampion
+getMedalsFromChampions : Champions -> List MedalFromChampion
 getMedalsFromChampions champions =
     champions
         |> List.foldl

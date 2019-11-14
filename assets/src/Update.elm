@@ -6,6 +6,7 @@ import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Dropdown
+import Editable
 import File exposing (File)
 import File.Select as Select
 import Graphql.Http
@@ -14,10 +15,10 @@ import Menu
 import Model exposing (..)
 import Page.Champion
 import Page.Champions
-import Page.EditChampion
 import Page.Events
 import Page.Login
 import Page.Medals
+import Page.NewChampion
 import Page.Records
 import Page.Teams
 import RemoteData as RD exposing (RemoteData(..), WebData)
@@ -45,9 +46,6 @@ update msg model =
                 External _ ->
                     ( model, Cmd.none )
 
-        RequestedPreviousPage ->
-            goBack model
-
         RequestedPreviousListingPage ->
             goToPreviousListing model
 
@@ -60,39 +58,14 @@ update msg model =
         GotChampion resp ->
             handleChampionResponse resp model
 
-        UpdatedChampionField field val ->
-            updateChampionForm field val model
+        UpdatedChampionField block field val ->
+            updateChampionForm block field val model
 
-        PressedSaveChampionButton ->
-            case model.currentPage of
-                EditChampionPage eModel ->
-                    eModel.champion
-                        |> RD.map
-                            (\champion ->
-                                champion
-                                    |> validateChampionForm
-                                    |> Maybe.map
-                                        (\champ ->
-                                            ( model
-                                            , if champ.id == Id "new" then
-                                                Api.createChampion champ
+        PressedSaveChampionButton block ->
+            saveChampion block model
 
-                                              else if model.isAdmin || (model.championLoggedIn == Just champ.id) then
-                                                Api.updateChampion champ
-
-                                              else
-                                                Cmd.none
-                                            )
-                                        )
-                                    |> Maybe.withDefault ( model, Cmd.none )
-                            )
-                        |> RD.withDefault ( model, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        GotSaveChampionResponse resp ->
-            handleSaveChampionResponse resp model
+        GotSaveChampionResponse maybeBlock resp ->
+            handleSaveChampionResponse maybeBlock resp model
 
         SelectedASport sportStr ->
             updateCurrentSport sportStr model
@@ -283,6 +256,18 @@ update msg model =
         GotLoginResponse resp ->
             handleLoginResponse resp model
 
+        PressedEditBlockButton block ->
+            editFormBlock block model
+
+        PressedCancelEditionButton block ->
+            cancelEdition block model
+
+        PressedSaveNewChampionButton ->
+            saveNewChampion model
+
+        GotCreateChampionResponse resp ->
+            handleCreateChampionResponse resp model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -306,11 +291,6 @@ handleUrlChange newLocation model =
                     model.previousListing
     in
     ( { model | currentPage = newPage, previousListing = previousListing }, cmd )
-
-
-goBack : Model -> ( Model, Cmd Msg )
-goBack model =
-    ( model, Nav.back model.key 1 )
 
 
 goToPreviousListing : Model -> ( Model, Cmd Msg )
@@ -339,26 +319,12 @@ getPageAndCmdFromRoute currentYear isAdmin championLoggedIn key route =
                 |> Tuple.mapFirst TeamsPage
 
         ChampionRoute id ->
-            Page.Champion.init isAdmin championLoggedIn id
+            Page.Champion.init currentYear isAdmin championLoggedIn id
                 |> Tuple.mapFirst ChampionPage
 
-        EditChampionRoute maybeId ->
-            let
-                allowIf bool =
-                    if bool then
-                        Page.EditChampion.init maybeId
-                            |> Tuple.mapFirst EditChampionPage
-
-                    else
-                        Page.Champions.init
-                            |> Tuple.mapBoth ChampionsPage (\cmds -> Nav.pushUrl key (Route.routeToString ChampionsRoute))
-            in
-            case maybeId of
-                Just id ->
-                    allowIf (Model.isAdminOrCurrentChampion isAdmin championLoggedIn id)
-
-                Nothing ->
-                    allowIf isAdmin
+        NewChampionRoute ->
+            Page.NewChampion.init
+                |> Tuple.mapFirst NewChampionPage
 
         EventsRoute ->
             Page.Events.init currentYear
@@ -373,74 +339,153 @@ getPageAndCmdFromRoute currentYear isAdmin championLoggedIn key route =
                 |> Tuple.mapFirst LoginPage
 
 
-updateChampionForm : FormField -> String -> Model -> ( Model, Cmd Msg )
-updateChampionForm field val model =
+updateChampionForm : FormBlock -> FormField -> String -> Model -> ( Model, Cmd Msg )
+updateChampionForm block field val model =
+    let
+        applyChangesOnChampion c =
+            case block of
+                PresentationBlock ->
+                    { c
+                        | presentation =
+                            c.presentation
+                                |> Editable.map
+                                    (\pres ->
+                                        case field of
+                                            FirstName ->
+                                                { pres | firstName = val }
+
+                                            LastName ->
+                                                { pres | lastName = val }
+
+                                            Intro ->
+                                                { pres | intro = Just val }
+
+                                            _ ->
+                                                pres
+                                    )
+                    }
+
+                PrivateInfoBlock ->
+                    { c
+                        | privateInfo =
+                            c.privateInfo
+                                |> Editable.map
+                                    (\pi ->
+                                        case field of
+                                            BirthDate ->
+                                                { pi | birthDate = Just val }
+
+                                            Address ->
+                                                { pi | address = Just val }
+
+                                            Email ->
+                                                { pi | email = Just val }
+
+                                            PhoneNumber ->
+                                                { pi | phoneNumber = Just val }
+
+                                            _ ->
+                                                pi
+                                    )
+                    }
+
+                SportCareerBlock ->
+                    { c
+                        | sportCareer =
+                            c.sportCareer
+                                |> Editable.map
+                                    (\sc ->
+                                        case field of
+                                            OlympicGamesParticipation ->
+                                                { sc | olympicGamesParticipation = Just val }
+
+                                            WorldCupParticipation ->
+                                                { sc | worldCupParticipation = Just val }
+
+                                            TrackRecord ->
+                                                { sc | trackRecord = Just val }
+
+                                            BestMemory ->
+                                                { sc | bestMemory = Just val }
+
+                                            Decoration ->
+                                                { sc | decoration = Just val }
+
+                                            _ ->
+                                                sc
+                                    )
+                    }
+
+                ProfessionalCareerBlock ->
+                    { c
+                        | professionalCareer =
+                            c.professionalCareer
+                                |> Editable.map
+                                    (\pc ->
+                                        case field of
+                                            Background ->
+                                                { pc | background = Just val }
+
+                                            Volunteering ->
+                                                { pc | volunteering = Just val }
+
+                                            _ ->
+                                                pc
+                                    )
+                    }
+
+                _ ->
+                    c
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newChamp =
-                                case field of
-                                    FirstName ->
-                                        { champion | firstName = val }
-
-                                    LastName ->
-                                        { champion | lastName = val }
-
-                                    Intro ->
-                                        { champion | intro = Just val }
-
-                                    OlympicGamesParticipation ->
-                                        { champion | olympicGamesParticipation = Just val }
-
-                                    WorldCupParticipation ->
-                                        { champion | worldCupParticipation = Just val }
-
-                                    TrackRecord ->
-                                        { champion | trackRecord = Just val }
-
-                                    BestMemory ->
-                                        { champion | bestMemory = Just val }
-
-                                    Decoration ->
-                                        { champion | decoration = Just val }
-
-                                    Background ->
-                                        { champion | background = Just val }
-
-                                    Volunteering ->
-                                        { champion | volunteering = Just val }
-
-                                    BirthDate ->
-                                        { champion | birthDate = Just val }
-
-                                    Email ->
-                                        { champion | email = Just val }
-
-                                    Address ->
-                                        { champion | address = Just val }
-
-                                    PhoneNumber ->
-                                        { champion | phoneNumber = Just val }
-
-                                    _ ->
-                                        champion
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChamp } }, Cmd.none )
-                    )
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map (\champion -> ( { model | currentPage = ChampionPage { cModel | champion = Success (applyChangesOnChampion champion) } }, Cmd.none ))
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = applyChangesOnChampion nModel.champion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-handleSaveChampionResponse : RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
-handleSaveChampionResponse response model =
-    case response of
-        Success (Just { id }) ->
-            ( model, Nav.pushUrl model.key (Route.routeToString (ChampionRoute id)) )
+handleSaveChampionResponse : Maybe FormBlock -> RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
+handleSaveChampionResponse maybeFormBlock response model =
+    case ( model.currentPage, response ) of
+        ( ChampionPage cModel, Success (Just receivedChampion) ) ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        maybeFormBlock
+                            |> Maybe.map
+                                (\block ->
+                                    let
+                                        newChampion =
+                                            case block of
+                                                PresentationBlock ->
+                                                    { champion | presentation = champion.presentation |> Editable.save }
+
+                                                PrivateInfoBlock ->
+                                                    { champion | privateInfo = champion.privateInfo |> Editable.save }
+
+                                                SportCareerBlock ->
+                                                    { champion | sportCareer = champion.sportCareer |> Editable.save }
+
+                                                ProfessionalCareerBlock ->
+                                                    { champion | professionalCareer = champion.professionalCareer |> Editable.save }
+
+                                                MedalsBlock ->
+                                                    { champion | medals = champion.medals |> Editable.save }
+
+                                                PicturesBlock ->
+                                                    { champion | pictures = champion.pictures |> Editable.save }
+                                    in
+                                    ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
+                                )
+                            |> Maybe.withDefault ( model, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -449,34 +494,40 @@ handleSaveChampionResponse response model =
 updateCurrentSport : String -> Model -> ( Model, Cmd Msg )
 updateCurrentSport sportStr model =
     let
-        updateFn m =
+        updateSportInChampion c =
+            { c
+                | presentation =
+                    c.presentation
+                        |> Editable.map (\pres -> { pres | sport = Model.sportFromString sportStr |> Maybe.withDefault pres.sport })
+            }
+
+        updateSportInModel m =
             { m | sport = Model.sportFromString sportStr }
     in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
-                        let
-                            newChamp =
-                                { champion | sport = Model.sportFromString sportStr |> Maybe.withDefault champion.sport }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChamp } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success (updateSportInChampion champion) } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = updateSportInChampion nModel.champion } }, Cmd.none )
+
         ChampionsPage cModel ->
-            ( { model | currentPage = ChampionsPage (updateFn cModel) }
+            ( { model | currentPage = ChampionsPage (updateSportInModel cModel) }
             , Cmd.none
             )
 
         MedalsPage mModel ->
-            ( { model | currentPage = MedalsPage (updateFn mModel) }
+            ( { model | currentPage = MedalsPage (updateSportInModel mModel) }
             , Cmd.none
             )
 
         TeamsPage tModel ->
-            ( { model | currentPage = TeamsPage (updateFn tModel) }
+            ( { model | currentPage = TeamsPage (updateSportInModel tModel) }
             , Cmd.none
             )
 
@@ -499,22 +550,30 @@ updateCurrentSport sportStr model =
 addProExperience : Model -> ( Model, Cmd Msg )
 addProExperience model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newKey =
-                                getDictNextKey champion.proExperiences
-
-                            newProExperiences =
-                                champion.proExperiences
-                                    |> Dict.insert newKey Model.initProExperience
-
                             newChampion =
-                                { champion | proExperiences = newProExperiences }
+                                { champion
+                                    | professionalCareer =
+                                        champion.professionalCareer
+                                            |> Editable.map
+                                                (\pc ->
+                                                    let
+                                                        newKey =
+                                                            getDictNextKey pc.proExperiences
+
+                                                        newProExperiences =
+                                                            pc.proExperiences
+                                                                |> Dict.insert newKey Model.initProExperience
+                                                    in
+                                                    { pc | proExperiences = newProExperiences }
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -525,15 +584,19 @@ addProExperience model =
 deleteProExperience : Int -> Model -> ( Model, Cmd Msg )
 deleteProExperience id model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
                             newChampion =
-                                { champion | proExperiences = champion.proExperiences |> Dict.remove id }
+                                { champion
+                                    | professionalCareer =
+                                        champion.professionalCareer
+                                            |> Editable.map (\pc -> { pc | proExperiences = pc.proExperiences |> Dict.remove id })
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -544,41 +607,48 @@ deleteProExperience id model =
 updateProExperience : Int -> FormField -> String -> Model -> ( Model, Cmd Msg )
 updateProExperience id field val model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newProExperiences =
-                                champion.proExperiences
-                                    |> Dict.update id
-                                        (Maybe.map
-                                            (\proExperience ->
-                                                case field of
-                                                    Title ->
-                                                        { proExperience | title = Just val }
-
-                                                    CompanyName ->
-                                                        { proExperience | companyName = Just val }
-
-                                                    Description ->
-                                                        { proExperience | description = Just val }
-
-                                                    Website ->
-                                                        { proExperience | website = Just val }
-
-                                                    Contact ->
-                                                        { proExperience | contact = Just val }
-
-                                                    _ ->
-                                                        proExperience
-                                            )
-                                        )
-
                             newChampion =
-                                { champion | proExperiences = newProExperiences }
+                                { champion
+                                    | professionalCareer =
+                                        champion.professionalCareer
+                                            |> Editable.map
+                                                (\pc ->
+                                                    { pc
+                                                        | proExperiences =
+                                                            pc.proExperiences
+                                                                |> Dict.update id
+                                                                    (Maybe.map
+                                                                        (\proExperience ->
+                                                                            case field of
+                                                                                Title ->
+                                                                                    { proExperience | title = Just val }
+
+                                                                                CompanyName ->
+                                                                                    { proExperience | companyName = Just val }
+
+                                                                                Description ->
+                                                                                    { proExperience | description = Just val }
+
+                                                                                Website ->
+                                                                                    { proExperience | website = Just val }
+
+                                                                                Contact ->
+                                                                                    { proExperience | contact = Just val }
+
+                                                                                _ ->
+                                                                                    proExperience
+                                                                        )
+                                                                    )
+                                                    }
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -589,22 +659,30 @@ updateProExperience id field val model =
 addYearInFrenchTeam : Model -> ( Model, Cmd Msg )
 addYearInFrenchTeam model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newKey =
-                                getDictNextKey champion.yearsInFrenchTeam
-
-                            newYears =
-                                champion.yearsInFrenchTeam
-                                    |> Dict.insert newKey model.currentYear
-
                             newChampion =
-                                { champion | yearsInFrenchTeam = newYears }
+                                { champion
+                                    | sportCareer =
+                                        champion.sportCareer
+                                            |> Editable.map
+                                                (\sc ->
+                                                    let
+                                                        newKey =
+                                                            getDictNextKey sc.yearsInFrenchTeam
+
+                                                        newYears =
+                                                            sc.yearsInFrenchTeam
+                                                                |> Dict.insert newKey model.currentYear
+                                                    in
+                                                    { sc | yearsInFrenchTeam = newYears }
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -615,21 +693,29 @@ addYearInFrenchTeam model =
 updateYearInFrenchTeam : Int -> String -> Model -> ( Model, Cmd Msg )
 updateYearInFrenchTeam id str model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         case String.toInt str of
                             Just year ->
                                 let
-                                    newYears =
-                                        champion.yearsInFrenchTeam
-                                            |> Dict.insert id (Year year)
-
                                     newChampion =
-                                        { champion | yearsInFrenchTeam = newYears }
+                                        { champion
+                                            | sportCareer =
+                                                champion.sportCareer
+                                                    |> Editable.map
+                                                        (\sc ->
+                                                            let
+                                                                newYears =
+                                                                    sc.yearsInFrenchTeam
+                                                                        |> Dict.insert id (Year year)
+                                                            in
+                                                            { sc | yearsInFrenchTeam = newYears }
+                                                        )
+                                        }
                                 in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                                ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -643,19 +729,27 @@ updateYearInFrenchTeam id str model =
 deleteYearInFrenchTeam : Int -> Model -> ( Model, Cmd Msg )
 deleteYearInFrenchTeam id model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newYears =
-                                champion.yearsInFrenchTeam
-                                    |> Dict.remove id
-
                             newChampion =
-                                { champion | yearsInFrenchTeam = newYears }
+                                { champion
+                                    | sportCareer =
+                                        champion.sportCareer
+                                            |> Editable.map
+                                                (\sc ->
+                                                    let
+                                                        newYears =
+                                                            sc.yearsInFrenchTeam
+                                                                |> Dict.remove id
+                                                    in
+                                                    { sc | yearsInFrenchTeam = newYears }
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -666,22 +760,30 @@ deleteYearInFrenchTeam id model =
 addMedal : Model -> ( Model, Cmd Msg )
 addMedal model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newKey =
-                                getDictNextKey champion.medals
-
-                            newMedals =
-                                champion.medals
-                                    |> Dict.insert newKey (Model.initMedal champion.sport model.currentYear)
-
                             newChampion =
-                                { champion | medals = newMedals }
+                                { champion
+                                    | medals =
+                                        champion.medals
+                                            |> Editable.map
+                                                (\medals ->
+                                                    let
+                                                        newKey =
+                                                            getDictNextKey medals
+
+                                                        sport =
+                                                            champion.presentation |> Editable.value |> .sport
+                                                    in
+                                                    medals
+                                                        |> Dict.insert newKey (Model.initMedal sport model.currentYear)
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -692,18 +794,15 @@ addMedal model =
 deleteMedal : Int -> Model -> ( Model, Cmd Msg )
 deleteMedal id model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newMedals =
-                                champion.medals |> Dict.remove id
-
                             newChampion =
-                                { champion | medals = newMedals }
+                                { champion | medals = champion.medals |> Editable.map (Dict.remove id) }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -714,21 +813,17 @@ deleteMedal id model =
 updateMedalCompetition : Int -> String -> Model -> ( Model, Cmd Msg )
 updateMedalCompetition id str model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         case Model.competitionFromString str of
                             Just competition ->
                                 let
-                                    newMedals =
-                                        champion.medals
-                                            |> Dict.update id (Maybe.map (\medal -> { medal | competition = competition }))
-
                                     newChampion =
-                                        { champion | medals = newMedals }
+                                        { champion | medals = champion.medals |> Editable.map (Dict.update id (Maybe.map (\medal -> { medal | competition = competition }))) }
                                 in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                                ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -742,21 +837,17 @@ updateMedalCompetition id str model =
 updateMedalYear : Int -> String -> Model -> ( Model, Cmd Msg )
 updateMedalYear id str model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         case String.toInt str of
                             Just year ->
                                 let
-                                    newMedals =
-                                        champion.medals
-                                            |> Dict.update id (Maybe.map (\medal -> { medal | year = Year year }))
-
                                     newChampion =
-                                        { champion | medals = newMedals }
+                                        { champion | medals = champion.medals |> Editable.map (Dict.update id (Maybe.map (\medal -> { medal | year = Year year }))) }
                                 in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                                ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -770,21 +861,17 @@ updateMedalYear id str model =
 updateMedalSpecialty : Int -> String -> Model -> ( Model, Cmd Msg )
 updateMedalSpecialty id str model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         case Model.specialtyFromString str of
                             Just specialty ->
                                 let
-                                    newMedals =
-                                        champion.medals
-                                            |> Dict.update id (Maybe.map (\medal -> { medal | specialty = specialty }))
-
                                     newChampion =
-                                        { champion | medals = newMedals }
+                                        { champion | medals = champion.medals |> Editable.map (Dict.update id (Maybe.map (\medal -> { medal | specialty = specialty }))) }
                                 in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                                ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -803,38 +890,6 @@ getDictNextKey =
         >> List.head
         >> Maybe.map ((+) 1)
         >> Maybe.withDefault 0
-
-
-validateChampionForm : ChampionForm -> Maybe Champion
-validateChampionForm c =
-    --TODO validation
-    Just
-        { id = c.id
-        , email = c.email
-        , firstName = c.firstName
-        , lastName = c.lastName
-        , birthDate = c.birthDate
-        , address = c.address
-        , phoneNumber = c.phoneNumber
-        , website = c.website
-        , sport = c.sport
-        , proExperiences = c.proExperiences |> Dict.values
-        , yearsInFrenchTeam = c.yearsInFrenchTeam |> Dict.values
-        , medals = c.medals |> Dict.values
-        , isMember = c.isMember
-        , intro = c.intro
-        , highlights = c.highlights |> Dict.values
-        , profilePicture = c.profilePicture
-        , olympicGamesParticipation = c.olympicGamesParticipation
-        , worldCupParticipation = c.worldCupParticipation
-        , trackRecord = c.trackRecord
-        , bestMemory = c.bestMemory
-        , decoration = c.decoration
-        , background = c.background
-        , volunteering = c.volunteering
-        , pictures = c.pictures |> Dict.values
-        , login = Nothing
-        }
 
 
 updateCurrentSpecialty : String -> Model -> ( Model, Cmd Msg )
@@ -928,24 +983,17 @@ selectChampion id model =
 handleChampionResponse : RemoteData (Graphql.Http.Error Champion) Champion -> Model -> ( Model, Cmd Msg )
 handleChampionResponse resp model =
     case ( model.currentPage, resp ) of
-        ( ChampionPage cModel, Success champion ) ->
-            if cModel.id == champion.id then
-                ( { model | currentPage = ChampionPage { cModel | champion = resp } }
-                , Cmd.none
-                )
-
-            else
-                ( model, Cmd.none )
-
-        ( EditChampionPage { id }, Success champion ) ->
-            if id == Just champion.id then
+        ( ChampionPage { id }, Success champion ) ->
+            if id == champion.id then
                 ( { model
                     | currentPage =
-                        EditChampionPage
+                        ChampionPage
                             { id = id
-                            , champion = Success (Page.EditChampion.championToForm champion)
+                            , champion = Success champion
                             , sectorDropdown = Dropdown.init
                             , medalsTableState = Table.initialSort "ANNÉE"
+                            , pictureDialog = Nothing
+                            , currentYear = model.currentYear
                             }
                   }
                 , Cmd.none
@@ -970,34 +1018,47 @@ cancelFileSelection model =
 
 handleFileSelectionDone : Bool -> File -> Model -> ( Model, Cmd Msg )
 handleFileSelectionDone isProfilePicture file model =
+    let
+        doUpdateProfilePicOfChampion c =
+            { c
+                | presentation =
+                    c.presentation
+                        |> Editable.map (\p -> { p | profilePicture = Just <| Attachment (File.name file) Nothing })
+            }
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
                             ( newChampion, gotFileUrlMsg ) =
                                 if isProfilePicture then
-                                    ( { champion | profilePicture = Just <| Attachment (File.name file) Nothing }
+                                    ( doUpdateProfilePicOfChampion champion
                                     , GotProfilePictureFileUrl
                                     )
 
                                 else
                                     let
                                         newKey =
-                                            getDictNextKey champion.pictures
+                                            getDictNextKey (Editable.value champion.pictures)
 
                                         newPictures =
                                             champion.pictures
-                                                |> Dict.insert newKey (Model.initPicture (File.name file))
+                                                |> Editable.map (Dict.insert newKey (Model.initPicture (File.name file)))
                                     in
                                     ( { champion | pictures = newPictures }, GotPictureFileUrl newKey )
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }
                         , Task.perform gotFileUrlMsg <| File.toUrl file
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = doUpdateProfilePicOfChampion nModel.champion } }
+            , Task.perform GotProfilePictureFileUrl <| File.toUrl file
+            )
 
         _ ->
             ( model, Cmd.none )
@@ -1005,29 +1066,41 @@ handleFileSelectionDone isProfilePicture file model =
 
 handleProfilePictureFileUrlReceived : String -> Model -> ( Model, Cmd Msg )
 handleProfilePictureFileUrlReceived base64file model =
-    case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newChampion =
-                                case champion.profilePicture of
+    let
+        updateProfilePicOfChampion c =
+            { c
+                | presentation =
+                    c.presentation
+                        |> Editable.map
+                            (\p ->
+                                case p.profilePicture of
                                     Nothing ->
-                                        champion
+                                        p
 
                                     Just oldFile ->
                                         let
                                             newFile =
                                                 { oldFile | base64 = Just base64file }
                                         in
-                                        { champion | profilePicture = Just newFile }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                                        { p | profilePicture = Just newFile }
+                            )
+            }
+    in
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success (updateProfilePicOfChampion champion) } }
                         , Cmd.none
                         )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = updateProfilePicOfChampion nModel.champion } }
+            , Cmd.none
+            )
 
         _ ->
             ( model, Cmd.none )
@@ -1036,24 +1109,26 @@ handleProfilePictureFileUrlReceived base64file model =
 handlePictureFileUrlReceived : Int -> String -> Model -> ( Model, Cmd Msg )
 handlePictureFileUrlReceived id base64file model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
-                            newPictures =
-                                champion.pictures
-                                    |> Dict.update id
-                                        (Maybe.map
-                                            (\({ attachment } as pic) ->
-                                                { pic | attachment = { attachment | base64 = Just base64file } }
-                                            )
-                                        )
-
                             newChampion =
-                                { champion | pictures = newPictures }
+                                { champion
+                                    | pictures =
+                                        champion.pictures
+                                            |> Editable.map
+                                                (Dict.update id
+                                                    (Maybe.map
+                                                        (\({ attachment } as pic) ->
+                                                            { pic | attachment = { attachment | base64 = Just base64file } }
+                                                        )
+                                                    )
+                                                )
+                                }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }
                         , Cmd.none
                         )
                     )
@@ -1092,41 +1167,44 @@ updateCurrentSector name model =
             , Cmd.none
             )
 
-        ( EditChampionPage eModel, True, _ ) ->
-            ( { model | currentPage = EditChampionPage (updateChampionWithProExperienceSector name eModel) }, Cmd.none )
+        ( ChampionPage cModel, True, _ ) ->
+            ( { model | currentPage = ChampionPage (updateChampionWithProExperienceSector name cModel) }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-updateChampionWithProExperienceSector : String -> EditChampionPageModel -> EditChampionPageModel
-updateChampionWithProExperienceSector sectorName eModel =
-    case eModel.champion of
+updateChampionWithProExperienceSector : String -> ChampionPageModel -> ChampionPageModel
+updateChampionWithProExperienceSector sectorName cModel =
+    case cModel.champion of
         Success champion ->
             let
                 newChampion =
                     { champion
-                        | proExperiences =
-                            champion.proExperiences
-                                |> Dict.map (\id exp -> { exp | sectors = exp.sectors ++ [ sectorName ] })
+                        | professionalCareer =
+                            champion.professionalCareer
+                                |> Editable.map
+                                    (\pc ->
+                                        { pc | proExperiences = pc.proExperiences |> Dict.map (\id exp -> { exp | sectors = exp.sectors ++ [ sectorName ] }) }
+                                    )
                     }
             in
-            { eModel
+            { cModel
                 | champion = Success newChampion
-                , sectorDropdown = eModel.sectorDropdown |> Dropdown.toggleMenu False |> Dropdown.addSelected sectorName |> Dropdown.setQuery Nothing
+                , sectorDropdown = cModel.sectorDropdown |> Dropdown.toggleMenu False |> Dropdown.addSelected sectorName |> Dropdown.setQuery Nothing
             }
 
         _ ->
-            eModel
+            cModel
 
 
 changeDropdownState : Menu.Msg -> Model -> ( Model, Cmd Msg )
 changeDropdownState menuMsg model =
     case ( model.currentPage, model.sectors ) of
-        ( EditChampionPage eModel, Success sectors ) ->
+        ( ChampionPage cModel, Success sectors ) ->
             let
                 dropdown =
-                    eModel.sectorDropdown
+                    cModel.sectorDropdown
 
                 acceptableSectors =
                     Model.acceptableSectors dropdown.query sectors
@@ -1139,7 +1217,7 @@ changeDropdownState menuMsg model =
                         acceptableSectors
 
                 newDropdown =
-                    Dropdown.setState newState eModel.sectorDropdown
+                    Dropdown.setState newState cModel.sectorDropdown
                         |> (if acceptableSectors == [] then
                                 Dropdown.emptyState
 
@@ -1148,10 +1226,10 @@ changeDropdownState menuMsg model =
                            )
 
                 newEModel =
-                    { eModel | sectorDropdown = newDropdown }
+                    { cModel | sectorDropdown = newDropdown }
 
                 newModel =
-                    { model | currentPage = EditChampionPage newEModel }
+                    { model | currentPage = ChampionPage newEModel }
             in
             maybeMsg
                 |> Maybe.map (\updateMsg -> update updateMsg newModel)
@@ -1164,17 +1242,17 @@ changeDropdownState menuMsg model =
 updateDropdownQuery : String -> Model -> ( Model, Cmd Msg )
 updateDropdownQuery newQuery model =
     case model.currentPage of
-        EditChampionPage eModel ->
+        ChampionPage cModel ->
             let
                 newModel =
-                    { eModel
+                    { cModel
                         | sectorDropdown =
-                            eModel.sectorDropdown
+                            cModel.sectorDropdown
                                 |> Dropdown.setQuery (Just newQuery)
                                 |> Dropdown.toggleMenu (newQuery /= "")
                     }
             in
-            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+            ( { model | currentPage = ChampionPage newModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1183,7 +1261,7 @@ updateDropdownQuery newQuery model =
 focusDropdown : Model -> ( Model, Cmd Msg )
 focusDropdown model =
     case model.currentPage of
-        EditChampionPage eModel ->
+        ChampionPage cModel ->
             ( model, Cmd.none )
 
         _ ->
@@ -1193,17 +1271,17 @@ focusDropdown model =
 closeDropdown : Model -> ( Model, Cmd Msg )
 closeDropdown model =
     case model.currentPage of
-        EditChampionPage eModel ->
+        ChampionPage cModel ->
             let
                 newModel =
-                    { eModel
+                    { cModel
                         | sectorDropdown =
-                            eModel.sectorDropdown
+                            cModel.sectorDropdown
                                 |> Dropdown.toggleMenu False
                                 |> Dropdown.setQuery Nothing
                     }
             in
-            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+            ( { model | currentPage = ChampionPage newModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1212,16 +1290,16 @@ closeDropdown model =
 removeItemFromDropdown : String -> Model -> ( Model, Cmd Msg )
 removeItemFromDropdown str model =
     case model.currentPage of
-        EditChampionPage eModel ->
+        ChampionPage cModel ->
             let
                 newModel =
-                    { eModel
+                    { cModel
                         | sectorDropdown =
-                            eModel.sectorDropdown
+                            cModel.sectorDropdown
                                 |> Dropdown.removeSelected str
                     }
             in
-            ( { model | currentPage = EditChampionPage newModel }, Cmd.none )
+            ( { model | currentPage = ChampionPage newModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1230,8 +1308,8 @@ removeItemFromDropdown str model =
 createASectorFromQuery : Model -> ( Model, Cmd Msg )
 createASectorFromQuery model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.sectorDropdown.query
+        ChampionPage cModel ->
+            cModel.sectorDropdown.query
                 |> Maybe.map
                     (\query ->
                         let
@@ -1239,13 +1317,13 @@ createASectorFromQuery model =
                                 Utils.capitalize query
 
                             newEModel =
-                                updateChampionWithProExperienceSector capitalizedQuery eModel
+                                updateChampionWithProExperienceSector capitalizedQuery cModel
 
                             newSectors =
                                 model.sectors
                                     |> RD.map (\sectors -> sectors ++ [ Model.createSector capitalizedQuery ])
                         in
-                        ( { model | currentPage = EditChampionPage newEModel, sectors = newSectors }, Cmd.none )
+                        ( { model | currentPage = ChampionPage newEModel, sectors = newSectors }, Cmd.none )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
@@ -1256,12 +1334,12 @@ createASectorFromQuery model =
 resetSectorDropdown : Model -> ( Model, Cmd Msg )
 resetSectorDropdown model =
     case model.currentPage of
-        EditChampionPage ({ sectorDropdown } as eModel) ->
+        ChampionPage ({ sectorDropdown } as cModel) ->
             let
                 newSectorDropdown =
                     sectorDropdown |> Dropdown.emptyState
             in
-            ( { model | currentPage = EditChampionPage { eModel | sectorDropdown = newSectorDropdown } }, Cmd.none )
+            ( { model | currentPage = ChampionPage { cModel | sectorDropdown = newSectorDropdown } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1269,25 +1347,32 @@ resetSectorDropdown model =
 
 addHighlight : Model -> ( Model, Cmd Msg )
 addHighlight model =
+    let
+        addHighlightToChampion c =
+            { c
+                | presentation =
+                    c.presentation
+                        |> Editable.map
+                            (\p ->
+                                let
+                                    newKey =
+                                        getDictNextKey p.highlights
+                                in
+                                { p | highlights = p.highlights |> Dict.insert newKey "" }
+                            )
+            }
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
-                        let
-                            newKey =
-                                getDictNextKey champion.highlights
-
-                            newHighlights =
-                                champion.highlights
-                                    |> Dict.insert newKey ""
-
-                            newChampion =
-                                { champion | highlights = newHighlights }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success (addHighlightToChampion champion) } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = addHighlightToChampion nModel.champion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1295,18 +1380,24 @@ addHighlight model =
 
 deleteHighlight : Int -> Model -> ( Model, Cmd Msg )
 deleteHighlight id model =
+    let
+        deleteHighlightFromChampion c =
+            { c
+                | presentation =
+                    c.presentation |> Editable.map (\p -> { p | highlights = p.highlights |> Dict.remove id })
+            }
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
-                        let
-                            newChampion =
-                                { champion | highlights = champion.highlights |> Dict.remove id }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success (deleteHighlightFromChampion champion) } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = deleteHighlightFromChampion nModel.champion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1314,22 +1405,24 @@ deleteHighlight id model =
 
 updateHighlight : Int -> String -> Model -> ( Model, Cmd Msg )
 updateHighlight id val model =
+    let
+        updateHighlightInChampion c =
+            { c
+                | presentation =
+                    c.presentation |> Editable.map (\p -> { p | highlights = p.highlights |> Dict.update id (Maybe.map (always val)) })
+            }
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
-                        let
-                            newHighlights =
-                                champion.highlights
-                                    |> Dict.update id (Maybe.map (always val))
-
-                            newChampion =
-                                { champion | highlights = newHighlights }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success (updateHighlightInChampion champion) } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = updateHighlightInChampion nModel.champion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1338,7 +1431,7 @@ updateHighlight id val model =
 editChampion : Id -> Model -> ( Model, Cmd Msg )
 editChampion id model =
     if model.isAdmin || (model.championLoggedIn == Just id) then
-        ( model, Nav.pushUrl model.key (Route.routeToString <| EditChampionRoute (Just id)) )
+        ( model, Nav.pushUrl model.key (Route.routeToString <| ChampionRoute id) )
 
     else
         ( model, Cmd.none )
@@ -1347,15 +1440,15 @@ editChampion id model =
 deletePicture : Int -> Model -> ( Model, Cmd Msg )
 deletePicture id model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         let
                             newChampion =
-                                { champion | pictures = champion.pictures |> Dict.remove id }
+                                { champion | pictures = champion.pictures |> Editable.map (Dict.remove id) }
                         in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
                     )
                 |> RD.withDefault ( model, Cmd.none )
 
@@ -1372,7 +1465,7 @@ displayLargePicture idx model =
                     (\champion ->
                         let
                             pictureToDisplay =
-                                LE.getAt idx champion.pictures
+                                Dict.get idx (champion.pictures |> Editable.value)
                         in
                         ( { model | currentPage = ChampionPage { cModel | pictureDialog = pictureToDisplay } }, Cmd.none )
                     )
@@ -1405,11 +1498,14 @@ showNextPicture direction model =
                 |> RD.map
                     (\champion ->
                         let
+                            pictures =
+                                champion.pictures |> Editable.value
+
                             nextPicture =
                                 cModel.pictureDialog
-                                    |> Maybe.andThen (\p -> LE.elemIndex p champion.pictures)
+                                    |> Maybe.andThen (\p -> pictures |> Dict.values |> LE.elemIndex p)
                                     |> Maybe.map ((+) direction)
-                                    |> Maybe.andThen (\newIndex -> LE.getAt newIndex champion.pictures)
+                                    |> Maybe.andThen (\newIndex -> Dict.get newIndex pictures)
                                     |> (\maybePic ->
                                             case maybePic of
                                                 Just pic ->
@@ -1696,21 +1792,17 @@ updateRecordWinnerNameField index str updateFn model =
 updateMedalType : Int -> String -> Model -> ( Model, Cmd Msg )
 updateMedalType id str model =
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
+        ChampionPage cModel ->
+            cModel.champion
                 |> RD.map
                     (\champion ->
                         case str |> String.toInt |> Maybe.andThen Model.medalTypeFromInt of
                             Just medalType ->
                                 let
-                                    newMedals =
-                                        champion.medals
-                                            |> Dict.update id (Maybe.map (\medal -> { medal | medalType = medalType }))
-
                                     newChampion =
-                                        { champion | medals = newMedals }
+                                        { champion | medals = champion.medals |> Editable.map (Dict.update id (Maybe.map (\medal -> { medal | medalType = medalType }))) }
                                 in
-                                ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
+                                ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
 
                             Nothing ->
                                 ( model, Cmd.none )
@@ -1723,18 +1815,18 @@ updateMedalType id str model =
 
 updateIsMember : Bool -> Model -> ( Model, Cmd Msg )
 updateIsMember bool model =
+    let
+        doUpdate c =
+            { c | presentation = c.presentation |> Editable.map (\p -> { p | isMember = bool }) }
+    in
     case model.currentPage of
-        EditChampionPage eModel ->
-            eModel.champion
-                |> RD.map
-                    (\champion ->
-                        let
-                            newChampion =
-                                { champion | isMember = bool }
-                        in
-                        ( { model | currentPage = EditChampionPage { eModel | champion = Success newChampion } }, Cmd.none )
-                    )
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map (\champion -> ( { model | currentPage = ChampionPage { cModel | champion = Success (doUpdate champion) } }, Cmd.none ))
                 |> RD.withDefault ( model, Cmd.none )
+
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | champion = doUpdate nModel.champion } }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -1786,6 +1878,131 @@ handleLoginResponse resp model =
 
                 _ ->
                     ( { model | currentPage = LoginPage { lModel | loginRequest = resp } }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+editFormBlock : FormBlock -> Model -> ( Model, Cmd Msg )
+editFormBlock block model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                case block of
+                                    PresentationBlock ->
+                                        { champion | presentation = champion.presentation |> Editable.edit }
+
+                                    PrivateInfoBlock ->
+                                        { champion | privateInfo = champion.privateInfo |> Editable.edit }
+
+                                    SportCareerBlock ->
+                                        { champion | sportCareer = champion.sportCareer |> Editable.edit }
+
+                                    ProfessionalCareerBlock ->
+                                        { champion | professionalCareer = champion.professionalCareer |> Editable.edit }
+
+                                    MedalsBlock ->
+                                        { champion | medals = champion.medals |> Editable.edit }
+
+                                    PicturesBlock ->
+                                        { champion | pictures = champion.pictures |> Editable.edit }
+                        in
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+saveChampion : FormBlock -> Model -> ( Model, Cmd Msg )
+saveChampion block model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        ( model
+                        , if model.isAdmin || (model.championLoggedIn == Just champion.id) then
+                            Api.updateChampion block champion
+
+                          else
+                            Cmd.none
+                        )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+cancelEdition : FormBlock -> Model -> ( Model, Cmd Msg )
+cancelEdition block model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            cModel.champion
+                |> RD.map
+                    (\champion ->
+                        let
+                            newChampion =
+                                case block of
+                                    PresentationBlock ->
+                                        { champion | presentation = champion.presentation |> Editable.cancel }
+
+                                    PrivateInfoBlock ->
+                                        { champion | privateInfo = champion.privateInfo |> Editable.cancel }
+
+                                    SportCareerBlock ->
+                                        { champion | sportCareer = champion.sportCareer |> Editable.cancel }
+
+                                    ProfessionalCareerBlock ->
+                                        { champion | professionalCareer = champion.professionalCareer |> Editable.cancel }
+
+                                    MedalsBlock ->
+                                        { champion | medals = champion.medals |> Editable.cancel }
+
+                                    PicturesBlock ->
+                                        { champion | pictures = champion.pictures |> Editable.cancel }
+                        in
+                        ( { model | currentPage = ChampionPage { cModel | champion = Success newChampion } }, Cmd.none )
+                    )
+                |> RD.withDefault ( model, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+saveNewChampion : Model -> ( Model, Cmd Msg )
+saveNewChampion model =
+    case model.currentPage of
+        NewChampionPage nModel ->
+            ( { model | currentPage = NewChampionPage { nModel | saveRequest = Loading } }
+            , if model.isAdmin then
+                nModel.champion |> Api.createChampion
+
+              else
+                Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleCreateChampionResponse : RemoteData (Graphql.Http.Error (Maybe Champion)) (Maybe Champion) -> Model -> ( Model, Cmd Msg )
+handleCreateChampionResponse response model =
+    case ( model.currentPage, response ) of
+        ( NewChampionPage cModel, Success (Just receivedChampion) ) ->
+            ( { model
+                | champions =
+                    model.champions
+                        |> RD.map (\list -> (receivedChampion |> Page.Champion.toChampionLite) :: list)
+              }
+            , Nav.pushUrl model.key (Route.routeToString <| ChampionRoute receivedChampion.id)
+            )
 
         _ ->
             ( model, Cmd.none )

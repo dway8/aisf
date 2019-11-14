@@ -1,5 +1,6 @@
 module Page.Champions exposing (init, view)
 
+import Aisf.Scalar exposing (Id(..))
 import Common
 import Dict exposing (Dict)
 import Element exposing (..)
@@ -8,7 +9,7 @@ import Html
 import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
-import Model exposing (Champion, Champions, ChampionsPageModel, Msg(..), Sector, Sectors, Sport)
+import Model exposing (ChampionLite, Champions, ChampionsPageModel, Msg(..), Sector, Sectors, Sport)
 import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Table
@@ -39,9 +40,9 @@ view isAdmin rdChampions rdSectors model =
             ]
         , Utils.viewIf isAdmin <|
             link []
-                { url = Route.routeToString <| EditChampionRoute Nothing
+                { url = Route.routeToString <| ChampionRoute (Id "new")
                 , label =
-                    row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un champion" ]
+                    row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "plus", text "Ajouter un coureur" ]
                         |> Button.makeButton Nothing
                         |> Button.withBackgroundColor Color.green
                         |> Button.viewButton
@@ -72,7 +73,7 @@ view isAdmin rdChampions rdSectors model =
         ]
 
 
-filterBySport : Maybe Sport -> List Champion -> List Champion
+filterBySport : Maybe Sport -> Champions -> Champions
 filterBySport sport champions =
     case sport of
         Nothing ->
@@ -83,7 +84,7 @@ filterBySport sport champions =
                 |> List.filter (.sport >> (==) s)
 
 
-filterBySector : Maybe Sector -> List Champion -> List Champion
+filterBySector : Maybe Sector -> Champions -> Champions
 filterBySector sector champions =
     case sector of
         Nothing ->
@@ -91,10 +92,10 @@ filterBySector sector champions =
 
         Just { name } ->
             champions
-                |> List.filter (.proExperiences >> List.any (\exp -> exp.sectors |> List.any ((==) name)))
+                |> List.filter (.sectors >> List.any ((==) name))
 
 
-tableConfig : Table.Config Champion Msg
+tableConfig : Table.Config ChampionLite Msg
 tableConfig =
     let
         tableCustomizations =
@@ -116,7 +117,7 @@ attrsForHeaders =
         ]
 
 
-tableColumns : List (Table.Column Champion Msg)
+tableColumns : List (Table.Column ChampionLite Msg)
 tableColumns =
     [ Common.profilePictureColumn
     , Common.memberColumn
