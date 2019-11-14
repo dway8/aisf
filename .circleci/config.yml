@@ -33,6 +33,12 @@ jobs:
 
       - run: cd assets && npm install
 
+      #elm 0.19.1
+      - run: curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+      - run: gunzip elm.gz
+      - run: chmod +x elm
+      - run: cp elm './assets/node_modules/.bin/elm'
+
       - run: npm run build --prefix ./assets && mix phx.digest
 
       - save_cache:  # generate and store mix cache

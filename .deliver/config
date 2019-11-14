@@ -28,6 +28,12 @@ pre_erlang_clean_compile() {
     cd '$BUILD_AT/assets'
     npm install $SILENCE
 
+    #elm 0.19.1
+    curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+    gunzip elm.gz
+    chmod +x elm
+    cp elm 'node_modules/.bin/elm'
+
   "
 
   status "Building static files"
