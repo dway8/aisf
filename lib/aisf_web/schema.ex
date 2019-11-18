@@ -211,6 +211,12 @@ defmodule AisfWeb.Schema do
       arg(:winners, non_null(list_of(non_null(:winner_params))))
       resolve(&RecordsResolver.create/2)
     end
+
+    field :delete_champion, type: :boolean do
+      arg(:id, non_null(:string))
+
+      resolve(&ChampionsResolver.delete/2)
+    end
   end
 
   input_object :pro_experience_params do

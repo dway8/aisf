@@ -73,7 +73,15 @@ type alias ChampionPageModel =
     , pictureDialog : Maybe Picture
     , sectorDropdown : Dropdown.Model
     , currentYear : Year
+    , deleteRequest : DeleteRequest
     }
+
+
+type DeleteRequest
+    = None
+    | WaitingForConfirmation
+    | Requested
+    | DeleteResponse Bool
 
 
 type alias NewChampionPageModel =
@@ -970,6 +978,10 @@ type Msg
     | GotLoginResponse (RemoteData (Graphql.Http.Error LoginResponse) LoginResponse)
     | PressedEditBlockButton FormBlock
     | PressedSaveNewChampionButton
+    | PressedDeleteChampionButton
+    | CancelledChampionDeletion
+    | ConfirmedChampionDeletion
+    | GotDeleteChampionResponse (Result (Graphql.Http.Error (Maybe Bool)) (Maybe Bool))
 
 
 type FormField

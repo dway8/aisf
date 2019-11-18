@@ -90,4 +90,21 @@ defmodule AisfWeb.ChampionsResolver do
         {:ok, %{result: true, id: champion.id}}
     end
   end
+
+  def delete(%{id: id}, _info) do
+    case Champions.get_champion(id) do
+      nil ->
+        Logger.warn("No champion found for id #{id}")
+        {:ok, false}
+
+      champion ->
+        case Champions.delete_champion(champion) do
+          {:ok, _} ->
+            {:ok, true}
+
+          {:error, _} ->
+            {:ok, false}
+        end
+    end
+  end
 end

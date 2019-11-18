@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Aisf.Mutation exposing (CreateChampionRequiredArguments, CreateEventOptionalArguments, CreateEventRequiredArguments, CreateRecordRequiredArguments, UpdateChampionMedalsRequiredArguments, UpdateChampionPicturesRequiredArguments, UpdateChampionPresentationOptionalArguments, UpdateChampionPresentationRequiredArguments, UpdateChampionPrivateInfoOptionalArguments, UpdateChampionPrivateInfoRequiredArguments, UpdateChampionProfessionalCareerOptionalArguments, UpdateChampionProfessionalCareerRequiredArguments, UpdateChampionSportCareerOptionalArguments, UpdateChampionSportCareerRequiredArguments, createChampion, createEvent, createRecord, updateChampionMedals, updateChampionPictures, updateChampionPresentation, updateChampionPrivateInfo, updateChampionProfessionalCareer, updateChampionSportCareer)
+module Aisf.Mutation exposing (CreateChampionRequiredArguments, CreateEventOptionalArguments, CreateEventRequiredArguments, CreateRecordRequiredArguments, DeleteChampionRequiredArguments, UpdateChampionMedalsRequiredArguments, UpdateChampionPicturesRequiredArguments, UpdateChampionPresentationOptionalArguments, UpdateChampionPresentationRequiredArguments, UpdateChampionPrivateInfoOptionalArguments, UpdateChampionPrivateInfoRequiredArguments, UpdateChampionProfessionalCareerOptionalArguments, UpdateChampionProfessionalCareerRequiredArguments, UpdateChampionSportCareerOptionalArguments, UpdateChampionSportCareerRequiredArguments, createChampion, createEvent, createRecord, deleteChampion, updateChampionMedals, updateChampionPictures, updateChampionPresentation, updateChampionPrivateInfo, updateChampionProfessionalCareer, updateChampionSportCareer)
 
 import Aisf.InputObject
 import Aisf.Interface
@@ -68,6 +68,15 @@ type alias CreateRecordRequiredArguments =
 createRecord : CreateRecordRequiredArguments -> SelectionSet decodesTo Aisf.Object.Record -> SelectionSet decodesTo RootMutation
 createRecord requiredArgs object_ =
     Object.selectionForCompositeField "createRecord" [ Argument.required "place" requiredArgs.place Encode.string, Argument.required "recordType" requiredArgs.recordType Encode.int, Argument.required "specialty" requiredArgs.specialty Encode.string, Argument.required "winners" requiredArgs.winners (Aisf.InputObject.encodeWinnerParams |> Encode.list), Argument.required "year" requiredArgs.year Encode.int ] object_ identity
+
+
+type alias DeleteChampionRequiredArguments =
+    { id : String }
+
+
+deleteChampion : DeleteChampionRequiredArguments -> SelectionSet (Maybe Bool) RootMutation
+deleteChampion requiredArgs =
+    Object.selectionForField "(Maybe Bool)" "deleteChampion" [ Argument.required "id" requiredArgs.id Encode.string ] (Decode.bool |> Decode.nullable)
 
 
 type alias UpdateChampionMedalsRequiredArguments =

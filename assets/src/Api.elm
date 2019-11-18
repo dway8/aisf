@@ -1,4 +1,4 @@
-module Api exposing (createChampion, createEvent, createRecord, getChampion, getChampions, getEvents, getRecords, getSectors, login, updateChampion)
+module Api exposing (createChampion, createEvent, createRecord, deleteChampion, getChampion, getChampions, getEvents, getRecords, getSectors, login, updateChampion)
 
 import Aisf.InputObject
 import Aisf.Mutation as Mutation
@@ -427,3 +427,11 @@ loginResponseSelection =
         )
         |> with LoginResponse.result
         |> with LoginResponse.id
+
+
+deleteChampion : Id -> Cmd Msg
+deleteChampion (Id id) =
+    Mutation.deleteChampion { id = id }
+        |> Graphql.Http.mutationRequest endpoint
+        |> Graphql.Http.withCredentials
+        |> Graphql.Http.send GotDeleteChampionResponse

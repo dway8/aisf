@@ -29,28 +29,16 @@ import Utils
 
 init : Year -> Bool -> Maybe Id -> Id -> ( ChampionPageModel, Cmd Msg )
 init currentYear isAdmin championLoggedIn id =
-    case id of
-        Id "new" ->
-            ( { id = id
-              , champion = Success initChampion
-              , medalsTableState = Table.initialSort "ANNÉE"
-              , pictureDialog = Nothing
-              , sectorDropdown = Dropdown.init
-              , currentYear = currentYear
-              }
-            , Cmd.none
-            )
-
-        _ ->
-            ( { id = id
-              , champion = Loading
-              , medalsTableState = Table.initialSort "ANNÉE"
-              , pictureDialog = Nothing
-              , sectorDropdown = Dropdown.init
-              , currentYear = currentYear
-              }
-            , Api.getChampion (Model.isAdminOrCurrentChampion isAdmin championLoggedIn id) id
-            )
+    ( { id = id
+      , champion = Loading
+      , medalsTableState = Table.initialSort "ANNÉE"
+      , pictureDialog = Nothing
+      , sectorDropdown = Dropdown.init
+      , currentYear = currentYear
+      , deleteRequest = None
+      }
+    , Api.getChampion (Model.isAdminOrCurrentChampion isAdmin championLoggedIn id) id
+    )
 
 
 initChampion : Champion
@@ -103,20 +91,20 @@ initChampion =
 
 
 view : RemoteData (Graphql.Http.Error Sectors) Sectors -> Bool -> Maybe Id -> ChampionPageModel -> Element Msg
-view rdSectors isAdmin championLoggedIn { id, champion, medalsTableState, currentYear, sectorDropdown } =
+view rdSectors isAdmin championLoggedIn { id, champion, medalsTableState, currentYear, sectorDropdown, deleteRequest } =
     let
         adminOrCurrentChampion =
             Model.isAdminOrCurrentChampion isAdmin championLoggedIn id
     in
     column [ UI.largeSpacing, width fill ]
-        [ row [ UI.defaultSpacing ]
+        [ row [ width fill ]
             [ Utils.viewIf (championLoggedIn == Nothing)
                 (row [ UI.defaultSpacing ] [ el [] <| UI.viewIcon "arrow-left", text <| "Retour à la liste" ]
                     |> Button.makeButton (Just RequestedPreviousListingPage)
                     |> Button.withBackgroundColor Color.lightGrey
-                    |> Button.withAttrs []
                     |> Button.viewButton
                 )
+            , Utils.viewIf isAdmin <| viewDeleteChampion deleteRequest
             ]
         , case champion of
             Success champ ->
@@ -908,3 +896,52 @@ toChampionLite champion =
     , medals = champion.medals |> Editable.value |> Dict.values
     , sectors = champion.professionalCareer |> Editable.value |> .proExperiences |> Dict.values |> List.concatMap .sectors
     }
+
+
+viewDeleteChampion : DeleteRequest -> Element Msg
+viewDeleteChampion request =
+    let
+        deleteButton =
+            text "Supprimer le coureur"
+                |> Button.makeButton (Just PressedDeleteChampionButton)
+                |> Button.withBackgroundColor Color.red
+                |> Button.viewButton
+    in
+    el [ alignRight, paddingXY 0 10 ] <|
+        case request of
+            None ->
+                deleteButton
+
+            WaitingForConfirmation ->
+                column [ UI.defaultSpacing ]
+                    [ el [ Font.bold ] <| text "Êtes-vous sûr de vouloir supprimer ce coureur ?"
+                    , row [ UI.defaultSpacing, alignRight ]
+                        [ text "Annuler"
+                            |> Button.makeButton (Just CancelledChampionDeletion)
+                            |> Button.withBackgroundColor Color.grey
+                            |> Button.viewButton
+                        , text "Confirmer"
+                            |> Button.makeButton (Just ConfirmedChampionDeletion)
+                            |> Button.withBackgroundColor Color.green
+                            |> Button.viewButton
+                        ]
+                    ]
+
+            Requested ->
+                text "Suppression en cours..."
+                    |> Button.makeButton Nothing
+                    |> Button.withBackgroundColor Color.red
+                    |> Button.withDisabled True
+                    |> Button.withAlpha 0.5
+                    |> Button.withCursor UI.notAllowedCursor
+                    |> Button.viewButton
+
+            DeleteResponse isSuccess ->
+                if isSuccess then
+                    none
+
+                else
+                    column [ UI.defaultSpacing ]
+                        [ el [ alignRight ] deleteButton
+                        , el [ Font.color Color.red ] <| text "Une erreur s'est produite, veuillez réessayer."
+                        ]

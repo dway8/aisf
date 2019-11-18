@@ -268,6 +268,18 @@ update msg model =
         GotCreateChampionResponse resp ->
             handleCreateChampionResponse resp model
 
+        PressedDeleteChampionButton ->
+            openDeleteChampionConfirmation model
+
+        CancelledChampionDeletion ->
+            respondToDeletionConfirmation False model
+
+        ConfirmedChampionDeletion ->
+            respondToDeletionConfirmation True model
+
+        GotDeleteChampionResponse resp ->
+            handleDeleteChampionResponse resp model
+
 
 handleUrlChange : Url -> Model -> ( Model, Cmd Msg )
 handleUrlChange newLocation model =
@@ -994,6 +1006,7 @@ handleChampionResponse resp model =
                             , medalsTableState = Table.initialSort "ANNÉE"
                             , pictureDialog = Nothing
                             , currentYear = model.currentYear
+                            , deleteRequest = None
                             }
                   }
                 , Cmd.none
@@ -2006,3 +2019,59 @@ handleCreateChampionResponse response model =
 
         _ ->
             ( model, Cmd.none )
+
+
+openDeleteChampionConfirmation : Model -> ( Model, Cmd Msg )
+openDeleteChampionConfirmation model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            ( { model | currentPage = ChampionPage { cModel | deleteRequest = WaitingForConfirmation } }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+respondToDeletionConfirmation : Bool -> Model -> ( Model, Cmd Msg )
+respondToDeletionConfirmation bool model =
+    case model.currentPage of
+        ChampionPage cModel ->
+            let
+                ( newCModel, cmd ) =
+                    if bool then
+                        ( { cModel | deleteRequest = Requested }, Api.deleteChampion cModel.id )
+
+                    else
+                        ( { cModel | deleteRequest = None }, Cmd.none )
+            in
+            ( { model | currentPage = ChampionPage newCModel }
+            , cmd
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleDeleteChampionResponse : Result (Graphql.Http.Error (Maybe Bool)) (Maybe Bool) -> Model -> ( Model, Cmd Msg )
+handleDeleteChampionResponse resp model =
+    case model.currentPage of
+        ChampionPage ({ id } as cModel) ->
+            case resp of
+                Ok (Just True) ->
+                    { model | champions = deleteChampionFromChampions id model.champions }
+                        |> goToPreviousListing
+
+                _ ->
+                    ( { model | currentPage = ChampionPage { cModel | deleteRequest = DeleteResponse False } }
+                    , Cmd.none
+                    )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+deleteChampionFromChampions : Id -> RemoteData (Graphql.Http.Error Champions) Champions -> RemoteData (Graphql.Http.Error Champions) Champions
+deleteChampionFromChampions id rdChampions =
+    rdChampions
+        |> RD.map (List.filter (\c -> c.id /= id))
