@@ -36,15 +36,15 @@ defmodule AisfWeb.Router do
   scope "/elixir", AisfWeb do
     pipe_through :browser
 
+    live_dashboard "/live-dashboard"
     get "/*path", PageController, :index
   end
 
-  if Mix.env() == :dev do
-    scope "/" do
-      pipe_through :browser
-      live_dashboard "/live-dashboard"
-    end
-  end
+  # if Mix.env() == :dev do
+  #   scope "/" do
+  #     pipe_through :browser
+  #   end
+  # end
 
   # Other scopes may use custom stacks.
   # scope "/api", AisfWeb do

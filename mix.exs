@@ -46,7 +46,7 @@ defmodule Aisf.MixProject do
       {:absinthe_plug, "~> 1.4"},
       {:poison, "~> 3.0"},
       {:bcrypt_elixir, "~> 2.2"},
-      {:wallaby, "~> 0.24.0", [runtime: false, only: :test]},
+      {:wallaby, "~> 0.23.0", runtime: false, only: :test},
       {:faker, "~> 0.13.0", only: [:dev, :test]},
       {:ex_url, "~> 1.2"},
       {:edeliver, "~> 1.8"},
