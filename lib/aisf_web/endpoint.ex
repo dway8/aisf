@@ -5,6 +5,8 @@ defmodule AisfWeb.Endpoint do
     websocket: true,
     longpoll: false
 
+  socket "/live", Phoenix.LiveView.Socket
+
   if Application.get_env(:aisf, :sql_sandbox) do
     plug Phoenix.Ecto.SQL.Sandbox
   end

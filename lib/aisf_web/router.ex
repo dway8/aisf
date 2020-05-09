@@ -1,5 +1,6 @@
 defmodule AisfWeb.Router do
   use AisfWeb, :router
+  import Phoenix.LiveDashboard.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -36,6 +37,13 @@ defmodule AisfWeb.Router do
     pipe_through :browser
 
     get "/*path", PageController, :index
+  end
+
+  if Mix.env() == :dev do
+    scope "/" do
+      pipe_through :browser
+      live_dashboard "/live-dashboard"
+    end
   end
 
   # Other scopes may use custom stacks.

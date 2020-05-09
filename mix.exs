@@ -5,7 +5,7 @@ defmodule Aisf.MixProject do
     [
       app: :aisf,
       version: "0.1.3",
-      elixir: "~> 1.5",
+      elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -20,7 +20,7 @@ defmodule Aisf.MixProject do
   def application do
     [
       mod: {Aisf.Application, []},
-      extra_applications: [:logger, :runtime_tools, :edeliver]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :edeliver]
     ]
   end
 
@@ -33,24 +33,25 @@ defmodule Aisf.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.0"},
-      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix, "~> 1.5.0"},
+      {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, ">= 3.2.0 and < 3.5.0"},
-      {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 2.11"},
+      {:postgrex, "~> 0.13.5"},
+      {:phoenix_html, "~> 2.14"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:gettext, "~> 0.11"},
-      {:jason, "~> 1.1.0"},
-      {:plug_cowboy, "~> 2.0"},
+      {:gettext, "~> 0.18.0"},
+      {:jason, "~> 1.2"},
+      {:plug_cowboy, "~> 2.2"},
       {:absinthe_ecto, "~> 0.1.3"},
-      {:absinthe_plug, "~> 1.4.0"},
+      {:absinthe_plug, "~> 1.4"},
       {:poison, "~> 3.0"},
-      {:bcrypt_elixir, "~> 2.0.3"},
-      {:wallaby, "~> 0.23.0", [runtime: false, only: :test]},
-      {:faker, "~> 0.12", only: [:dev, :test]},
-      {:ex_url, "~> 1.1"},
-      {:edeliver, ">= 1.7.0"},
-      {:distillery, "~> 2.1", warn_missing: false}
+      {:bcrypt_elixir, "~> 2.2"},
+      {:wallaby, "~> 0.24.0", [runtime: false, only: :test]},
+      {:faker, "~> 0.13.0", only: [:dev, :test]},
+      {:ex_url, "~> 1.2"},
+      {:edeliver, "~> 1.8"},
+      {:distillery, "~> 2.1", warn_missing: false},
+      {:phoenix_live_dashboard, "~> 0.1"}
     ]
   end
 

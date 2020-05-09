@@ -15,7 +15,8 @@ config :aisf, AisfWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "gdPkEUMweKVmottW7lFa93KQ3sZ4x9AMBCvA/2e6BJGVJFzurTxzyNb+FqyIGEWh",
   render_errors: [view: AisfWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Aisf.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub_server: Aisf.PubSub,
+  live_view: [signing_salt: "VXsTvCkavlacgzklD73ofe3MTTitgGiX"]
 
 # Configures Elixir's Logger
 config :logger, :console,
