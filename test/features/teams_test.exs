@@ -3,11 +3,11 @@ defmodule AisfWeb.TeamsTest do
   alias AisfWeb.Factory
 
   setup do
-    {:ok, champion1} =
-      Factory.create_champion_with(%{sport: "Saut", years_in_french_team: [1973, 1999, 2018]})
+    {:ok, champion1} = Factory.create_champion_with(%{sport: "Saut"})
+    Factory.update_sport_career(champion1, %{years_in_french_team: [1973, 1999, 2018]})
 
-    {:ok, champion2} =
-      Factory.create_champion_with(%{sport: "Snowboard", years_in_french_team: [2000, 2002]})
+    {:ok, champion2} = Factory.create_champion_with(%{sport: "Snowboard"})
+    Factory.update_sport_career(champion2, %{years_in_french_team: [2000, 2002]})
 
     {:ok, _champion3} = Factory.create_champion_with(%{sport: "Freestyle"})
 

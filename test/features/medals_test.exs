@@ -27,8 +27,10 @@ defmodule AisfWeb.MedalsTest do
       }
     ]
 
-    {:ok, champion1} = Factory.create_champion_with(%{sport: "Ski de fond", medals: medals1})
-    {:ok, champion2} = Factory.create_champion_with(%{sport: "Combiné nordique", medals: medals2})
+    {:ok, champion1} = Factory.create_champion_with(%{sport: "Ski de fond"})
+    Factory.create_medals_for_champion(champion1, medals1)
+    {:ok, champion2} = Factory.create_champion_with(%{sport: "Combiné nordique"})
+    Factory.create_medals_for_champion(champion2, medals2)
     {:ok, champion3} = Factory.create_champion_with(%{sport: "Biathlon"})
 
     {:ok, champion1: champion1, champion2: champion2, champion3: champion3}

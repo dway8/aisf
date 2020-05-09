@@ -40,7 +40,7 @@ defmodule AisfWeb.Admin.ListTest do
     session
     |> visit("/elixir/")
     |> click(Query.text(champion1.first_name))
-    |> assert_has(Query.text("Éditer la fiche"))
+    |> assert_has(Query.text("Modifier", count: 6))
     |> assert_has(Query.text("INFORMATIONS PRIVÉES"))
   end
 end
