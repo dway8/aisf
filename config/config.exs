@@ -8,7 +8,7 @@
 use Mix.Config
 
 config :aisf,
-  ecto_repos: [Aisf.Repo]
+  ecto_repos: [Aisf.Champions.Store.PostgresAdapter.Repo]
 
 # Configures the endpoint
 config :aisf, AisfWeb.Endpoint,
@@ -17,6 +17,8 @@ config :aisf, AisfWeb.Endpoint,
   render_errors: [view: AisfWeb.ErrorView, accepts: ~w(html json)],
   pubsub_server: Aisf.PubSub,
   live_view: [signing_salt: "VXsTvCkavlacgzklD73ofe3MTTitgGiX"]
+
+config :aisf, Aisf.Champions.Store.PostgresAdapter.Repo, priv: "priv/champions/postgres/repo"
 
 # Configures Elixir's Logger
 config :logger, :console,

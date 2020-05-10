@@ -1,4 +1,4 @@
-defmodule Aisf.Champions.Champion do
+defmodule Aisf.Champions.Store.Champion do
   @moduledoc false
 
   defstruct [

@@ -45,3 +45,5 @@ npm-debug.log
 /screenshots/
 .deliver/releases/
 /media/
+
+.elixir-ls/

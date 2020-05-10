@@ -51,7 +51,8 @@ defmodule Aisf.MixProject do
       {:ex_url, "~> 1.2"},
       {:edeliver, "~> 1.8"},
       {:distillery, "~> 2.1", warn_missing: false},
-      {:phoenix_live_dashboard, "~> 0.1"}
+      {:phoenix_live_dashboard, "~> 0.1"},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 

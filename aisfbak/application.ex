@@ -10,11 +10,12 @@ defmodule Aisf.Application do
     children = [
       # Start the PubSub system
       {Phoenix.PubSub, name: Aisf.PubSub},
+      # Start the Ecto repository
+      Aisf.Repo,
       # Start the endpoint when the application starts
-      AisfWeb.Endpoint,
+      AisfWeb.Endpoint
       # Starts a worker by calling: Aisf.Worker.start_link(arg)
       # {Aisf.Worker, arg},
-      Aisf.Champions
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

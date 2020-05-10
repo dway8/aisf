@@ -12,7 +12,7 @@ config :aisf, :sql_sandbox, true
 config :logger, level: :warn
 
 # Configure your database
-config :aisf, Aisf.Repo,
+config :aisf, Aisf.Champions.Store.PostgresAdapter.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
