@@ -15,4 +15,16 @@ defmodule Aisf.Champions.Store do
   def get_champion(id) do
     @adapter.get_champion(id)
   end
+
+  def create_champion(args) do
+    args =
+      args
+      |> Map.put(:login, generate_next_login())
+
+    @adapter.create_champion(args)
+  end
+
+  defp generate_next_login() do
+    @adapter.generate_next_login()
+  end
 end

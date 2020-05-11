@@ -41,4 +41,37 @@ defmodule Aisf.Champions.Store.PostgresAdapter do
         {:error, :not_found}
     end
   end
+
+  @impl true
+  @spec create_champion(map) :: {:ok, Champion.t()} | {:error, :missing_fields}
+  def create_champion(args) do
+    query =
+      %PostgresAdapter.Champion{}
+      |> PostgresAdapter.Champion.changeset(args)
+      |> Repo.insert()
+
+    case query do
+      {:ok, champion} ->
+        {:ok,
+         champion
+         |> Repo.preload(pro_experiences: [:sectors])
+         |> Repo.preload([:medals])
+         |> Repo.preload(pictures: from(p in Picture, order_by: p.inserted_at))}
+
+      _ ->
+        {:error, :missing_fields}
+    end
+  end
+
+  @impl true
+  @spec generate_next_login() :: integer()
+  def generate_next_login() do
+    case Repo.one(from(c in PostgresAdapter.Champion, select: max(c.login))) do
+      nil ->
+        1
+
+      val ->
+        val + 1
+    end
+  end
 end

@@ -128,14 +128,15 @@ defmodule AisfWeb.Schema do
   end
 
   mutation do
-    # field :create_champion, type: :champion do
-    #   arg(:first_name, non_null(:string))
-    #   arg(:last_name, non_null(:string))
-    #   arg(:sport, non_null(:string))
-    #   arg(:is_member, non_null(:boolean))
-    #
-    #   resolve(&ChampionsResolver.create/2)
-    # end
+    field :create_champion, type: :champion do
+      arg(:first_name, non_null(:string))
+      arg(:last_name, non_null(:string))
+      arg(:sport, non_null(:string))
+      arg(:is_member, non_null(:boolean))
+
+      resolve(&ChampionsResolver.create/2)
+    end
+
     #
     # field :update_champion_presentation, type: :champion do
     #   arg(:id, non_null(:string))

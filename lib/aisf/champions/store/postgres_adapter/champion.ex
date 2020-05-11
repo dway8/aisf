@@ -39,20 +39,46 @@ defmodule Aisf.Champions.Store.PostgresAdapter.Champion do
   end
 
   # @type t :: %__MODULE__{
-  #         id: String.t() | nil,
-  #         email: String.t() | nil,
-  #         password: String.t() | nil,
-  #         password_hash: String.t() | nil,
-  #         inserted_at: DateTime.t() | nil,
-  #         updated_at: DateTime.t() | nil
+  #         id: String.t(),
+  #         first_name: String.t(),
+  #         last_name: String.t(),
+  #         email: String.t(),
+  #         birth_date: String.t(),
+  #         address: String.t(),
+  #         phone_number: String.t(),
+  #         website: String.t(),
+  #         sport: String.t(),
+  #         years_in_french_team: [integer()],
+  #         is_member: boolean(),
+  #         intro: String.t(),
+  #         highlights: [String.t()],
+  #         profile_picture_filename: String.t(),
+  #         french_team_participation: String.t(),
+  #         olympic_games_participation: String.t(),
+  #         world_cup_participation: String.t(),
+  #         track_record: String.t(),
+  #         best_memory: String.t(),
+  #         decoration: String.t(),
+  #         background: String.t(),
+  #         volunteering: String.t(),
+  #         login: integer()
   #       }
 
-  # @spec changeset(t, map) :: Changeset.t()
-  # def changeset(user, attrs) do
-  #   user
-  #   |> cast(attrs, [:email, :password])
-  #   |> validate_required([:email, :password])
-  #   |> unique_constraint(:email, message: "is_already_registered")
-  #   |> put_password_hash()
-  # end
+  def changeset(champion, params) do
+    champion
+    |> cast(params, [
+      :first_name,
+      :last_name,
+      :sport,
+      :is_member,
+      :login
+    ])
+    |> validate_required([
+      :first_name,
+      :last_name,
+      :sport,
+      :is_member,
+      :login
+    ])
+  end
 end

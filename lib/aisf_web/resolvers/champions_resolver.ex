@@ -12,9 +12,9 @@ defmodule AisfWeb.ChampionsResolver do
     Champions.get_champion(id)
   end
 
-  # def create(args, _info) do
-  #   Champions.create_champion(args)
-  # end
+  def create(args, _info) do
+    Champions.create_champion(args)
+  end
 
   #
   # def update_presentation(args, _info) do

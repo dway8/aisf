@@ -15,4 +15,8 @@ defmodule Aisf.Champions do
   def get_champion(id) do
     Store.get_champion(id)
   end
+
+  def create_champion(args) do
+    Store.create_champion(args)
+  end
 end
