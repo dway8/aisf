@@ -8,17 +8,14 @@ defmodule AisfWeb.ChampionsResolver do
     {:ok, champions}
   end
 
-  #
-  # def get(%{id: id}, _info) do
-  #   case Champions.get_champion(id) do
-  #     nil -> {:error, "Champion with id #{id} not found!"}
-  #     champion -> {:ok, champion}
-  #   end
-  # end
-  #
+  def get(%{id: id}, _info) do
+    Champions.get_champion(id)
+  end
+
   # def create(args, _info) do
   #   Champions.create_champion(args)
   # end
+
   #
   # def update_presentation(args, _info) do
   #   case Champions.get_champion(args.id) do

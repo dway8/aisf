@@ -11,4 +11,8 @@ defmodule Aisf.Champions.Store do
   def list_champions_lite do
     @adapter.list_champions_lite()
   end
+
+  def get_champion(id) do
+    @adapter.get_champion(id)
+  end
 end

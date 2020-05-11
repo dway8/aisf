@@ -46,4 +46,4 @@ npm-debug.log
 .deliver/releases/
 /media/
 
-.elixir-ls/
+.elixir_ls/
